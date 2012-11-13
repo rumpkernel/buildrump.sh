@@ -70,7 +70,7 @@ LIBDO.pthread=_external
 EOF
 
 machine=`uname2machine ${MACH}`
-`false` && ./build.sh -m ${machine} -j16 -U -u -D rump -T rump/tools \
+./build.sh -m ${machine} -j16 -U -u -D rump -T rump/tools \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
