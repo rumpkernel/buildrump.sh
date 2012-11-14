@@ -105,15 +105,38 @@ cd ../../rump
 cat > test.c << EOF
 #include <sys/types.h>
 #include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <rump/rump.h>
+#include <rump/rump_syscalls.h>
+
+static void
+die(const char *reason)
+{
+
+	fprintf(stderr, "%s\n", reason);
+	exit(1);
+}
 
 int
 main()
 {
+	char buf[8192];
+	int fd;
 
+	setenv("RUMP_VERBOSE", "1", 1);
         rump_init();
+	if (rump_sys_mkdir("/kern", 0755) == -1)
+		die("mkdir /kern");
+	if (rump_sys_mount("kernfs", "/kern", 0, NULL, 0) == -1)
+		die("mount kernfs");
+	if ((fd = rump_sys_open("/kern/version", 0)) == -1)
+		die("open /kern/version");
+	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
+		die("read version");
+	printf("\nRead version info from /kern:\n\n%s", buf);
 }
 EOF
 
-cc test.c -Iusr/include -lrump  -lrumpuser -ldl -Lusr/lib -Wl,-Rusr/lib
+cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -ldl -Lusr/lib -Wl,-Rusr/lib
 RUMP_VERBOSE=1 ./a.out
