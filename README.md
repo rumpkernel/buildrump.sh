@@ -14,6 +14,9 @@ Drop the buildrump.sh script into the top level of the NetBSD source tree
 and run it as ./buildrump.sh.  Wait some moments.  If all goes well, you
 will have a rump kernel, the hypervisor and necessary headers in ./rump
 
+For now it's a good idea to use a NetBSD-current with at least
+the same timestamp as the script.
+
 
 Tested hosts
 ============
