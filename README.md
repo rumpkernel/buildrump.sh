@@ -17,6 +17,16 @@ will have a rump kernel, the hypervisor and necessary headers in ./rump
 For now it's a good idea to use a NetBSD-current with at least
 the same timestamp as the script.
 
+Dependencies
+------------
+
+Since the script plugs into NetBSD's build.sh, there are practically
+zero dependencies.  The things I had to install are:
+
+- cc
+- zlib
+- something for getting the NetBSD source tree (I used cvs)
+
 
 Tested hosts
 ============
