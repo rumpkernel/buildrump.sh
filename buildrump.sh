@@ -60,6 +60,25 @@ maketoolchain ()
 
 maketoolchain
 
+# set the path to the real compiler
+workaround_ccache ()
+{
+	CCACHE_CC="failed" 
+	REALCC="$(LANG=C gcc -v 2>&1  |grep Target|cut -f2 -d:|sed -e 's/^ //g')-gcc"
+	for directory_in_path in $(echo $PATH|sed -e 's/:/\n/g'); 
+		do [ -f ${directory_in_path}/${REALCC} ] && \
+			[  $(basename $(readlink -f ${directory_in_path}/${REALCC})) != 'ccache' ] && \
+				 export CCACHE_CC="${directory_in_path}/${REALCC}" && echo "ccache detected: $CCACHE_CC is the real compiler" && \
+		break; done
+	[ $CCACHE_CC == "failed" ] && die "ccache detected but we failed to find the real compiler"
+
+}
+
+# detect if we are using ccache so we can fix the env
+current_gcc_real_name=$(basename $(readlink -f `which gcc`))
+[ $current_gcc_real_name == "ccache" ] && workaround_ccache
+
+
 export EXTERNAL_TOOLCHAIN="`pwd`/${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
