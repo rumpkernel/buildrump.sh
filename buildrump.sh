@@ -49,11 +49,12 @@ maketoolchain ()
 
 	mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 	for x in ${TOOLS}; do
-		tool=`which ${x}`
-		[ $? -ne 0 ] && die "could not find ${x}"
-
 		# ok, it's not really --netbsd, but let's make-believe!
-		ln -sf ${tool} ${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
+		tname=${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
+		[ -f ${tname} ] && continue
+
+		printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+		chmod 755 ${tname}
 	done
 }
 
