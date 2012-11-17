@@ -5,8 +5,6 @@
 # This is a very preliminary version, much of the stuff is currently
 # hardcoded etc.
 #
-# requires -current [at least] as of 20121114
-#
 
 # the bass
 die ()
@@ -103,6 +101,7 @@ domake etc distrib-dirs
 
 domake sys/rump/include includes
 domake sys/rump
+[ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
 
 domake lib/librumpuser includes
 domake lib/librumpuser
