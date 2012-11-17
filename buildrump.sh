@@ -21,6 +21,9 @@ uname2machine ()
 	"x86_64")
 		rv="amd64"
 		;;
+	"i686")
+		rv="i386"
+		;;
 	default)
 		rv=${1}
 	esac
