@@ -58,6 +58,8 @@ maketoolchain ()
 	done
 }
 
+[ ! -f build.sh ] && die script must be run from the top level nbsrc dir
+srcdir=`pwd`
 
 maketoolchain
 
@@ -71,7 +73,7 @@ LIBDO.pthread=_external
 EOF
 
 machine=`uname2machine ${MACH}`
-./build.sh -m ${machine} -j16 -U -u -D rump -T rump/tools \
+./build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
@@ -83,26 +85,38 @@ machine=`uname2machine ${MACH}`
 RUMPTOOLS="`pwd`/rump/tools"
 RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
 
-cd etc
-${RUMPMAKE} distrib-dirs || die "distrib-dirs"
+domake ()
+{
 
-cd ../sys/rump
-${RUMPMAKE} obj || die "sys/rump obj"
-${RUMPMAKE} dependall || die "sys/rump dependall"
-${RUMPMAKE} install || die "sys/rump install"
+	cd ${1}
+	if [ -z "${2}" ] ; then
+		${RUMPMAKE} -j8 obj || die "make $1 obj"
+		${RUMPMAKE} -j8 dependall || die "make $1 dependall"
+		${RUMPMAKE} -j8 install || die "make $1 install"
+	else
+		${RUMPMAKE} -j8 $2 || die "make $1 $2"
+	fi
+	cd ${srcdir}
+}
 
-cd include
-${RUMPMAKE} includes || die "sys/rump/includes includes"
+domake etc distrib-dirs
 
-cd ../../../lib/librumpuser
-${RUMPMAKE} includes || die "lib/librumpuser includes"
-${RUMPMAKE} dependall || die "lib/librumpuser dependall"
-${RUMPMAKE} install || die "lib/librumpuser install"
+domake sys/rump/include includes
+domake sys/rump
+
+domake lib/librumpuser includes
+domake lib/librumpuser
+
+# DONE
+echo
+echo done building.  bootstrapping a simple rump kernel for testing purposes.
+echo
+
 
 #
 # aaaand perform a very simple test
 #
-cd ../../rump
+cd rump
 cat > test.c << EOF
 #include <sys/types.h>
 #include <inttypes.h>
@@ -135,7 +149,7 @@ main()
 		die("open /kern/version");
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
-	printf("\nRead version info from /kern:\n\n%s", buf);
+	printf("\nReading version info from /kern:\n\n%s", buf);
 }
 EOF
 
