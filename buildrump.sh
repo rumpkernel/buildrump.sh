@@ -24,8 +24,12 @@ uname2machine ()
 	"i686")
 		rv="i386"
 		;;
-	default)
+	"sun4v")
+		rv="sparc64"
+		;;
+	*)
 		rv=${1}
+		;;
 	esac
 
 	echo ${rv}
