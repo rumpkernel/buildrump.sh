@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env sh
 #
 # This script will build rump kernel components and the hypervisor
 # on a non-NetBSD host and hopefully leave you with a usable installation.
@@ -14,31 +14,46 @@ die ()
 	exit 1
 }
 
-uname2machine ()
-{
+[ ! -f build.sh ] && die script must be run from the top level nbsrc dir
+srcdir=`pwd`
 
-	case $1 in
-	"x86_64")
-		rv="amd64"
-		;;
-	"i686")
-		rv="i386"
-		;;
-	"sun4v")
-		rv="sparc64"
-		;;
-	*)
-		rv=${1}
-		;;
-	esac
+hostos=`uname -s`
+binsh=sh
+case ${hostos} in
+"Linux")
+	RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+	;;
+"SunOS")
+	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
+	binsh=/usr/xpg4/bin/sh
+	;;
+*)
+	die unsupported host OS: ${hostos}
+	;;
+esac
 
-	echo ${rv}
-}
+MACH=`uname -m`
+case ${MACH} in
+"x86_64")
+	machine="amd64"
+	;;
+"i686")
+	machine="i386"
+	;;
+"sun4v")
+	machine="sparc64"
+	MACH="sparc64"
+	# assume gcc.  i'm not going to start trying to
+	# remember what the magic incantation for sunpro was
+	EXTRA_CFLAGS='-m64'
+	EXTRA_LDFLAGS='-m64'
+	EXTRA_AFLAGS='-m64'
+	;;
+esac
 
 # use same machine as host.
 #
 # XXX: differences in uname output?
-MACH=`uname -m`
 
 MYTOOLDIR=rump/tools
 
@@ -49,36 +64,39 @@ MYTOOLDIR=rump/tools
 # TODO?: don't hardcore this based on PATH
 #
 TOOLS='gcc cpp ar as ld nm objcopy objdump ranlib size strip'
-maketoolchain ()
-{
 
-	mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
-	for x in ${TOOLS}; do
-		# ok, it's not really --netbsd, but let's make-believe!
-		tname=${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
-		[ -f ${tname} ] && continue
+mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
+for x in ${TOOLS}; do
+	# ok, it's not really --netbsd, but let's make-believe!
+	tname=${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
+	[ -f ${tname} ] && continue
 
-		printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
-		chmod 755 ${tname}
-	done
-}
-
-[ ! -f build.sh ] && die script must be run from the top level nbsrc dir
-srcdir=`pwd`
-
-maketoolchain
+	printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+	chmod 755 ${tname}
+done
 
 export EXTERNAL_TOOLCHAIN="`pwd`/${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
 cat > "${MYTOOLDIR}/mk.conf" << EOF
-CFLAGS+=-Wno-unused-but-set-variable
+CFLAGS+=-Wno-unused-but-set-variable ${EXTRA_CFLAGS}
 CPPFLAGS+=-I`pwd`/rump/usr/include
+MKARZERO=no
 LIBDO.pthread=_external
+RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
+if [ ! -z "${EXTRA_LDFLAGS}" ]; then
+	echo "LDFLAGS+=${EXTRA_LDFLAGS}" >> "${MYTOOLDIR}/mk.conf"
+fi
+if [ ! -z "${EXTRA_AFLAGS}" ]; then
+	echo "AFLAGS+=${EXTRA_AFLAGS}" >> "${MYTOOLDIR}/mk.conf"
+fi
+tst=`cc --print-file-name=crtbeginS.o`
+[ -z "${tst%crtbeginS}" ] && echo '_GCC_CRTBEGINS=""' >> "${MYTOOLDIR}/mk.conf"
+tst=`cc --print-file-name=crtendS.o`
+[ -z "${tst%crtbeginS}" ] && echo '_GCC_CRTENDS=""' >> "${MYTOOLDIR}/mk.conf"
 
-machine=`uname2machine ${MACH}`
-./build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
+${binsh} build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
