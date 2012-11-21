@@ -25,6 +25,7 @@ case ${hostos} in
 	;;
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
+	EXTRA_RUMPUSER='-lsocket -lrt'
 	binsh=/usr/xpg4/bin/sh
 
 	# do some random test to check for gnu foolchain
@@ -182,5 +183,5 @@ main()
 }
 EOF
 
-cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -ldl -Lusr/lib -Wl,-Rusr/lib
+cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -ldl ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
 RUMP_VERBOSE=1 ./a.out
