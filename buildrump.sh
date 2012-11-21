@@ -26,6 +26,11 @@ case ${hostos} in
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 	binsh=/usr/xpg4/bin/sh
+
+	# do some random test to check for gnu foolchain
+	if ! ar --version 2>/dev/null | grep -q 'GNU ar' ; then
+		die Need GNU toolchain in PATH, `which ar` is not
+	fi
 	;;
 *)
 	die unsupported host OS: ${hostos}
@@ -92,9 +97,9 @@ if [ ! -z "${EXTRA_AFLAGS}" ]; then
 	echo "AFLAGS+=${EXTRA_AFLAGS}" >> "${MYTOOLDIR}/mk.conf"
 fi
 tst=`cc --print-file-name=crtbeginS.o`
-[ -z "${tst%crtbeginS}" ] && echo '_GCC_CRTBEGINS=""' >> "${MYTOOLDIR}/mk.conf"
+[ -z "${tst%crtbeginS.o}" ] && echo '_GCC_CRTBEGINS=' >> "${MYTOOLDIR}/mk.conf"
 tst=`cc --print-file-name=crtendS.o`
-[ -z "${tst%crtbeginS}" ] && echo '_GCC_CRTENDS=""' >> "${MYTOOLDIR}/mk.conf"
+[ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
 ${binsh} build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
     -V MKGROFF=no \
