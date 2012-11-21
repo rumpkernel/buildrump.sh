@@ -6,6 +6,8 @@ non-NetBSD hosts.  The goal is to eventually get everything from here
 into the NetBSD build.sh script, but we're starting out elsewhere to
 facilitate quick modifications before things stabilize.
 
+For more information on rump kernels, see http://www.NetBSD/docs/rump/
+
 
 Instructions
 ============
