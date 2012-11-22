@@ -68,11 +68,20 @@ MYTOOLDIR=rump/tools
 # build.sh expects.
 #
 # TODO?: don't hardcore this based on PATH
+# TODO2: cpp missing
 #
-TOOLS='gcc cpp ar as ld nm objcopy objdump ranlib size strip'
+TOOLS='ar as ld nm objcopy objdump ranlib size strip'
+if cc --version | grep -q GCC; then
+	CC=gcc
+elif cc --version | grep -q clang; then
+	CC=clang
+	LLVM='-V HAVE_LLVM=1'
+else
+	die Unsupported cc "(`which cc`)"
+fi
 
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
-for x in ${TOOLS}; do
+for x in ${CC} ${TOOLS}; do
 	# ok, it's not really --netbsd, but let's make-believe!
 	tname=${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
 	[ -f ${tname} ] && continue
@@ -103,6 +112,7 @@ tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
 ${binsh} build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
+    ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
