@@ -30,10 +30,13 @@ zero dependencies.  The things I had to install are:
 - something for getting the NetBSD source tree (I used cvs)
 
 
-Tested hosts
-============
+Tested configurations
+=====================
 
-This script has been tested on the following platforms (uname -a):
+The script supports both gcc and clang as the host target compiler.
+It has been tested to work with GNU binutils.
+
+The following platforms have been tested:
 
 - Linux
     - Linux Ubuntu-1210-quantal-64-minimal 3.5.0-18-generic #29-Ubuntu SMP Fri Oct 19 10:26:51 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux (with thanks to Zafer Aydogan for providing access, amd64)
