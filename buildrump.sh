@@ -44,11 +44,11 @@ case ${hostos} in
 	;;
 esac
 
-MACH=`uname -m`
-case ${MACH} in
+mach_arch=`uname -m`
+case ${mach_arch} in
 "amd64")
 	machine="amd64"
-	MACH="x86_64"
+	mach_arch="x86_64"
 	;;
 "x86_64")
 	machine="amd64"
@@ -58,7 +58,7 @@ case ${MACH} in
 	;;
 "sun4v")
 	machine="sparc64"
-	MACH="sparc64"
+	mach_arch="sparc64"
 	# assume gcc.  i'm not going to start trying to
 	# remember what the magic incantation for sunpro was
 	EXTRA_CFLAGS='-m64'
@@ -104,7 +104,7 @@ cd ${srcdir}
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 for x in ${CC} ${TOOLS}; do
 	# ok, it's not really --netbsd, but let's make-believe!
-	tname=${MYTOOLDIR}/bin/${MACH}--netbsd-${x}
+	tname=${MYTOOLDIR}/bin/${mach_arch}--netbsd-${x}
 	[ -f ${tname} ] && continue
 
 	printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
@@ -119,18 +119,14 @@ CPPFLAGS+=-I`pwd`/rump/usr/include
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
-if [ ! -z "${W_UNUSED_BUT_SET}" ]; then
-	echo "CFLAGS+=${W_UNUSED_BUT_SET}" >> "${MYTOOLDIR}/mk.conf"
-fi
-if [ ! -z "${EXTRA_CFLAGS}" ]; then
-	echo "CFLAGS+=${EXTRA_CFLAGS}" >> "${MYTOOLDIR}/mk.conf"
-fi
-if [ ! -z "${EXTRA_LDFLAGS}" ]; then
-	echo "LDFLAGS+=${EXTRA_LDFLAGS}" >> "${MYTOOLDIR}/mk.conf"
-fi
-if [ ! -z "${EXTRA_AFLAGS}" ]; then
-	echo "AFLAGS+=${EXTRA_AFLAGS}" >> "${MYTOOLDIR}/mk.conf"
-fi
+appendmkconf () {
+	[ ! -z "${1}" ] && echo "${2}+=${1}" >> "${MYTOOLDIR}/mk.conf"
+}
+appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS"
+appendmkconf "${EXTRA_CFLAGS}" "CFLAGS"
+appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS"
+appendmkconf "${EXTRA_AFLAGS}" "AFLAGS"
+
 tst=`cc --print-file-name=crtbeginS.o`
 [ -z "${tst%crtbeginS.o}" ] && echo '_GCC_CRTBEGINS=' >> "${MYTOOLDIR}/mk.conf"
 tst=`cc --print-file-name=crtendS.o`
@@ -218,5 +214,6 @@ main()
 }
 EOF
 
-cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
-RUMP_VERBOSE=1 ./a.out
+# should do this properly
+${CC} test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
+./a.out
