@@ -6,6 +6,8 @@
 # hardcoded etc.
 #
 
+MYTOOLDIR=rump/tools
+
 # the bass
 die ()
 {
@@ -57,21 +59,17 @@ case ${MACH} in
 	;;
 esac
 
-# use same machine as host.
-#
-# XXX: differences in uname output?
-
-MYTOOLDIR=rump/tools
-
 #
 # create links to an external toolchain in the format that
 # build.sh expects.
 #
 # TODO?: don't hardcore this based on PATH
 # TODO2: cpp missing
+# XXX: why can't all cc's that are gcc actually tell me
+#      that they're gcc with cc --version?!?
 #
 TOOLS='ar as ld nm objcopy objdump ranlib size strip'
-if cc --version | grep -q GCC; then
+if cc --version | grep -q 'Free Software Foundation'; then
 	CC=gcc
 elif cc --version | grep -q clang; then
 	CC=clang
@@ -79,6 +77,21 @@ elif cc --version | grep -q clang; then
 else
 	die Unsupported cc "(`which cc`)"
 fi
+
+#
+# Try to test if cc supports -Wno-unused-but-set-variable.
+# This is a bit tricky since apparently gcc doesn't tell it
+# doesn't support it unless there is some other error to complain
+# about as well.  So we try compiling a broken source file...
+mkdir -p obj || die cannot create obj
+cd obj
+echo 'no you_shall_not_compile' > broken.c
+${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
+if ! grep -q Wno-unused-but-set-variable broken.out ; then
+	W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
+fi
+rm -f broken.c broken.out
+cd ${srcdir}
 
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 for x in ${CC} ${TOOLS}; do
@@ -94,12 +107,16 @@ export EXTERNAL_TOOLCHAIN="`pwd`/${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
 cat > "${MYTOOLDIR}/mk.conf" << EOF
-CFLAGS+=-Wno-unused-but-set-variable ${EXTRA_CFLAGS}
 CPPFLAGS+=-I`pwd`/rump/usr/include
-MKARZERO=no
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
+if [ ! -z "${W_UNUSED_BUT_SET}" ]; then
+	echo "CFLAGS+=${W_UNUSED_BUT_SET}" >> "${MYTOOLDIR}/mk.conf"
+fi
+if [ ! -z "${EXTRA_CFLAGS}" ]; then
+	echo "CFLAGS+=${EXTRA_CFLAGS}" >> "${MYTOOLDIR}/mk.conf"
+fi
 if [ ! -z "${EXTRA_LDFLAGS}" ]; then
 	echo "LDFLAGS+=${EXTRA_LDFLAGS}" >> "${MYTOOLDIR}/mk.conf"
 fi
