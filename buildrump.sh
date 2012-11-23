@@ -20,12 +20,16 @@ srcdir=`pwd`
 hostos=`uname -s`
 binsh=sh
 case ${hostos} in
+"FreeBSD")
+	RUMPKERN_UNDEF='-U__FreeBSD__'
+	;;
 "Linux")
 	RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+	EXTRA_RUMPUSER='-ldl'
 	;;
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-	EXTRA_RUMPUSER='-lsocket -lrt'
+	EXTRA_RUMPUSER='-lsocket -lrt -ldl'
 	binsh=/usr/xpg4/bin/sh
 
 	# do some random test to check for gnu foolchain
@@ -40,6 +44,10 @@ esac
 
 MACH=`uname -m`
 case ${MACH} in
+"amd64")
+	machine="amd64"
+	MACH="x86_64"
+	;;
 "x86_64")
 	machine="amd64"
 	;;
@@ -94,12 +102,14 @@ export EXTERNAL_TOOLCHAIN="`pwd`/${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
 cat > "${MYTOOLDIR}/mk.conf" << EOF
-CFLAGS+=-Wno-unused-but-set-variable ${EXTRA_CFLAGS}
 CPPFLAGS+=-I`pwd`/rump/usr/include
 MKARZERO=no
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
+if [ ! -z "${EXTRA_CFLAGS}" ]; then
+	echo "CFLAGS+=${EXTRA_CFLAGS}" >> "${MYTOOLDIR}/mk.conf"
+fi
 if [ ! -z "${EXTRA_LDFLAGS}" ]; then
 	echo "LDFLAGS+=${EXTRA_LDFLAGS}" >> "${MYTOOLDIR}/mk.conf"
 fi
@@ -193,5 +203,5 @@ main()
 }
 EOF
 
-cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -ldl ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
+cc test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
 RUMP_VERBOSE=1 ./a.out
