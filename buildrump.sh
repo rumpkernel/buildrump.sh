@@ -6,7 +6,10 @@
 # hardcoded etc.
 #
 
-MYTOOLDIR=rump/tools
+OBJDIR=`pwd`/obj
+DESTDIR=${OBJDIR}/rump
+MYTOOLDIR=${DESTDIR}/tools
+SRCDIR=${NETBSDSRCDIR:-`pwd`}
 
 # the bass
 die ()
@@ -16,8 +19,7 @@ die ()
 	exit 1
 }
 
-[ ! -f build.sh ] && die script must be run from the top level nbsrc dir
-srcdir=`pwd`
+[ ! -f "${SRCDIR}/build.sh" ] && die script must be run from the top level nbsrc dir or \$NETBSDSRCDIR should be set
 
 hostos=`uname -s`
 binsh=sh
@@ -91,15 +93,15 @@ fi
 # This is a bit tricky since apparently gcc doesn't tell it
 # doesn't support it unless there is some other error to complain
 # about as well.  So we try compiling a broken source file...
-mkdir -p obj || die cannot create obj
-cd obj
+mkdir -p $OBJDIR || die cannot create obj
+cd $OBJDIR
 echo 'no you_shall_not_compile' > broken.c
 ${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
 if ! grep -q Wno-unused-but-set-variable broken.out ; then
 	W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
 fi
 rm -f broken.c broken.out
-cd ${srcdir}
+cd ${SRCDIR}
 
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 for x in ${CC} ${TOOLS}; do
@@ -111,11 +113,11 @@ for x in ${CC} ${TOOLS}; do
 	chmod 755 ${tname}
 done
 
-export EXTERNAL_TOOLCHAIN="`pwd`/${MYTOOLDIR}"
+export EXTERNAL_TOOLCHAIN="${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
 cat > "${MYTOOLDIR}/mk.conf" << EOF
-CPPFLAGS+=-I`pwd`/rump/usr/include
+CPPFLAGS+=-I$DESTDIR/usr/include
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
@@ -132,31 +134,31 @@ tst=`cc --print-file-name=crtbeginS.o`
 tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
-${binsh} build.sh -m ${machine} -j16 -U -u -D rump -O obj -T rump/tools \
+${binsh} build.sh -m ${machine} -j16 -U -u -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOOLDIR} \
     ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
     -V NOLINT=1 \
     -V USE_SSP=no \
-    -V MAKECONF="`pwd`/${MYTOOLDIR}/mk.conf" \
+    -V MAKECONF="${MYTOOLDIR}/mk.conf" \
     tools
 
-RUMPTOOLS="`pwd`/rump/tools"
+RUMPTOOLS="${MYTOOLDIR}"
 RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
 
 domake ()
 {
 
 	cd ${1}
+	${RUMPMAKE} -j8 obj || die "make $1 obj"
 	if [ -z "${2}" ] ; then
-		${RUMPMAKE} -j8 obj || die "make $1 obj"
 		${RUMPMAKE} -j8 dependall || die "make $1 dependall"
 		${RUMPMAKE} -j8 install || die "make $1 install"
 	else
 		${RUMPMAKE} -j8 $2 || die "make $1 $2"
 	fi
-	cd ${srcdir}
+	cd ${SRCDIR}
 }
 
 domake etc distrib-dirs
@@ -177,7 +179,7 @@ echo
 #
 # aaaand perform a very simple test
 #
-cd rump
+cd ${DESTDIR}
 cat > test.c << EOF
 #include <sys/types.h>
 #include <inttypes.h>
