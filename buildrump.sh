@@ -59,9 +59,23 @@ while [ $# -gt 0 ] ; do
 	shift
 done
 
-MYTOOLDIR=${OBJDIR}/tools
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
+
+# resolve critical directories
+curdir=`pwd`
+mkdir -p $OBJDIR || die cannot create ${OBJDIR}
+cd ${OBJDIR}
+OBJDIR=`pwd`
+cd ${curdir}
+mkdir -p $DESTDIR || die cannot create ${DESTDIR}
+cd ${DESTDIR}
+DESTDIR=`pwd`
+cd ${curdir}
+cd ${SRCDIR}
+SRCDIR=`pwd`
+
+MYTOOLDIR=${OBJDIR}/tools
 
 hostos=`uname -s`
 binsh=sh
@@ -142,7 +156,6 @@ fi
 # This is a bit tricky since apparently gcc doesn't tell it
 # doesn't support it unless there is some other error to complain
 # about as well.  So we try compiling a broken source file...
-mkdir -p $OBJDIR || die cannot create obj
 cd $OBJDIR
 echo 'no you_shall_not_compile' > broken.c
 ${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
@@ -202,6 +215,7 @@ domake ()
 
 	cd ${1}
 	if [ -z "${2}" ] ; then
+		${RUMPMAKE} -j ${JNUM} obj || die "make $1 dependall"
 		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
 		${RUMPMAKE} -j ${JNUM} install || die "make $1 install"
 	else
