@@ -15,7 +15,8 @@ SRCDIR=${NETBSDSRCDIR:-`pwd`}
 die ()
 {
 
-	echo $* >&2
+	echo '>> ERROR' >&2
+	echo ">> $*" >&2
 	exit 1
 }
 
@@ -214,9 +215,14 @@ main()
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
 	printf("\nReading version info from /kern:\n\n%s", buf);
+
+	return 0;
 }
 EOF
 
 # should do this properly
 ${CC} test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
-./a.out
+./a.out || die test failed
+
+echo
+echo Success.
