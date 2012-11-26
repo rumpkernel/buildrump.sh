@@ -9,6 +9,7 @@
 OBJDIR=`pwd`/obj
 DESTDIR=`pwd`/rump
 SRCDIR=`pwd`
+JNUM=4
 
 # the parrot routine
 die ()
@@ -23,20 +24,24 @@ helpme ()
 {
 
 	exec 1>&2
-	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir]"
+	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir] [-j num]"
 	echo "\t-d: location for headers/libs.  default: PWD/rump"
 	echo "\t-o: location for build-time files.  default: PWD/obj"
 	echo "\t-s: location of source tree.  default: PWD"
+	echo "\t-j: value of -j specified to make.  default: ${JNUM}"
 	exit 1
 }
 
-args=`getopt d:ho:s: $*`
+args=`getopt d:hj:o:s:u $*`
 [ $? -ne 0 ] && helpme
 set -- $args
 while [ $# -gt 0 ] ; do
 	case "$1" in
 	-h)
 		helpme
+		;;
+	-j)
+		JNUM=$2; shift
 		;;
 	-d)
 		DESTDIR=$2; shift
@@ -46,6 +51,9 @@ while [ $# -gt 0 ] ; do
 		;;
 	-s)
 		SRCDIR=$2; shift
+		;;
+	-u)
+		UPDATE='-u'
 		;;
 	--)
 		shift; break
@@ -178,8 +186,8 @@ tst=`cc --print-file-name=crtbeginS.o`
 tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
-${binsh} build.sh -m ${machine} -j16 -U -u -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOOLDIR} \
-    ${LLVM} \
+${binsh} build.sh -m ${machine} -U -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOOLDIR} \
+    ${UPDATE} -j ${JNUM} ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
@@ -196,12 +204,13 @@ domake ()
 {
 
 	cd ${1}
-	${RUMPMAKE} -j8 obj || die "make $1 obj"
+	[ -z "${UPDATE}" ] && ${RUMPMAKE} -j ${JNUM} cleandir
+	${RUMPMAKE} -j ${JNUM} obj || die "make $1 obj"
 	if [ -z "${2}" ] ; then
-		${RUMPMAKE} -j8 dependall || die "make $1 dependall"
-		${RUMPMAKE} -j8 install || die "make $1 install"
+		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
+		${RUMPMAKE} -j ${JNUM} install || die "make $1 install"
 	else
-		${RUMPMAKE} -j8 $2 || die "make $1 $2"
+		${RUMPMAKE} -j ${JNUM} $2 || die "make $1 $2"
 	fi
 	cd ${SRCDIR}
 }
