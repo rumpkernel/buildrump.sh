@@ -201,7 +201,6 @@ domake ()
 {
 
 	cd ${1}
-	${RUMPMAKE} -j ${JNUM} obj || die "make $1 obj"
 	if [ -z "${2}" ] ; then
 		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
 		${RUMPMAKE} -j ${JNUM} install || die "make $1 install"
@@ -211,6 +210,7 @@ domake ()
 	cd ${SRCDIR}
 }
 
+domake etc obj
 domake etc distrib-dirs
 
 domake sys/rump/include includes
