@@ -7,7 +7,7 @@
 #
 
 OBJDIR=`pwd`/obj
-DESTDIR=${OBJDIR}/rump
+DESTDIR=`pwd`/rump
 MYTOOLDIR=${DESTDIR}/tools
 SRCDIR=${NETBSDSRCDIR:-`pwd`}
 
