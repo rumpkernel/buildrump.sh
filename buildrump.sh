@@ -52,9 +52,6 @@ while [ $# -gt 0 ] ; do
 	-s)
 		SRCDIR=$2; shift
 		;;
-	-u)
-		UPDATE='-u'
-		;;
 	--)
 		shift; break
 		;;
@@ -187,7 +184,7 @@ tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
 ${binsh} build.sh -m ${machine} -U -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOOLDIR} \
-    ${UPDATE} -j ${JNUM} ${LLVM} \
+    -j ${JNUM} ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
@@ -204,7 +201,6 @@ domake ()
 {
 
 	cd ${1}
-	[ -z "${UPDATE}" ] && ${RUMPMAKE} -j ${JNUM} cleandir
 	${RUMPMAKE} -j ${JNUM} obj || die "make $1 obj"
 	if [ -z "${2}" ] ; then
 		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
