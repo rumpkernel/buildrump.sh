@@ -32,7 +32,7 @@ helpme ()
 	exit 1
 }
 
-args=`getopt d:hj:o:s:u $*`
+args=`getopt d:hj:o:s: $*`
 [ $? -ne 0 ] && helpme
 set -- $args
 while [ $# -gt 0 ] ; do
