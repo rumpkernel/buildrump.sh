@@ -2,24 +2,61 @@
 #
 # This script will build rump kernel components and the hypervisor
 # on a non-NetBSD host and hopefully leave you with a usable installation.
-# This is a very preliminary version, much of the stuff is currently
-# hardcoded etc.
+# This is a slightly preliminary version.
 #
 
+# defaults
 OBJDIR=`pwd`/obj
 DESTDIR=`pwd`/rump
-MYTOOLDIR=${DESTDIR}/tools
-SRCDIR=${NETBSDSRCDIR:-`pwd`}
+SRCDIR=`pwd`
 
-# the bass
+# the parrot routine
 die ()
 {
 
-	echo $* >&2
+	echo '>> ERROR:' >&2
+	echo ">> $*" >&2
 	exit 1
 }
 
-[ ! -f "${SRCDIR}/build.sh" ] && die script must be run from the top level nbsrc dir or \$NETBSDSRCDIR should be set
+helpme ()
+{
+
+	exec 1>&2
+	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir]"
+	echo "\t-d: location for headers/libs.  default: PWD/rump"
+	echo "\t-o: location for build-time files.  default: PWD/obj"
+	echo "\t-s: location of source tree.  default: PWD"
+	exit 1
+}
+
+args=`getopt d:ho:s: $*`
+[ $? -ne 0 ] && helpme
+set -- $args
+while [ $# -gt 0 ] ; do
+	case "$1" in
+	-h)
+		helpme
+		;;
+	-d)
+		DESTDIR=$2; shift
+		;;
+	-o)
+		OBJDIR=$2; shift
+		;;
+	-s)
+		SRCDIR=$2; shift
+		;;
+	--)
+		shift; break
+		;;
+	esac
+	shift
+done
+
+MYTOOLDIR=${OBJDIR}/tools
+[ ! -f "${SRCDIR}/build.sh" ] && \
+    die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
 
 hostos=`uname -s`
 binsh=sh
@@ -221,9 +258,14 @@ main()
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
 	printf("\nReading version info from /kern:\n\n%s", buf);
+
+	return 0;
 }
 EOF
 
 # should do this properly
 ${CC} test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
-./a.out
+./a.out || die test failed
+
+echo
+echo Success.
