@@ -143,6 +143,7 @@ ${binsh} build.sh -m ${machine} -j16 -U -u -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOO
     -V USE_SSP=no \
     -V MAKECONF="${MYTOOLDIR}/mk.conf" \
     tools
+[ $? -ne 0 ] && die build.sh tools failed
 
 RUMPTOOLS="${MYTOOLDIR}"
 RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
