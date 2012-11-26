@@ -183,8 +183,8 @@ tst=`cc --print-file-name=crtbeginS.o`
 tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
-${binsh} build.sh -m ${machine} -U -D ${DESTDIR} -O ${OBJDIR} -T ${MYTOOLDIR} \
-    -j ${JNUM} ${LLVM} \
+${binsh} build.sh -m ${machine} -U -u -D ${DESTDIR} -O ${OBJDIR} \
+    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
