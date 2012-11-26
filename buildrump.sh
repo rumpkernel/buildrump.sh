@@ -24,6 +24,9 @@ die ()
 hostos=`uname -s`
 binsh=sh
 case ${hostos} in
+"DragonFly")
+	RUMPKERN_UNDEF='-U__DragonFly__'
+	;;
 "FreeBSD")
 	RUMPKERN_UNDEF='-U__FreeBSD__'
 	;;
@@ -55,8 +58,10 @@ case ${mach_arch} in
 "x86_64")
 	machine="amd64"
 	;;
-"i686")
+"i386"|"i686")
 	machine="i386"
+	mach_arch="i486"
+	toolabi="elf"
 	;;
 "sun4v")
 	machine="sparc64"
@@ -68,6 +73,8 @@ case ${mach_arch} in
 	EXTRA_AFLAGS='-m64'
 	;;
 esac
+
+[ -z "${machine}" ] && die script needs knowledge of machine \"${mach_arch}\"
 
 #
 # create links to an external toolchain in the format that
@@ -106,7 +113,7 @@ cd ${SRCDIR}
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 for x in ${CC} ${TOOLS}; do
 	# ok, it's not really --netbsd, but let's make-believe!
-	tname=${MYTOOLDIR}/bin/${mach_arch}--netbsd-${x}
+	tname=${MYTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
 	[ -f ${tname} ] && continue
 
 	printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
