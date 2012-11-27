@@ -291,9 +291,10 @@ main()
 		die("mount kernfs");
 	if ((fd = rump_sys_open("/kern/version", 0)) == -1)
 		die("open /kern/version");
+	printf("\nReading version info from /kern:\n", buf);
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
-	printf("\nReading version info from /kern:\n\n%s", buf);
+	printf("\n%s", buf);
 
 	return 0;
 }
