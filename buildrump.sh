@@ -75,7 +75,7 @@ cd ${curdir}
 cd ${SRCDIR}
 SRCDIR=`pwd`
 
-MYTOOLDIR=${OBJDIR}/tools
+MYTOOLDIR=${OBJDIR}/tooldir
 
 hostos=`uname -s`
 binsh=sh
@@ -165,6 +165,8 @@ fi
 rm -f broken.c broken.out
 cd ${SRCDIR}
 
+#
+# Create external toolchain wrappers.
 mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
 for x in ${CC} ${TOOLS}; do
 	# ok, it's not really --netbsd, but let's make-believe!
@@ -174,12 +176,11 @@ for x in ${CC} ${TOOLS}; do
 	printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
 	chmod 755 ${tname}
 done
-
 export EXTERNAL_TOOLCHAIN="${MYTOOLDIR}"
 export TOOLCHAIN_MISSING=yes
 
 cat > "${MYTOOLDIR}/mk.conf" << EOF
-CPPFLAGS+=-I$DESTDIR/usr/include
+CPPFLAGS+=-I${DESTDIR}/include
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
@@ -196,7 +197,7 @@ tst=`cc --print-file-name=crtbeginS.o`
 tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
-${binsh} build.sh -m ${machine} -U -u -D ${DESTDIR} -O ${OBJDIR} \
+${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
     -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
@@ -224,15 +225,31 @@ domake ()
 	cd ${SRCDIR}
 }
 
+# create necessary dirs for build process
 domake etc obj
 domake etc distrib-dirs
 
+# cleanup dirs we don't need in $dest, the easy way out
+rm -rf ${OBJDIR}/dest/usr/lib/*
+
+# install headers into staging area
 domake sys/rump/include includes
+domake lib/librumpuser includes
+
+# and copy them over to the final resting place
+tar -C ${OBJDIR}/dest/usr -cf - include/rump | tar -C ${DESTDIR} -xf -
+
+# then build rump kernel components
 domake sys/rump
 [ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
 
-domake lib/librumpuser includes
+# ... and the hypervisor
 domake lib/librumpuser
+
+# and copy libraries to the final resting place
+tar -C ${OBJDIR}/dest     -cf - lib | tar -C ${DESTDIR} -xf -
+tar -C ${OBJDIR}/dest/usr -cf - lib | tar -C ${DESTDIR} -xf -
+
 
 # DONE
 echo
@@ -243,7 +260,7 @@ echo
 #
 # aaaand perform a very simple test
 #
-cd ${DESTDIR}
+cd ${OBJDIR}
 cat > test.c << EOF
 #include <sys/types.h>
 #include <inttypes.h>
@@ -283,8 +300,8 @@ main()
 EOF
 
 # should do this properly
-${CC} test.c -Iusr/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -Lusr/lib -Wl,-Rusr/lib
-./a.out || die test failed
+${CC} -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+./rumptest || die test failed
 
 echo
 echo Success.
