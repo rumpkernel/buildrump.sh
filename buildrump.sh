@@ -25,39 +25,36 @@ helpme ()
 
 	exec 1>&2
 	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir] [-j num]"
-	echo "\t-d: location for headers/libs.  default: PWD/rump"
-	echo "\t-o: location for build-time files.  default: PWD/obj"
-	echo "\t-s: location of source tree.  default: PWD"
-	echo "\t-j: value of -j specified to make.  default: ${JNUM}"
+	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
+	printf "\t-o: location for build-time files.  default: PWD/obj\n"
+	printf "\t-s: location of source tree.  default: PWD\n"
+	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	exit 1
 }
 
-args=`getopt d:hj:o:s: $*`
-[ $? -ne 0 ] && helpme
-set -- $args
-while [ $# -gt 0 ] ; do
-	case "$1" in
-	-h)
+while getopts 'd:hj:o:s:' opt; do
+	case "$opt" in
+	j)
+		JNUM=${OPTARG}; shift
+		;;
+	d)
+		DESTDIR=${OPTARG}; shift
+		;;
+	o)
+		OBJDIR=${OPTARG}; shift
+		;;
+	s)
+		SRCDIR=${OPTARG}; shift
+		;;
+	-)
+		break
+		;;
+	h|\?)
 		helpme
 		;;
-	-j)
-		JNUM=$2; shift
-		;;
-	-d)
-		DESTDIR=$2; shift
-		;;
-	-o)
-		OBJDIR=$2; shift
-		;;
-	-s)
-		SRCDIR=$2; shift
-		;;
-	--)
-		shift; break
-		;;
 	esac
-	shift
 done
+shift $((${OPTIND} - 1))
 
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
