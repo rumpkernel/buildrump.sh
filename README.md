@@ -27,7 +27,7 @@ zero dependencies.  The things I had to install are:
 
 - cc
 - zlib
-- something for getting NetBSD src (I used "cvs -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src")
+- something for getting NetBSD src (I used `cvs -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`)
 
 
 Tested configurations
