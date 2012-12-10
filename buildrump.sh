@@ -29,10 +29,12 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
+	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	exit 1
 }
 
-while getopts 'd:hj:o:s:' opt; do
+DBG='-O2 -g'
+while getopts 'd:hj:o:rs:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}; shift
@@ -42,6 +44,10 @@ while getopts 'd:hj:o:s:' opt; do
 		;;
 	o)
 		OBJDIR=${OPTARG}; shift
+		;;
+	r)
+		RUMP_DIAGNOSTIC=no
+		DBG=''
 		;;
 	s)
 		SRCDIR=${OPTARG}; shift
@@ -182,12 +188,14 @@ LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 EOF
 appendmkconf () {
-	[ ! -z "${1}" ] && echo "${2}+=${1}" >> "${MYTOOLDIR}/mk.conf"
+	[ ! -z "${1}" ] && echo "${2}${3}=${1}" >> "${MYTOOLDIR}/mk.conf"
 }
-appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS"
-appendmkconf "${EXTRA_CFLAGS}" "CFLAGS"
-appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS"
-appendmkconf "${EXTRA_AFLAGS}" "AFLAGS"
+appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS" +
+appendmkconf "${EXTRA_CFLAGS}" "CFLAGS" +
+appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
+appendmkconf "${EXTRA_AFLAGS}" "AFLAGS" +
+appendmkconf "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
+appendmkconf "${DBG}" "DBG"
 
 # The following is now handled internally by the NetBSD mk files,
 # but keep this here for "compat" anyway for some weeks.
