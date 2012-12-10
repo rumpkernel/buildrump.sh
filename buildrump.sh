@@ -189,6 +189,8 @@ appendmkconf "${EXTRA_CFLAGS}" "CFLAGS"
 appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS"
 appendmkconf "${EXTRA_AFLAGS}" "AFLAGS"
 
+# The following is now handled internally by the NetBSD mk files,
+# but keep this here for "compat" anyway for some weeks.
 tst=`cc --print-file-name=crtbeginS.o`
 [ -z "${tst%crtbeginS.o}" ] && echo '_GCC_CRTBEGINS=' >> "${MYTOOLDIR}/mk.conf"
 tst=`cc --print-file-name=crtendS.o`
