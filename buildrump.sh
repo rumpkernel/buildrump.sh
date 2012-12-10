@@ -197,6 +197,9 @@ tst=`cc --print-file-name=crtbeginS.o`
 tst=`cc --print-file-name=crtendS.o`
 [ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
 
+# Use some defaults.
+# The html pages would be nice, but result in too many broken
+# links, since they assume the whole NetBSD man page set to be present.
 ${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
     -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} \
     -V MKGROFF=no \
@@ -204,6 +207,7 @@ ${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
     -V NOPROFILE=1 \
     -V NOLINT=1 \
     -V USE_SSP=no \
+    -V MKHTML=no -V MKCATPAGES=yes \
     -V MAKECONF="${MYTOOLDIR}/mk.conf" \
     tools
 [ $? -ne 0 ] && die build.sh tools failed
@@ -225,30 +229,41 @@ domake ()
 	cd ${SRCDIR}
 }
 
-# create necessary dirs for build process
-domake etc obj
-domake etc distrib-dirs
+# set up $dest via symlinks.  this is easier than trying to teach
+# the NetBSD build system that we're not interested in an extra
+# level of "usr"
+mkdir -p ${DESTDIR}/include || die create ${DESTDIR}/include
+mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
+mkdir -p ${DESTDIR}/man || die create ${DESTDIR}/man
+mkdir -p ${OBJDIR}/dest/usr/share/man || die create ${OBJDIR}/dest/usr/share/man
+ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/include
+ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/lib
+ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/lib
+for man in cat man ; do 
+	for x in 1 2 3 4 5 6 7 8 9 ; do
+		ln -sf ${DESTDIR}/man ${OBJDIR}/dest/usr/share/man/${man}${x}
+	done
+done
 
-# cleanup dirs we don't need in $dest, the easy way out
-rm -rf ${OBJDIR}/dest/usr/lib/*
-
-# install headers into staging area
+# install rump kernel and hypervisor headers
 domake sys/rump/include includes
 domake lib/librumpuser includes
 
-# and copy them over to the final resting place
-tar -C ${OBJDIR}/dest/usr -cf - include/rump | tar -C ${DESTDIR} -xf -
-
-# then build rump kernel components
-domake sys/rump
-[ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
-
-# ... and the hypervisor
+# first build the hypervisor
 domake lib/librumpuser
 
-# and copy libraries to the final resting place
-tar -C ${OBJDIR}/dest     -cf - lib | tar -C ${DESTDIR} -xf -
-tar -C ${OBJDIR}/dest/usr -cf - lib | tar -C ${DESTDIR} -xf -
+# then the rump kernel base and factions
+domake lib/librump
+domake lib/librumpdev
+domake lib/librumpnet
+domake lib/librumpvfs
+
+# then build rump kernel driver
+domake sys/rump/dev
+domake sys/rump/fs
+domake sys/rump/kern
+domake sys/rump/net
+[ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
 
 
 # DONE
