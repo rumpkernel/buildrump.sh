@@ -197,12 +197,21 @@ appendmkconf "${EXTRA_AFLAGS}" "AFLAGS" +
 appendmkconf "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
 appendmkconf "${DBG}" "DBG"
 
-# The following is now handled internally by the NetBSD mk files,
-# but keep this here for "compat" anyway for some weeks.
-tst=`cc --print-file-name=crtbeginS.o`
-[ -z "${tst%crtbeginS.o}" ] && echo '_GCC_CRTBEGINS=' >> "${MYTOOLDIR}/mk.conf"
-tst=`cc --print-file-name=crtendS.o`
-[ -z "${tst%crtendS.o}" ] && echo '_GCC_CRTENDS=' >> "${MYTOOLDIR}/mk.conf"
+#
+# Not all platforms have  the same set of crt files.  for some
+# reason unbeknownst to me, if the file does not exist,
+# at least gcc --print-file-name just echoes the input parameter.
+# Try to detect this and tell the NetBSD makefiles that the crtfile
+# in question should be left empty.
+chkcrt () {
+	tst=`cc --print-file-name=${1}.o`
+	up=`echo ${1} | tr [a-z] [A-Z]`
+	[ -z "${tst%${1}.o}" ] && echo "_GCC_CRT${up}=" >>"${MYTOOLDIR}/mk.conf"
+}
+chkcrt begins
+chkcrt ends
+chkcrt i
+chkcrt n
 
 # Use some defaults.
 # The html pages would be nice, but result in too many broken
