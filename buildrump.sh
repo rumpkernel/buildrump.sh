@@ -37,20 +37,20 @@ DBG='-O2 -g'
 while getopts 'd:hj:o:rs:' opt; do
 	case "$opt" in
 	j)
-		JNUM=${OPTARG}; shift
+		JNUM=${OPTARG}
 		;;
 	d)
-		DESTDIR=${OPTARG}; shift
+		DESTDIR=${OPTARG}
 		;;
 	o)
-		OBJDIR=${OPTARG}; shift
+		OBJDIR=${OPTARG}
 		;;
 	r)
 		RUMP_DIAGNOSTIC=no
 		DBG=''
 		;;
 	s)
-		SRCDIR=${OPTARG}; shift
+		SRCDIR=${OPTARG}
 		;;
 	-)
 		break
