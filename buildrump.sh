@@ -29,18 +29,22 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
+	printf "\t-q: quiet build, minimal compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	exit 1
 }
 
 DBG='-O2 -g'
-while getopts 'd:hj:o:rs:' opt; do
+while getopts 'd:hj:o:qrs:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
 		;;
 	d)
 		DESTDIR=${OPTARG}
+		;;
+	q)
+		BEQUIET='-N0'
 		;;
 	o)
 		OBJDIR=${OPTARG}
@@ -217,7 +221,7 @@ chkcrt n
 # The html pages would be nice, but result in too many broken
 # links, since they assume the whole NetBSD man page set to be present.
 ${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
-    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} \
+    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
