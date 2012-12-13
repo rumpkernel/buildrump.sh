@@ -34,7 +34,8 @@ Tested configurations
 =====================
 
 The script supports both gcc and clang as the host target compiler.
-It has been tested to work with GNU binutils.
+It has been tested to work with GNU binutils (caveat: the currently
+included linker script will not work with binutils 2.18 or earlier).
 
 The following platforms have been tested:
 
