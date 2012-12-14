@@ -159,17 +159,33 @@ else
 fi
 
 #
+# Perform some toolchain feature tests to determine what options
+# we need to use for building.
+#
+
+cd ${OBJDIR}
+#
 # Try to test if cc supports -Wno-unused-but-set-variable.
 # This is a bit tricky since apparently gcc doesn't tell it
 # doesn't support it unless there is some other error to complain
 # about as well.  So we try compiling a broken source file...
-cd $OBJDIR
 echo 'no you_shall_not_compile' > broken.c
 ${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
 if ! grep -q Wno-unused-but-set-variable broken.out ; then
 	W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
 fi
 rm -f broken.c broken.out
+
+#
+# Check if the linker supports all the features of the rump kernel
+# component ldscript used for linking shared libraries.
+# If not, build only static rump kernel components.
+echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
+echo 'int main(void) {return 0;}' > test.c
+if ! cc test.c -Wl,-T ldscript.test; then
+	HASPIC='-V NOPIC=1'
+fi
+rm -f test.c a.out ldscript.test
 cd ${SRCDIR}
 
 #
@@ -221,7 +237,7 @@ chkcrt n
 # The html pages would be nice, but result in too many broken
 # links, since they assume the whole NetBSD man page set to be present.
 ${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
-    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} \
+    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
     -V MKGROFF=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
@@ -336,7 +352,7 @@ main()
 EOF
 
 # should do this properly
-${CC} -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser ${EXTRA_CFLAGS} ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+${CC} -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 ./rumptest || die test failed
 
 echo
