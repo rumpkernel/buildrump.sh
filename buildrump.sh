@@ -346,6 +346,7 @@ main()
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
 	printf("\n%s", buf);
+	rump_sys_reboot(0, NULL);
 
 	return 0;
 }
