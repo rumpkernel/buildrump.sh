@@ -346,13 +346,14 @@ main()
 	if (rump_sys_read(fd, buf, sizeof(buf)) <= 0)
 		die("read version");
 	printf("\n%s", buf);
+	rump_sys_reboot(0, NULL);
 
 	return 0;
 }
 EOF
 
 # should do this properly
-${CC} -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+${CC} -g -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 ./rumptest || die test failed
 
 echo
