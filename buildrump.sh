@@ -159,6 +159,13 @@ else
 fi
 
 #
+# Check for GNU ld (as invoked by cc, since that's how the
+# NetBSD Makefiles invoke it)
+if ! cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+	die "GNU ld required (by NetBSD Makefiles)"
+fi
+
+#
 # Perform some toolchain feature tests to determine what options
 # we need to use for building.
 #
