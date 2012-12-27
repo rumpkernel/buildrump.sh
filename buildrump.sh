@@ -11,6 +11,10 @@ DESTDIR=`pwd`/rump
 SRCDIR=`pwd`
 JNUM=4
 
+# NetBSD source version requirement
+NBSRC_DATE=20121227
+NBSRC_SUB=0
+
 # the parrot routine
 die ()
 {
@@ -81,8 +85,19 @@ DESTDIR=`pwd`
 cd ${curdir}
 cd ${SRCDIR}
 SRCDIR=`pwd`
-
 MYTOOLDIR=${OBJDIR}/tooldir
+
+# check if NetBSD src is new enough
+oIFS="${IFS}"
+IFS=':'
+exec 3>&2-
+ver="`sed -n 's/^BUILDRUMP=//p' < ${SRCDIR}/sys/rump/VERSION`"
+exec 2>&3-
+set ${ver} 0
+[ "1${1}" -lt "1${NBSRC_DATE}" \
+  -o \( "1${1}" -eq "1${NBSRC_DATE}" -a "1${2}" -lt "1${NBSRC_SUB}" \) ] \
+    && die "Update of NetBSD source tree to ${NBSRC_DATE}:${NBSRC_SUB} required"
+IFS="${oIFS}"
 
 hostos=`uname -s`
 binsh=sh
