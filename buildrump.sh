@@ -90,9 +90,9 @@ MYTOOLDIR=${OBJDIR}/tooldir
 # check if NetBSD src is new enough
 oIFS="${IFS}"
 IFS=':'
-exec 3>&2-
+exec 3>&2 2>/dev/null
 ver="`sed -n 's/^BUILDRUMP=//p' < ${SRCDIR}/sys/rump/VERSION`"
-exec 2>&3-
+exec 2>&3 3>&-
 set ${ver} 0
 [ "1${1}" -lt "1${NBSRC_DATE}" \
   -o \( "1${1}" -eq "1${NBSRC_DATE}" -a "1${2}" -lt "1${NBSRC_SUB}" \) ] \
