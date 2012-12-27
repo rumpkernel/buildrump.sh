@@ -246,6 +246,7 @@ chkcrt n
 ${binsh} build.sh -m ${machine} -U -u -D ${OBJDIR}/dest -O ${OBJDIR} \
     -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
     -V MKGROFF=no \
+    -V MKARZERO=no \
     -V EXTERNAL_TOOLCHAIN=${EXTERNAL_TOOLCHAIN} \
     -V NOPROFILE=1 \
     -V NOLINT=1 \
