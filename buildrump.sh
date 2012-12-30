@@ -12,7 +12,7 @@ SRCDIR=`pwd`
 JNUM=4
 
 # NetBSD source version requirement
-NBSRC_DATE=20121227
+NBSRC_DATE=20121230
 NBSRC_SUB=0
 
 # the parrot routine
@@ -135,6 +135,14 @@ case ${mach_arch} in
 	;;
 "x86_64")
 	machine="amd64"
+	;;
+"armv6l")
+	machine="evbarm"
+	mach_arch="arm"
+	toolabi="elf"
+	# XXX: assume at least armv6k due to some armv6 inaccuracy in NetBSD
+	EXTRA_CFLAGS='-march=armv6k'
+	EXTRA_AFLAGS='-march=armv6k'
 	;;
 "i386"|"i686")
 	machine="i386"
