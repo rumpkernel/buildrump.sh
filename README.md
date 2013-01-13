@@ -1,9 +1,8 @@
-Building NetBSD-based rump kernels on non-NetBSD
+Running NetBSD-based rump kernels on non-NetBSD
 ================================================
 
-The buildrump.sh script builds NetBSD kernel drivers on non-NetBSD hosts
-and thus enables running them.  This portability is achieved by running
-the drivers in rump kernels on the target host.
+The buildrump.sh script builds NetBSD kernel drivers for non-NetBSD
+targets.  The drivers can be run in rump kernels on the target host.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
