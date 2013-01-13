@@ -1,10 +1,9 @@
 Building NetBSD-based rump kernels on non-NetBSD
 ================================================
 
-This repo contains support scripts for building rump kernels for
-non-NetBSD hosts.  The goal is to eventually get everything from here
-into the NetBSD build.sh script, but we're starting out elsewhere to
-facilitate quick modifications before things stabilize.
+The buildrump.sh script builds NetBSD kernel drivers on non-NetBSD hosts
+and thus enables running them.  This portability is achieved by running
+the drivers in rump kernels on the target host.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -12,29 +11,50 @@ For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 Instructions
 ============
 
-Drop the buildrump.sh script into the top level of the NetBSD source tree
-and run it as ./buildrump.sh.  Wait some moments.  If all goes well, you
-will have a rump kernel, the hypervisor and necessary headers in ./rump
+Get NetBSD src, e.g. `cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co
+-P src`.  If your source tree is too old, the script will complain.
+Generally speaking, for now you need a recent NetBSD-current.
 
-For now it's a good idea to use a NetBSD-current with at least
-the same timestamp as the script.
+Run the script and specify the NetBSD source directory with `-s`.  Use `-h`
+to see other options.
+
+After a successful build, the script will run a simple test program.
+The final output should be something like the following:
+
+	[...]
+	NetBSD 6.99.16 (RUMP-ROAST) #0: Sun Jan 13 23:27:47 EET 2013
+		pooka@golem:/var/tmp/pooka/obj/lib/librump
+	rump kernel halting...
+	syncing disks... done
+	unmounting file systems...
+	unmounted kernfs on /kern type kernfs
+	unmounted rumpfs on / type rumpfs
+	unmounting done
+	halted
+	
+	Success.
+	$ 
+
 
 Dependencies
 ------------
 
-Since the script plugs into NetBSD's build.sh, there are practically
-zero dependencies.  The things I had to install are:
+The toolchain in PATH is used to produce the target binaries (support
+for cross-compilation may be added at a later date).  The script builds
+other necessary tools out of the NetBSD source tree using `build.sh`.
+In addition from what is expected to be present on a bare-bones host
+(`sh`, `rm`, etc.), the following software is required:
 
-- cc
+- cc (gcc or clang)
+- binutils (ld, objcopy, etc.)
 - zlib
-- something for getting NetBSD src (I used `cvs -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`)
+
+GNU ld is necessary since the NetBSD kernel Makefiles depend on
+its command line syntax.
 
 
 Tested configurations
 =====================
-
-The script supports both gcc and clang as the host target compiler.
-It has been tested to work with GNU binutils.
 
 The following platforms have been tested:
 
