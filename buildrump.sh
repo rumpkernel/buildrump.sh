@@ -38,7 +38,7 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
-	printf "\t-q: quiet build, minimal compiler output.  default: noisy\n"
+	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	exit 1
 }
@@ -186,6 +186,7 @@ EOF
 
 DBG='-O2 -g'
 SKIPTOOLS=false
+NOISE=2
 while getopts 'd:hj:o:Pqrs:' opt; do
 	case "$opt" in
 	j)
@@ -195,7 +196,8 @@ while getopts 'd:hj:o:Pqrs:' opt; do
 		DESTDIR=${OPTARG}
 		;;
 	q)
-		BEQUIET='-N0'
+		# build.sh handles value going negative
+		NOISE=$((NOISE-1))
 		;;
 	o)
 		OBJDIR=${OPTARG}
@@ -221,6 +223,7 @@ while getopts 'd:hj:o:Pqrs:' opt; do
 	esac
 done
 shift $((${OPTIND} - 1))
+BEQUIET="-N${NOISE}"
 
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
@@ -314,22 +317,30 @@ esac
 [ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
 
 ${SKIPTOOLS} || maketools
+cd ${SRCDIR}
 
 RUMPTOOLS="${MYTOOLDIR}"
 RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
 
+# this helper makes sure we get some output with the
+# NetBSD noisybuild stuff (-q to this script)
+makedirtarget ()
+{
+
+	printf 'iwantitall:\n\t@${MAKEDIRTARGET} %s %s\n' $1 $2 | \
+	    ${RUMPMAKE} -f share/mk/bsd.own.mk -f - -j ${JNUM} iwantitall
+}
+
 domake ()
 {
 
-	cd ${1}
 	if [ -z "${2}" ] ; then
-		${RUMPMAKE} -j ${JNUM} obj || die "make $1 dependall"
-		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
-		${RUMPMAKE} -j ${JNUM} install || die "make $1 install"
+		makedirtarget $1 obj || die "make $1 dependall"
+		makedirtarget $1 dependall || die "make $1 dependall"
+		makedirtarget $1 install || die "make $1 install"
 	else
-		${RUMPMAKE} -j ${JNUM} $2 || die "make $1 $2"
+		makedirtarget $1 $2 || die "make $1 $2"
 	fi
-	cd ${SRCDIR}
 }
 
 # set up $dest via symlinks.  this is easier than trying to teach
