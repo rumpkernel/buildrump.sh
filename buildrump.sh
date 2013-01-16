@@ -38,7 +38,7 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
-	printf "\t-q: quiet build, minimal compiler output.  default: noisy\n"
+	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	exit 1
 }
@@ -186,6 +186,7 @@ EOF
 
 DBG='-O2 -g'
 SKIPTOOLS=false
+NOISE=2
 while getopts 'd:hj:o:Pqrs:' opt; do
 	case "$opt" in
 	j)
@@ -195,7 +196,8 @@ while getopts 'd:hj:o:Pqrs:' opt; do
 		DESTDIR=${OPTARG}
 		;;
 	q)
-		BEQUIET='-N0'
+		# build.sh handles value going negative
+		NOISE=$((NOISE-1))
 		;;
 	o)
 		OBJDIR=${OPTARG}
@@ -221,6 +223,7 @@ while getopts 'd:hj:o:Pqrs:' opt; do
 	esac
 done
 shift $((${OPTIND} - 1))
+BEQUIET="-N${NOISE}"
 
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
