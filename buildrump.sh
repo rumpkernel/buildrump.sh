@@ -49,7 +49,7 @@ helpme ()
 
 appendmkconf ()
 {
-	[ ! -z "${1}" ] && echo "${2}${3}=${1}" >> "${MYTOOLDIR}/mk.conf"
+	[ ! -z "${1}" ] && echo "${2}${3}=${1}" >> "${BRTOOLDIR}/mk.conf"
 }
 
 #
@@ -62,7 +62,7 @@ chkcrt ()
 {
 	tst=`cc --print-file-name=${1}.o`
 	up=`echo ${1} | tr [a-z] [A-Z]`
-	[ -z "${tst%${1}.o}" ] && echo "_GCC_CRT${up}=" >>"${MYTOOLDIR}/mk.conf"
+	[ -z "${tst%${1}.o}" ] && echo "_GCC_CRT${up}=" >>"${BRTOOLDIR}/mk.conf"
 }
 
 #
@@ -131,17 +131,17 @@ maketools ()
 
 	#
 	# Create external toolchain wrappers.
-	mkdir -p ${MYTOOLDIR}/bin || die "cannot create ${MYTOOLDIR}"
+	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
 	for x in ${CC} ${TOOLS}; do
 		# ok, it's not really --netbsd, but let's make-believe!
-		tname=${MYTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
+		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
 		[ -f ${tname} ] && continue
 
 		printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
 		chmod 755 ${tname}
 	done
 
-	cat > "${MYTOOLDIR}/mk.conf" << EOF
+	cat > "${BRTOOLDIR}/mk.conf" << EOF
 NOGCCERROR=1
 CPPFLAGS+=-I${DESTDIR}/include
 LIBDO.pthread=_external
@@ -165,16 +165,16 @@ EOF
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
 	${binsh} build.sh -m ${machine} -U -u \
-	    -D ${OBJDIR}/dest -O ${OBJDIR} \
-	    -T ${MYTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
-	    -V EXTERNAL_TOOLCHAIN=${MYTOOLDIR} -V TOOLCHAIN_MISSING=yes \
+	    -D ${OBJDIR}/dest -O ${OBJDIR} -w ${RUMPMAKE} \
+	    -T ${BRTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
+	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V MKGROFF=no \
 	    -V MKARZERO=no \
 	    -V NOPROFILE=1 \
 	    -V NOLINT=1 \
 	    -V USE_SSP=no \
 	    -V MKHTML=no -V MKCATPAGES=yes \
-	    -V MAKECONF="${MYTOOLDIR}/mk.conf" \
+	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
 }
@@ -188,7 +188,7 @@ DBG='-O2 -g'
 SKIPTOOLS=false
 ANYHOSTISGOOD=false
 NOISE=2
-while getopts 'd:hHj:o:Pqrs:' opt; do
+while getopts 'd:hHj:o:Pqrs:T:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
@@ -218,6 +218,9 @@ while getopts 'd:hHj:o:Pqrs:' opt; do
 	s)
 		SRCDIR=${OPTARG}
 		;;
+	T)
+		BRTOOLDIR=${OPTARG}
+		;;
 	-)
 		break
 		;;
@@ -244,7 +247,8 @@ DESTDIR=`pwd`
 cd ${curdir}
 cd ${SRCDIR}
 SRCDIR=`pwd`
-MYTOOLDIR=${OBJDIR}/tooldir
+
+[ -z "${BRTOOLS}" ] && BRTOOLS=${OBJDIR}/tooldir
 
 # check if NetBSD src is new enough
 oIFS="${IFS}"
@@ -328,11 +332,9 @@ case ${mach_arch} in
 esac
 [ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
 
+RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${SKIPTOOLS} || maketools
 cd ${SRCDIR}
-
-RUMPTOOLS="${MYTOOLDIR}"
-RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
 
 # this helper makes sure we get some output with the
 # NetBSD noisybuild stuff (-q to this script)
