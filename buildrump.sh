@@ -314,22 +314,30 @@ esac
 [ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
 
 ${SKIPTOOLS} || maketools
+cd ${SRCDIR}
 
 RUMPTOOLS="${MYTOOLDIR}"
 RUMPMAKE="${RUMPTOOLS}/bin/nbmake-${machine}"
 
+# this helper makes sure we get some output with the
+# NetBSD noisybuild stuff (-q to this script)
+makedirtarget ()
+{
+
+	printf 'iwantitall:\n\t@${MAKEDIRTARGET} %s %s\n' $1 $2 | \
+	    ${RUMPMAKE} -f share/mk/bsd.own.mk -f - -j ${JNUM} iwantitall
+}
+
 domake ()
 {
 
-	cd ${1}
 	if [ -z "${2}" ] ; then
-		${RUMPMAKE} -j ${JNUM} obj || die "make $1 dependall"
-		${RUMPMAKE} -j ${JNUM} dependall || die "make $1 dependall"
-		${RUMPMAKE} -j ${JNUM} install || die "make $1 install"
+		makedirtarget $1 obj || die "make $1 dependall"
+		makedirtarget $1 dependall || die "make $1 dependall"
+		makedirtarget $1 install || die "make $1 install"
 	else
-		${RUMPMAKE} -j ${JNUM} $2 || die "make $1 $2"
+		makedirtarget $1 $2 || die "make $1 $2"
 	fi
-	cd ${SRCDIR}
 }
 
 # set up $dest via symlinks.  this is easier than trying to teach
