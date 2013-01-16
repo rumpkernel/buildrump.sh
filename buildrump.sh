@@ -186,14 +186,18 @@ EOF
 
 DBG='-O2 -g'
 SKIPTOOLS=false
+ANYHOSTISGOOD=false
 NOISE=2
-while getopts 'd:hj:o:Pqrs:' opt; do
+while getopts 'd:hHj:o:Pqrs:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
 		;;
 	d)
 		DESTDIR=${OPTARG}
+		;;
+	H)
+		ANYHOSTISGOOD=true
 		;;
 	q)
 		# build.sh handles value going negative
@@ -277,10 +281,18 @@ case ${hostos} in
 		die Need GNU toolchain in PATH, `which ar` is not
 	fi
 	;;
+"CYGWIN_NT"*)
+	HASPIC='-V NOPIC=1'
+	host_notsupp='yes'
+	;;
 *)
-	die unsupported host OS: ${hostos}
+	host_notsupp='yes'
 	;;
 esac
+
+if [ "${host_notsupp}" = 'yes' ]; then
+	${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
+fi
 
 mach_arch=`uname -m`
 case ${mach_arch} in
