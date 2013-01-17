@@ -36,6 +36,7 @@ helpme ()
 	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir] [-j num]"
 	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
+	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
@@ -245,10 +246,14 @@ mkdir -p $DESTDIR || die cannot create ${DESTDIR}
 cd ${DESTDIR}
 DESTDIR=`pwd`
 cd ${curdir}
+
+[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
+cd ${BRTOOLDIR}
+BRTOOLDIR=`pwd`
+
 cd ${SRCDIR}
 SRCDIR=`pwd`
-
-[ -z "${BRTOOLS}" ] && BRTOOLS=${OBJDIR}/tooldir
 
 # check if NetBSD src is new enough
 oIFS="${IFS}"
