@@ -12,7 +12,7 @@ SRCDIR=`pwd`
 JNUM=4
 
 # NetBSD source version requirement
-NBSRC_DATE=20121230
+NBSRC_DATE=20130117
 NBSRC_SUB=0
 
 
@@ -378,12 +378,14 @@ for man in cat man ; do
 	done
 done
 
-# install rump kernel and hypervisor headers
+# install rump kernel, hypervisor and client callstub headers
 domake sys/rump/include includes
 domake lib/librumpuser includes
+domake lib/librumpclient includes
 
-# first build the hypervisor
+# first build the "userspace" components
 domake lib/librumpuser
+domake lib/librumpclient
 
 # then the rump kernel base and factions
 domake lib/librump
