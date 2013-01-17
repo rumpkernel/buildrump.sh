@@ -246,14 +246,14 @@ mkdir -p $DESTDIR || die cannot create ${DESTDIR}
 cd ${DESTDIR}
 DESTDIR=`pwd`
 cd ${curdir}
+cd ${SRCDIR}
+SRCDIR=`pwd`
+cd ${curdir}
 
 [ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
 cd ${BRTOOLDIR}
 BRTOOLDIR=`pwd`
-
-cd ${SRCDIR}
-SRCDIR=`pwd`
 
 # check if NetBSD src is new enough
 oIFS="${IFS}"
