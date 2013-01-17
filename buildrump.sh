@@ -385,7 +385,9 @@ domake lib/librumpclient includes
 
 # first build the "userspace" components
 domake lib/librumpuser
-domake lib/librumpclient
+
+# installation with shlibs fails.  0xd0
+#domake lib/librumpclient
 
 # then the rump kernel base and factions
 domake lib/librump
