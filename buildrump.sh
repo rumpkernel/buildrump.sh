@@ -175,6 +175,7 @@ EOF
 	    -V NOLINT=1 \
 	    -V USE_SSP=no \
 	    -V MKHTML=no -V MKCATPAGES=yes \
+	    -V SHLIBINSTALLDIR=/usr/lib \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
@@ -370,7 +371,6 @@ mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
 mkdir -p ${DESTDIR}/man || die create ${DESTDIR}/man
 mkdir -p ${OBJDIR}/dest/usr/share/man || die create ${OBJDIR}/dest/usr/share/man
 ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/include
-ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/lib
 ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/lib
 for man in cat man ; do 
 	for x in 1 2 3 4 5 6 7 8 9 ; do
@@ -386,8 +386,8 @@ domake lib/librumpclient includes
 # first build the "userspace" components
 domake lib/librumpuser
 
-# installation with shlibs fails.  0xd0
-#domake lib/librumpclient
+# then build the remote callstub library
+domake lib/librumpclient
 
 # then the rump kernel base and factions
 domake lib/librump
