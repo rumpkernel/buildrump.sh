@@ -453,8 +453,10 @@ main()
 }
 EOF
 
-# should do this properly
+set -x
 cc -g -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+set +x
+echo
 ./rumptest || die test failed
 
 echo
