@@ -3,6 +3,8 @@ Running NetBSD-based rump kernels on non-NetBSD
 
 The buildrump.sh script builds NetBSD kernel drivers for non-NetBSD
 targets.  The drivers can be run in rump kernels on the target host.
+The script and the resulting rump kernel components can/should be run
+as an unprivileged user, i.e. no root account is required.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -52,8 +54,8 @@ GNU ld is necessary since the NetBSD kernel Makefiles depend on
 its command line syntax.
 
 
-Tested configurations
-=====================
+Tested hosts
+============
 
 The following platforms have been tested:
 
