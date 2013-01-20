@@ -55,6 +55,15 @@ GNU ld is necessary since the NetBSD kernel Makefiles depend on
 its command line syntax.
 
 
+Running / Using
+---------------
+
+The build script creates a few simple tests into the object directory
+(default: obj) to check that the build result is functional.  These
+tests are good places to start modying or running as single-step in
+a debugger.
+
+
 Tested hosts
 ============
 
