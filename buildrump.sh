@@ -284,6 +284,7 @@ case ${hostos} in
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 	EXTRA_RUMPUSER='-lsocket -lrt -ldl'
+	LIBSOCKET='-lsocket'
 	binsh=/usr/xpg4/bin/sh
 
 	# do some random test to check for gnu foolchain
@@ -405,29 +406,34 @@ domake sys/rump/net
 
 # DONE
 echo
-echo done building.  bootstrapping a simple rump kernel for testing purposes.
-echo
+echo done building.  doing simple tests
 
 
 #
-# aaaand perform a very simple test
+# aaaand perform some simple tests
 #
 cd ${OBJDIR}
-cat > test.c << EOF
-#include <sys/types.h>
+IFS=' '
+
+testcommon='#include <sys/types.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <rump/rump.h>
-#include <rump/rump_syscalls.h>
+#include <unistd.h>
 
 static void
 die(const char *reason)
 {
 
-	fprintf(stderr, "%s\n", reason);
+	fprintf(stderr, "%s\\n", reason);
 	exit(1);
 }
+'
+
+echo ${testcommon} > fstest.c
+cat >> fstest.c << EOF
+#include <rump/rump.h>
+#include <rump/rump_syscalls.h>
 
 int
 main()
@@ -453,11 +459,65 @@ main()
 }
 EOF
 
+sockname=mysocket
+export RUMP_SERVER="unix://${sockname}"
+
+echo ${testcommon} > simpleserver.c
+cat >> simpleserver.c << EOF
+#include <rump/rump.h>
+
+int
+main()
+{
+
+	unsetenv("RUMP_VERBOSE");
+	if (rump_daemonize_begin() != 0)
+		die("daemonize init");
+        rump_init();
+	if (rump_init_server("${RUMP_SERVER}") != 0)
+		die("server init");
+	if (rump_daemonize_done(0) != 0)
+		die("daemonize fini");
+	pause();
+	return 0;
+}
+EOF
+
+echo ${testcommon} > simpleclient.c
+cat >> simpleclient.c << EOF
+#include <sys/types.h>
+#include <rump/rumpclient.h>
+#include <rump/rump_syscalls.h>
+int
+main()
+{
+
+	rumpclient_init();
+	if (rump_sys_getpid() < 2)
+		die("something went wrong! (\"what\" left as an exercise)");
+	rump_sys_reboot(0, NULL);
+	return 0;
+}
+EOF
+
+echo Remote communication
+
 set -x
-cc -g -o rumptest test.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+cc -g -o simpleserver simpleserver.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrump -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+cc -g -o simpleclient simpleclient.c -I${DESTDIR}/include -lrumpclient ${LIBSOCKET} ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 set +x
+echo Running ...
+./simpleserver || die simpleserver failed
+./simpleclient || die simpleclient failed
+
+echo Done
 echo
-./rumptest || die test failed
+echo VFS test
+
+set -x
+cc -g -o fstest fstest.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump  -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+set +x
+./fstest || die fstest failed
 
 echo
 echo Success.
