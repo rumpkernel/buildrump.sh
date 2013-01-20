@@ -12,9 +12,10 @@ For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 Instructions
 ============
 
-Get NetBSD src, e.g. `cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co
--P src`.  If your source tree is too old, the script will complain.
-Generally speaking, for now you need a recent NetBSD-current.
+Get NetBSD src, e.g.
+`env CVS_RSH=ssh cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`.
+If your source tree is too old, the script will complain.  Generally
+speaking, for now you need a recent NetBSD-current.
 
 Run the script and specify the NetBSD source directory with `-s`.  Use `-h`
 to see other options.
