@@ -74,3 +74,6 @@ The following platforms have been tested:
 
 - Solaris
     - SunOS hutcs 5.10 Generic_142900-15 sun4v sparc SUNW,T5240 Solaris (needs xpg4/bin/sh, sparc64)
+
+There is also initial support for Cygwin, but it will not work
+out-of-the-box.
