@@ -38,9 +38,11 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
 	printf "\t-s: location of source tree.  default: PWD\n"
+	printf "\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
+	printf "\t-D: increase debugginess.  default: ok 99%% of the time\n"
 	exit 1
 }
 
@@ -154,6 +156,8 @@ EOF
 	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf "${EXTRA_AFLAGS}" "AFLAGS" +
 	appendmkconf "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
+	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
+	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf "${DBG}" "DBG"
 
 	chkcrt begins
@@ -190,13 +194,22 @@ DBG='-O2 -g'
 SKIPTOOLS=false
 ANYHOSTISGOOD=false
 NOISE=2
-while getopts 'd:hHj:o:Pqrs:T:' opt; do
+debugginess=0
+while getopts 'd:DhHj:o:Pqrs:T:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
 		;;
 	d)
 		DESTDIR=${OPTARG}
+		;;
+	D)
+		[ ! -z "${RUMP_DIAGNOSTIC}" ]&& die Cannot specify releasy debug
+
+		debugginess=$((debugginess+1))
+		[ ${debugginess} -gt 0 ] && DBG='-O0 -g'
+		[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
+		[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 		;;
 	H)
 		ANYHOSTISGOOD=true
@@ -214,6 +227,7 @@ while getopts 'd:hHj:o:Pqrs:T:' opt; do
 		SKIPTOOLS=true
 		;;
 	r)
+		[ ${debugginess} -gt 0 ] && die Cannot specify debbuggy release
 		RUMP_DIAGNOSTIC=no
 		DBG=''
 		;;
