@@ -311,6 +311,9 @@ case ${hostos} in
 	RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 	EXTRA_RUMPUSER='-ldl'
 	;;
+"NetBSD")
+	# what do you expect? ;)
+	;;
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 	EXTRA_RUMPUSER='-lsocket -lrt -ldl'
