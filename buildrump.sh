@@ -429,11 +429,13 @@ domake lib/librumpdev
 domake lib/librumpnet
 domake lib/librumpvfs
 
-# then build rump kernel driver
+# finally build the rump kernel drivers
 domake sys/rump/dev
 domake sys/rump/fs
 domake sys/rump/kern
 domake sys/rump/net
+
+# ... and on Linux build syscall compat too
 [ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
 
 
