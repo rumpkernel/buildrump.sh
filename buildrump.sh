@@ -189,6 +189,7 @@ EOF
 	    -D ${OBJDIR}/dest -O ${OBJDIR} -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
+	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
 	    -V MKARZERO=no \
 	    -V NOPROFILE=1 \
