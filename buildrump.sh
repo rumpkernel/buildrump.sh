@@ -28,7 +28,7 @@ SRCDIR=`pwd`
 JNUM=4
 
 # NetBSD source version requirement
-NBSRC_DATE=20130117
+NBSRC_DATE=20130131
 NBSRC_SUB=0
 
 
