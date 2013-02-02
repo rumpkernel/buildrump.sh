@@ -311,6 +311,7 @@ case ${hostos} in
 "Linux")
 	RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 	EXTRA_RUMPUSER='-ldl'
+	EXTRA_RUMPCLIENT='-lpthread -ldl'
 	;;
 "NetBSD")
 	# what do you expect? ;)
@@ -318,7 +319,7 @@ case ${hostos} in
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 	EXTRA_RUMPUSER='-lsocket -lrt -ldl'
-	LIBSOCKET='-lsocket'
+	EXTRA_RUMPCLIENT='-lsocket -ldl'
 	binsh=/usr/xpg4/bin/sh
 
 	# do some random test to check for gnu foolchain
@@ -544,7 +545,7 @@ cc -g -o simpleserver simpleserver.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl
 # XXX: some systems don't have all of the librumpclient pthread
 # dependencies in libc, so always link in libpthread, although
 # it wouldn't be required on systems such as NetBSD
-cc -g -o simpleclient simpleclient.c -I${DESTDIR}/include -lrumpclient ${LIBSOCKET} -lpthread ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+cc -g -o simpleclient simpleclient.c -I${DESTDIR}/include -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 set +x
 echo Running ...
 ./simpleserver || die simpleserver failed
