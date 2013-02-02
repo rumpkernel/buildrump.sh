@@ -540,7 +540,11 @@ echo Remote communication
 
 set -x
 cc -g -o simpleserver simpleserver.c -I${DESTDIR}/include -Wl,--no-as-needed -Wl,--whole-archive -lrump -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
-cc -g -o simpleclient simpleclient.c -I${DESTDIR}/include -lrumpclient ${LIBSOCKET} ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+
+# XXX: some systems don't have all of the librumpclient pthread
+# dependencies in libc, so always link in libpthread, although
+# it wouldn't be required on systems such as NetBSD
+cc -g -o simpleclient simpleclient.c -I${DESTDIR}/include -lrumpclient ${LIBSOCKET} -lpthread ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 set +x
 echo Running ...
 ./simpleserver || die simpleserver failed
