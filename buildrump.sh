@@ -385,18 +385,7 @@ makedirtarget ()
 
 	printf 'iwantitall:\n\t@${MAKEDIRTARGET} %s %s\n' $1 $2 | \
 	    ${RUMPMAKE} -f share/mk/bsd.own.mk -f - -j ${JNUM} iwantitall
-}
-
-domake ()
-{
-
-	if [ -z "${2}" ] ; then
-		makedirtarget $1 obj || die "make $1 dependall"
-		makedirtarget $1 dependall || die "make $1 dependall"
-		makedirtarget $1 install || die "make $1 install"
-	else
-		makedirtarget $1 $2 || die "make $1 $2"
-	fi
+	[ $? -eq 0 ] || die "makedirtarget $1 $2"
 }
 
 # set up $dest via symlinks.  this is easier than trying to teach
@@ -414,31 +403,39 @@ for man in cat man ; do
 	done
 done
 
-# install rump kernel, hypervisor and client callstub headers
-domake sys/rump/include includes
-domake lib/librumpuser includes
-domake lib/librumpclient includes
+#
+# Now it's time to build.  This takes 4 passes, just like when
+# building NetBSD the regular way.  The passes are:
+# 1) obj
+# 2) includes
+# 3) dependall
+# 4) install
+#
 
-# first build the "userspace" components
-domake lib/librumpuser
+ALLDIRS='lib/librumpuser lib/librumpclient
+    lib/librump lib/librumpdev lib/librumpnet lib/librumpvfs
+    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include'
+[ "`uname`" = "Linux" ] && ALLDIRS="${ALLDIRS} sys/rump/kern/lib/libsys_linux"
 
-# then build the remote callstub library
-domake lib/librumpclient
+# 1) obj
+for dir in ${ALLDIRS}; do
+	makedirtarget ${dir} obj
+done
 
-# then the rump kernel base and factions
-domake lib/librump
-domake lib/librumpdev
-domake lib/librumpnet
-domake lib/librumpvfs
+# 2) includes
+for dir in ${ALLDIRS}; do
+	makedirtarget ${dir} includes
+done
 
-# finally build the rump kernel drivers
-domake sys/rump/dev
-domake sys/rump/fs
-domake sys/rump/kern
-domake sys/rump/net
+# 3) dependall
+for dir in ${ALLDIRS}; do
+	makedirtarget ${dir} dependall
+done
 
-# ... and on Linux build syscall compat too
-[ "`uname`" = "Linux" ] && domake sys/rump/kern/lib/libsys_linux
+# 4) install
+for dir in ${ALLDIRS}; do
+	makedirtarget ${dir} install
+done
 
 
 # DONE
