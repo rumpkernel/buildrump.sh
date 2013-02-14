@@ -213,7 +213,7 @@ EOF
 BRDIR=$(dirname $0)
 
 # source test routines, to be run after build
-. ${BRDIR}/testrump.sh
+. ${BRDIR}/tests/testrump.sh
 
 DBG='-O2 -g'
 SKIPTOOLS=false
