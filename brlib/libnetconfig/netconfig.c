@@ -155,8 +155,8 @@ RUMP_COMPONENT(RUMP_COMPONENT_NET_IFCFG)
 {
 	int rv;
 
-	if ((rv = socreate(AF_INET, &in4so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
+	if ((rv = socreate(PF_INET, &in4so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
 		panic("netconfig socreate in4: %d", rv);
-	if ((rv = socreate(AF_INET6, &in6so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
+	if ((rv = socreate(PF_INET6, &in6so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
 		panic("netconfig socreate in6: %d", rv);
 }
