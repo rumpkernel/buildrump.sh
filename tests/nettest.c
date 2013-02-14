@@ -23,8 +23,6 @@ server(void)
 	int slen = sizeof(sin);
 	int s, s2;
 
-	rump_init();
-
 	/* configure interface using the portable interfaces */
 	NOFAIL(rump_pub_netconfig_ifcreate("shmif0"));
 	NOFAIL(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem"));
