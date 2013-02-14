@@ -6,6 +6,9 @@
 #   bash srcdirs | xargs cvs -d anoncvs@anoncvs.netbsd.org:/cvsroot -z3 co -P
 #
 
+sh -c 'printf "WARNING: script moved to nbsrc/sys/rump/listsrcdirs\n" 1>&2;
+       printf "WARNING: The one at this location will be removed soon\n\n" 1>&2'
+
 echo src/{build.sh,Makefile,Makefile.inc} \
     src/{sys,tools,common,include} \
     src/share/mk \
