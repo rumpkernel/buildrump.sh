@@ -18,6 +18,7 @@
 #include <sys/socketvar.h>
 
 #include <net/if.h>
+#include <net/route.h>
 
 #include <netinet/in.h>
 
@@ -28,7 +29,7 @@
 
 static struct socket *in4so;
 static struct socket *in6so;
-//static struct socket *rtso;
+static struct socket *rtso;
 
 int
 rump_netconfig_ifcreate(const char *ifname)
@@ -147,8 +148,48 @@ rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int mask)
 int
 rump_netconfig_ipv4_gw(const char *gwaddr)
 {
+	struct rt_msghdr rtm, *rtmp;
+	struct sockaddr_in sin;
+	struct mbuf *m;
+	int off, rv;
 
-	panic("default route configuration TODO");
+	memset(&rtm, 0, sizeof(rtm));
+	rtm.rtm_type = RTM_ADD;
+	rtm.rtm_flags = RTF_UP | RTF_STATIC | RTF_GATEWAY;
+	rtm.rtm_version = RTM_VERSION;
+	rtm.rtm_seq = 2;
+	rtm.rtm_addrs = RTA_DST | RTA_GATEWAY | RTA_NETMASK;
+
+	m = m_gethdr(M_WAIT, MT_DATA);
+	m_copyback(m, 0, sizeof(rtm), &rtm);
+	off = sizeof(rtm);
+
+	/* dest */
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_len = sizeof(sin);
+	m_copyback(m, off, sin.sin_len, &sin);
+	RT_ADVANCE(off, (struct sockaddr *)&sin);
+
+	/* gw */
+	sin.sin_addr.s_addr = inet_addr(gwaddr);
+	m_copyback(m, off, sin.sin_len, &sin);
+	RT_ADVANCE(off, (struct sockaddr *)&sin);
+
+	/* mask */
+	sin.sin_addr.s_addr = 0;
+	m_copyback(m, off, sin.sin_len, &sin);
+	RT_ADVANCE(off, (struct sockaddr *)&sin);
+
+	m = m_pullup(m, sizeof(*rtmp));
+	rtmp = mtod(m, struct rt_msghdr *);
+	m->m_pkthdr.len = rtmp->rtm_msglen = off;
+
+	solock(rtso);
+	rv = rtso->so_proto->pr_output(m, rtso);
+	sounlock(rtso);
+
+	return rv;
 }
 
 RUMP_COMPONENT(RUMP_COMPONENT_NET_IFCFG)
@@ -159,4 +200,6 @@ RUMP_COMPONENT(RUMP_COMPONENT_NET_IFCFG)
 		panic("netconfig socreate in4: %d", rv);
 	if ((rv = socreate(PF_INET6, &in6so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
 		panic("netconfig socreate in6: %d", rv);
+	if ((rv = socreate(PF_ROUTE, &rtso, SOCK_RAW, 0, curlwp, NULL)) != 0)
+		panic("netconfig socreate route: %d", rv);
 }
