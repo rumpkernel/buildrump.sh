@@ -15,6 +15,7 @@
  */
 
 #include <sys/param.h>
+#include <sys/kernel.h>
 #include <sys/socketvar.h>
 
 #include <net/if.h>
@@ -115,6 +116,7 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	struct ifaliasreq ia;
 	struct sockaddr_in *sin;
 	in_addr_t m_addr;
+	int rv;
 
 	memset(&ia, 0, sizeof(ia));
 	strlcpy(ia.ifra_name, ifname, sizeof(ia.ifra_name));
@@ -135,7 +137,13 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	sin->sin_len = sizeof(*sin);
 	sin->sin_addr.s_addr = ~m_addr;
 
-	return ifioctl(in4so, SIOCAIFADDR, &ia, curlwp);
+	rv = ifioctl(in4so, SIOCAIFADDR, &ia, curlwp);
+	/*
+	 * small pause so that we can assume interface is usable when
+	 * we return (ARPs have trickled through, etc.)
+	 */
+	kpause("ramasee", false, mstohz(50), NULL);
+	return rv;
 }
 
 int
