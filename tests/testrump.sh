@@ -29,9 +29,9 @@ doremote ()
 	    -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_CFLAGS}		\
 	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
-	echo Running ...
-	${TESTOBJ}/simpleserver "${RUMP_SERVER}" || die simpleserver failed
-	${TESTOBJ}/simpleclient || die simpleclient failed
+
+	./simpleserver "${RUMP_SERVER}" || die simpleserver failed
+	./simpleclient || die simpleclient failed
 
 	echo Done
 }
@@ -48,7 +48,8 @@ dofs ()
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
 	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
-	${TESTOBJ}/fstest || die fstest failed
+
+	./fstest || die fstest failed
 
 	echo Done
 }
@@ -59,22 +60,54 @@ donet ()
 	echo Networking test
 
 	set -x
-	cc -g -o ${TESTOBJ}/nettest ${TESTDIR}/nettest.c		\
+	cc -g -o ${TESTOBJ}/nettest_simple ${TESTDIR}/nettest_simple.c	\
 	    -I${DESTDIR}/include -Wl,--no-as-needed 			\
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
 	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
-	${TESTOBJ}/nettest server &
-	${TESTOBJ}/nettest client || die nettest client failed
+
+	rm -f busmem
+	./nettest_simple server &
+	./nettest_simple client || die nettest client failed
+
+	echo Done
+}
+
+donetrouted ()
+{
+
+	echo Routed networking test
+
+	set -x
+	cc -g -o ${TESTOBJ}/nettest_routed ${TESTDIR}/nettest_routed.c	\
+	    -I${DESTDIR}/include -Wl,--no-as-needed 			\
+	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
+	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
+	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
+	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	set +x
+
+	rm -f net1 net2
+	./nettest_routed server &
+	./nettest_routed router unix://${TESTOBJ}/routerctrl &
+	./nettest_routed client || die nettest client failed
+
+	# "code reuse ;)"
+	export RUMP_SERVER="unix://${TESTOBJ}/routerctrl"
+	./simpleclient || die failed to reboot router
+
+	echo Done
 }
 
 alltests ()
 {
 
 	mkdir -p ${TESTOBJ}
+	cd ${TESTOBJ}
 	doremote
 	donet
+	donetrouted
 	dofs
 }
