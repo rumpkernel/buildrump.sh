@@ -1,0 +1,33 @@
+;
+; Some quick attempt for a collection of interfaces to get basic
+; networking configured and going on rump kernels without having
+; to use NetBSD clients for the task.
+;
+; This is just a hack, please please please implement it better
+; (with a sugar and cherry on top ... I mean on top of the please,
+; not the implementation).
+;
+
+NAME|netconfig
+PUBHDR|rump/netconfig.h
+PRIVHDR|netconfig_if_priv.h
+WRAPPERS|netconfig_if_wrappers.c
+
+; type	| name				| args
+;
+
+; interface creation/destruction
+int	|netconfig_ifcreate	|const char *
+int	|netconfig_ifup		|const char *
+int	|netconfig_ifsetlinkstr	|const char *, const char *
+int	|netconfig_ifdown	|const char *
+int	|netconfig_ifdestroy	|const char *
+
+
+; address configuration (ipv4, ipv6)
+int	|netconfig_ipv4_ifaddr	|const char *, const char *, const char *
+int	|netconfig_ipv6_ifaddr	|const char *, const char *, int
+
+
+; default route configuration
+int	|netconfig_ipv4_gw	|const char *

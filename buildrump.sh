@@ -187,7 +187,7 @@ EOF
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
 	${binsh} build.sh -m ${machine} -u \
-	    -D ${OBJDIR}/dest -O ${OBJDIR} -w ${RUMPMAKE} \
+	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
@@ -200,6 +200,7 @@ EOF
 	    -V SHLIBINSTALLDIR=/usr/lib \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
+	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
 }
@@ -209,8 +210,10 @@ EOF
 # BEGIN SCRIPT
 #
 
+BRDIR=$(dirname $0)
+
 # source test routines, to be run after build
-. `dirname $0`/testrump.sh
+. ${BRDIR}/testrump.sh
 
 DBG='-O2 -g'
 SKIPTOOLS=false
@@ -381,7 +384,6 @@ esac
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${SKIPTOOLS} || maketools
-cd ${SRCDIR}
 
 # this helper makes sure we get some output with the
 # NetBSD noisybuild stuff (-q to this script)
@@ -389,7 +391,8 @@ makedirtarget ()
 {
 
 	printf 'iwantitall:\n\t@${MAKEDIRTARGET} %s %s\n' $1 $2 | \
-	    ${RUMPMAKE} -f share/mk/bsd.own.mk -f - -j ${JNUM} iwantitall
+	    ${RUMPMAKE} -f ${SRCDIR}/share/mk/bsd.own.mk -f - -j ${JNUM} \
+	      iwantitall
 	[ $? -eq 0 ] || die "makedirtarget $1 $2"
 }
 
@@ -417,31 +420,18 @@ done
 # 4) install
 #
 
-ALLDIRS='lib/librumpuser lib/librumpclient
+ALLDIRS="lib/librumpuser lib/librumpclient
     lib/librump lib/librumpdev lib/librumpnet lib/librumpvfs
-    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include'
+    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
+    ${BRDIR}/brlib"
 [ "`uname`" = "Linux" ] && ALLDIRS="${ALLDIRS} sys/rump/kern/lib/libsys_linux"
 
-# 1) obj
-for dir in ${ALLDIRS}; do
-	makedirtarget ${dir} obj
+cd ${SRCDIR}
+for target in obj includes dependall install; do
+	for dir in ${ALLDIRS}; do
+		makedirtarget ${dir} ${target}
+	done
 done
-
-# 2) includes
-for dir in ${ALLDIRS}; do
-	makedirtarget ${dir} includes
-done
-
-# 3) dependall
-for dir in ${ALLDIRS}; do
-	makedirtarget ${dir} dependall
-done
-
-# 4) install
-for dir in ${ALLDIRS}; do
-	makedirtarget ${dir} install
-done
-
 
 # DONE
 echo
