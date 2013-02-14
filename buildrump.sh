@@ -165,6 +165,7 @@ NOGCCERROR=1
 CPPFLAGS+=-I${DESTDIR}/include
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
+INSTPRIV=-U
 EOF
 
 	appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS" +
@@ -185,7 +186,7 @@ EOF
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
-	${binsh} build.sh -m ${machine} -U -u \
+	${binsh} build.sh -m ${machine} -u \
 	    -D ${OBJDIR}/dest -O ${OBJDIR} -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
@@ -394,7 +395,7 @@ makedirtarget ()
 # set up $dest via symlinks.  this is easier than trying to teach
 # the NetBSD build system that we're not interested in an extra
 # level of "usr"
-mkdir -p ${DESTDIR}/include || die create ${DESTDIR}/include
+mkdir -p ${DESTDIR}/include/rump || die create ${DESTDIR}/include/rump
 mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
 mkdir -p ${DESTDIR}/man || die create ${DESTDIR}/man
 mkdir -p ${OBJDIR}/dest/usr/share/man || die create ${OBJDIR}/dest/usr/share/man
