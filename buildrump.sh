@@ -198,6 +198,7 @@ EOF
 	    -V USE_SSP=no \
 	    -V MKHTML=no -V MKCATPAGES=yes \
 	    -V SHLIBINSTALLDIR=/usr/lib \
+	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
