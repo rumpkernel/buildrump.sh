@@ -15,9 +15,8 @@ Instructions
 Get a copy of the NetBSD source tree.  The easiest may is to fetch
 the entire tree, e.g.
 `env CVS_RSH=ssh cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`.
-The minimal set of NetBSD sources is documented in "listsrcdirs".
-The script will make sure your source tree is recent enough to support
-the necessary features.
+The minimum necessary checkout is documented in a script available from
+the NetBSD source repository at src/sys/rump/listsrcdirs.
 
 Run the script and specify the NetBSD source directory with `-s`.  Use `-h`
 to see other options.
