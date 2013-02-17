@@ -22,9 +22,9 @@
 #
 
 # defaults
-OBJDIR=`pwd`/obj
-DESTDIR=`pwd`/rump
-SRCDIR=`pwd`
+OBJDIR=./obj
+DESTDIR=./rump
+SRCDIR=.
 JNUM=4
 
 # NetBSD source version requirement
@@ -215,6 +215,8 @@ SKIPTOOLS=false
 ANYHOSTISGOOD=false
 NOISE=2
 debugginess=0
+BRDIR=$(dirname $0)
+
 while getopts 'd:DhHj:o:Pqrs:T:' opt; do
 	case "$opt" in
 	j)
@@ -267,34 +269,33 @@ while getopts 'd:DhHj:o:Pqrs:T:' opt; do
 done
 shift $((${OPTIND} - 1))
 BEQUIET="-N${NOISE}"
+[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
 
+mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
+mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
+mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
+
+abspath ()
+{
+
+	local curdir=`pwd -P`
+	eval cd \${${1}}
+	eval ${1}=`pwd -P`
+	cd ${curdir}
+}
+
 # resolve critical directories
-curdir=`pwd`
-mkdir -p $OBJDIR || die cannot create ${OBJDIR}
-cd ${OBJDIR}
-OBJDIR=`pwd`
-cd ${curdir}
-mkdir -p $DESTDIR || die cannot create ${DESTDIR}
-cd ${DESTDIR}
-DESTDIR=`pwd`
-cd ${curdir}
-cd ${SRCDIR}
-SRCDIR=`pwd`
-cd ${curdir}
-cd $(dirname $0)
-BRDIR=`pwd`
-cd ${curdir}
+abspath DESTDIR
+abspath OBJDIR
+abspath SRCDIR
+abspath BRTOOLDIR
+abspath BRDIR
 
 # source test routines, to be run after build
 . ${BRDIR}/tests/testrump.sh
-
-[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
-mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
-cd ${BRTOOLDIR}
-BRTOOLDIR=`pwd`
 
 # check if NetBSD src is new enough
 oIFS="${IFS}"
