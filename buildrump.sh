@@ -210,11 +210,6 @@ EOF
 # BEGIN SCRIPT
 #
 
-BRDIR=$(dirname $0)
-
-# source test routines, to be run after build
-. ${BRDIR}/tests/testrump.sh
-
 DBG='-O2 -g'
 SKIPTOOLS=false
 ANYHOSTISGOOD=false
@@ -289,6 +284,12 @@ cd ${curdir}
 cd ${SRCDIR}
 SRCDIR=`pwd`
 cd ${curdir}
+cd $(dirname $0)
+BRDIR=`pwd
+cd ${curdir}
+
+# source test routines, to be run after build
+. ${BRDIR}/tests/testrump.sh
 
 [ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
