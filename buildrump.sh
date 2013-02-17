@@ -285,7 +285,7 @@ cd ${SRCDIR}
 SRCDIR=`pwd`
 cd ${curdir}
 cd $(dirname $0)
-BRDIR=`pwd
+BRDIR=`pwd`
 cd ${curdir}
 
 # source test routines, to be run after build
