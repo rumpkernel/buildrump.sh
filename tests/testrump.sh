@@ -104,10 +104,14 @@ donetrouted ()
 alltests ()
 {
 
+	echo Running simple tests
+
 	mkdir -p ${TESTOBJ}
 	cd ${TESTOBJ}
 	doremote
 	donet
 	donetrouted
 	dofs
+
+	echo Success
 }
