@@ -211,13 +211,12 @@ EOF
 #
 
 DBG='-O2 -g'
-SKIPTOOLS=false
 ANYHOSTISGOOD=false
 NOISE=2
 debugginess=0
 BRDIR=$(dirname $0)
 
-while getopts 'd:DhHj:o:Pqrs:T:' opt; do
+while getopts 'd:DhHj:o:qrs:T:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
@@ -243,11 +242,6 @@ while getopts 'd:DhHj:o:Pqrs:T:' opt; do
 	o)
 		OBJDIR=${OPTARG}
 		;;
-	P)
-		# "developer only", not mentioned in -h
-		echo 'You asked for it, you got it: skipping tool build'
-		SKIPTOOLS=true
-		;;
 	r)
 		[ ${debugginess} -gt 0 ] && die Cannot specify debbuggy release
 		RUMP_DIAGNOSTIC=no
@@ -270,6 +264,33 @@ done
 shift $((${OPTIND} - 1))
 BEQUIET="-N${NOISE}"
 [ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+
+#
+# Determine what which parts we should execute.  Default: all
+#
+allcmds="tools build install tests"
+
+if [ $# -eq 0 ]; then
+	for cmd in ${allcmds}; do
+		eval do${cmd}=true
+	done
+else
+	for cmd in ${allcmds}; do
+		eval do${cmd}=false
+	done
+
+	for arg in $*; do
+		while true ; do
+			for cmd in ${allcmds}; do
+				if [ "${arg}" = "${cmd}" ]; then
+					eval do${cmd}=true
+					break 2
+				fi
+			done
+			die "Invalid arg $arg"
+		done
+	done
+fi
 
 [ ! -f "${SRCDIR}/build.sh" ] && \
     die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
@@ -385,7 +406,7 @@ esac
 [ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
-${SKIPTOOLS} || maketools
+${dotools} && maketools
 
 # this helper makes sure we get some output with the
 # NetBSD noisybuild stuff (-q to this script)
@@ -398,20 +419,26 @@ makedirtarget ()
 	[ $? -eq 0 ] || die "makedirtarget $1 $2"
 }
 
-# set up $dest via symlinks.  this is easier than trying to teach
-# the NetBSD build system that we're not interested in an extra
-# level of "usr"
-mkdir -p ${DESTDIR}/include/rump || die create ${DESTDIR}/include/rump
-mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
-mkdir -p ${DESTDIR}/man || die create ${DESTDIR}/man
-mkdir -p ${OBJDIR}/dest/usr/share/man || die create ${OBJDIR}/dest/usr/share/man
-ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/include
-ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/lib
-for man in cat man ; do 
-	for x in 1 2 3 4 5 6 7 8 9 ; do
-		ln -sf ${DESTDIR}/man ${OBJDIR}/dest/usr/share/man/${man}${x}
+setupdest ()
+{
+
+	# set up $dest via symlinks.  this is easier than trying to teach
+	# the NetBSD build system that we're not interested in an extra
+	# level of "usr"
+	mkdir -p ${DESTDIR}/include/rump || die create ${DESTDIR}/include/rump
+	mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
+	mkdir -p ${DESTDIR}/man || die create ${DESTDIR}/man
+	mkdir -p ${OBJDIR}/dest/usr/share/man \
+	    || die create ${OBJDIR}/dest/usr/share/man
+	ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/include
+	ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/lib
+	for man in cat man ; do 
+		for x in 1 2 3 4 5 6 7 8 9 ; do
+			ln -sf ${DESTDIR}/man \
+			    ${OBJDIR}/dest/usr/share/man/${man}${x}
+		done
 	done
-done
+}
 
 #
 # Now it's time to build.  This takes 4 passes, just like when
@@ -422,6 +449,10 @@ done
 # 4) install
 #
 
+${dobuild} && targets="obj includes dependall"
+${doinstall} && setupdest
+${doinstall} && targets="${targets} install"
+
 ALLDIRS="lib/librumpuser lib/librumpclient
     lib/librump lib/librumpdev lib/librumpnet lib/librumpvfs
     sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
@@ -429,18 +460,11 @@ ALLDIRS="lib/librumpuser lib/librumpclient
 [ "`uname`" = "Linux" ] && ALLDIRS="${ALLDIRS} sys/rump/kern/lib/libsys_linux"
 
 cd ${SRCDIR}
-for target in obj includes dependall install; do
+for target in ${targets}; do
 	for dir in ${ALLDIRS}; do
 		makedirtarget ${dir} ${target}
 	done
 done
 
-# DONE
-echo
-echo done building.  doing simple tests
-
 # run tests from testrump.sh we sourced earlier
-alltests
-
-echo
-echo Success.
+${dotests} && alltests
