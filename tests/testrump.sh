@@ -69,7 +69,7 @@ donet ()
 	set +x
 
 	rm -f busmem
-	./nettest_simple server &
+	./nettest_simple server || die nettest server failed
 	./nettest_simple client || die nettest client failed
 
 	echo Done
@@ -90,8 +90,8 @@ donetrouted ()
 	set +x
 
 	rm -f net1 net2
-	./nettest_routed server &
-	./nettest_routed router unix://${TESTOBJ}/routerctrl &
+	./nettest_routed server || die nettest server failed
+	./nettest_routed router unix://${TESTOBJ}/routerctrl || die router fail
 	./nettest_routed client || die nettest client failed
 
 	# "code reuse ;)"

@@ -23,6 +23,8 @@ server(void)
 	int slen = sizeof(sin);
 	int s, s2;
 
+	rump_daemonize_begin();
+	rump_init();
 	config_server();
 
 	/* socket, bind, listen, accept.  standard sockets programming */
@@ -33,6 +35,9 @@ server(void)
 	sin.sin_addr.s_addr = INADDR_ANY;
 	NOFAIL(rump_sys_bind(s, (struct sockaddr *)&sin, slen));
 	NOFAIL(rump_sys_listen(s, 37));
+
+	/* delay detach from console until we have a listening sucket */
+	rump_daemonize_done(0);
 
 #define TESTSTR "You feel like you've been here before --More--\n"
 	NOFAIL(s2 = rump_sys_accept(s, (struct sockaddr *)&sin, &slen));
@@ -47,6 +52,7 @@ client(void)
 	ssize_t nn;
 	int s;
 
+	rump_init();
 	config_client();
 
 	/* socket, connect.  standard sockets programming */
@@ -69,8 +75,11 @@ static void
 router(const char *ctrlsock)
 {
 
+	rump_daemonize_begin();
+	rump_init();
 	rump_init_server(ctrlsock);
 	config_router();
+	rump_daemonize_done(0);
 	pause();
 }
 
@@ -78,11 +87,6 @@ int
 main(int argc, char *argv[])
 {
 
-	/*
-	 * Bootstrap rump kernel.  it's so cheap that we might as well
-	 * do it here before checking the args.
-	 */
-	rump_init();
 
 	if (argc < 2)
 		die("need role");
