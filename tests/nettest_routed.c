@@ -1,5 +1,7 @@
 #include <sys/types.h>
 
+#include <inttypes.h>
+
 #include <rump/rump.h>
 #include <rump/netconfig.h>
 
