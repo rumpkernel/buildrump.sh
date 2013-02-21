@@ -1,10 +1,11 @@
 Running NetBSD-based rump kernels on non-NetBSD
 ================================================
 
-The buildrump.sh script builds NetBSD kernel drivers for non-NetBSD
-targets.  The drivers can be run in rump kernels on the target host.
-The script and the resulting rump kernel components can/should be run
-as an unprivileged user, i.e. no root account is required.
+The buildrump.sh script builds NetBSD kernel drivers such as file systems
+and the TCP/IP stack for non-NetBSD targets.  The drivers can be run
+in rump kernels on the target host.  The script and the resulting rump
+kernel components can/should be run as an unprivileged user, i.e. no
+root account is required.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -12,17 +13,18 @@ For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 Instructions
 ============
 
-Get a copy of the NetBSD source tree.  The easiest may is to fetch
-the entire tree, e.g.
+Get a copy of the NetBSD source tree.  The easiest way is to fetch
+the entire tree, e.g. using anoncvs:
 `env CVS_RSH=ssh cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`.
-The minimum necessary checkout is documented in a script available from
-the NetBSD source repository at src/sys/rump/listsrcdirs.
+The minimum necessary subset of the NetBSD source tree is documented in
+a script available from the NetBSD repository at src/sys/rump/listsrcdirs.
 
-Run the script and specify the NetBSD source directory with `-s`.  Use `-h`
-to see other options.
+Run the `buildrump.sh` script and specify the NetBSD source directory
+with `-s`.  Use `-h` to see other options.
 
-After a successful build, the script will run a simple test program.
-The final output should be something like the following:
+After a successful build, the script will run some simple tests to
+check that e.g. file systems and the TCP/IP stack work correctly.
+If the tests are successful, the final output is:
 
 	[...]
 	NetBSD 6.99.16 (RUMP-ROAST) #0: Sun Jan 13 23:27:47 EET 2013
