@@ -40,14 +40,15 @@ If the tests are successful, the final output is:
 	$ 
 
 
-Dependencies
+Build dependencies
 ------------
 
 The toolchain in PATH is used to produce the target binaries (support
 for cross-compilation may be added at a later date).  The script builds
 other necessary tools out of the NetBSD source tree using `build.sh`.
 In addition from what is expected to be present on a bare-bones host
-(`sh`, `rm`, etc.), the following software is required:
+(`sh`, `rm`, etc.), the following software is required during the build
+process:
 
 - cc (gcc or clang)
 - binutils (ld, objcopy, etc.)
@@ -55,15 +56,6 @@ In addition from what is expected to be present on a bare-bones host
 
 GNU ld is necessary since the NetBSD kernel Makefiles depend on
 its command line syntax.
-
-
-Running / Using
----------------
-
-The build script creates a few simple tests into the object directory
-(default: obj) to check that the build result is functional.  These
-tests are good places to start modying or running as single-step in
-a debugger.
 
 
 Tested hosts
