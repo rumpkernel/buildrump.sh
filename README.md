@@ -27,8 +27,6 @@ check that e.g. file systems and the TCP/IP stack work correctly.
 If the tests are successful, the final output is:
 
 	[...]
-	NetBSD 6.99.16 (RUMP-ROAST) #0: Sun Jan 13 23:27:47 EET 2013
-		pooka@golem:/var/tmp/pooka/obj/lib/librump
 	rump kernel halting...
 	syncing disks... done
 	unmounting file systems...
@@ -36,8 +34,9 @@ If the tests are successful, the final output is:
 	unmounted rumpfs on / type rumpfs
 	unmounting done
 	halted
+	Done
 	
-	Success.
+	Success
 	$ 
 
 
