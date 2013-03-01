@@ -162,16 +162,19 @@ maketools ()
 
 	cat > "${BRTOOLDIR}/mk.conf" << EOF
 NOGCCERROR=1
-CPPFLAGS+=-I${DESTDIR}/include
+BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
+CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 INSTPRIV=-U
+CFLAGS+=\${BUILDRUMP_CFLAGS}
+AFLAGS+=\${BUILDRUMP_AFLAGS}
 EOF
 
 	appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS" +
-	appendmkconf "${EXTRA_CFLAGS}" "CFLAGS" +
 	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
-	appendmkconf "${EXTRA_AFLAGS}" "AFLAGS" +
+	appendmkconf "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
+	appendmkconf "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
 	appendmkconf "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
 	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
