@@ -28,7 +28,7 @@ SRCDIR=.
 JNUM=4
 
 # NetBSD source version requirement
-NBSRC_DATE=20130131
+NBSRC_DATE=20130301
 NBSRC_SUB=0
 
 
