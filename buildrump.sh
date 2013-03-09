@@ -24,7 +24,7 @@
 # defaults
 OBJDIR=./obj
 DESTDIR=./rump
-SRCDIR=.
+SRCDIR=./src
 JNUM=4
 
 # NetBSD source version requirement
