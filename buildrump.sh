@@ -58,6 +58,7 @@ helpme ()
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
+	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-D: increase debugginess.  default: ok 99%% of the time\n"
 	exit 1
 }
@@ -204,6 +205,7 @@ EOF
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
+	    ${BUILDSH_VARGS} \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
 }
@@ -219,7 +221,7 @@ NOISE=2
 debugginess=0
 BRDIR=$(dirname $0)
 
-while getopts 'd:DhHj:o:qrs:T:' opt; do
+while getopts 'd:DhHj:o:qrs:T:V:' opt; do
 	case "$opt" in
 	j)
 		JNUM=${OPTARG}
@@ -255,6 +257,9 @@ while getopts 'd:DhHj:o:qrs:T:' opt; do
 		;;
 	T)
 		BRTOOLDIR=${OPTARG}
+		;;
+	V)
+		BUILDSH_VARGS="${BUILDSH_VARGS} -V ${OPTARG}"
 		;;
 	-)
 		break
