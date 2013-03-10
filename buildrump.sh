@@ -85,8 +85,8 @@ chkcrt ()
 }
 
 #
-# Create tools and wrappers.  This can be skipped with -P.
-# Giving -P implies you know what you're doing.  It's useful for
+# Create tools and wrappers.  This step needs to be run at least once
+# and is always run by default, but you might want to skip it for:
 # 1) iteration speed on a slow-ish host
 # 2) making manual modification to the tools for testing and avoiding
 #    the script nuke them on the next iteration
