@@ -192,7 +192,8 @@ EOF
 	cd ${SRCDIR}
 	${binsh} build.sh -m ${machine} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
-	    -T ${BRTOOLDIR} -j ${JNUM} ${LLVM} ${BEQUIET} ${HASPIC} \
+	    -T ${BRTOOLDIR} -j ${JNUM} \
+	    ${LLVM} ${BEQUIET} ${HASPIC} ${SOFTFLOAT} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
@@ -395,6 +396,9 @@ case ${mach_arch} in
 	# XXX: assume at least armv6k due to armv6 inaccuracy in NetBSD
 	EXTRA_CFLAGS='-march=armv6k'
 	EXTRA_AFLAGS='-march=armv6k'
+
+	# force hardfloat, the default (i.e. soft) doesn't work on all hosts
+	SOFTFLOAT='-V MKSOFTFLOAT=no'
 	;;
 "i386"|"i686")
 	machine="i386"
