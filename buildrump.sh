@@ -145,7 +145,7 @@ maketools ()
 	echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 	echo 'int main(void) {return 0;}' > test.c
 	if ! cc test.c -Wl,-T ldscript.test; then
-		HASPIC='-V NOPIC=1'
+		BUILDSHARED='-V NOPIC=1'
 	fi
 	rm -f test.c a.out ldscript.test
 
@@ -193,7 +193,7 @@ EOF
 	${binsh} build.sh -m ${machine} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
-	    ${LLVM} ${BEQUIET} ${HASPIC} ${SOFTFLOAT} \
+	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
@@ -366,9 +366,13 @@ case ${hostos} in
 	if ! ar --version 2>/dev/null | grep -q 'GNU ar' ; then
 		die Need GNU toolchain in PATH, `which ar` is not
 	fi
+
+	# I haven't managed to get static libs to work on Solaris,
+	# so just be happy with shared ones
+	BUILDSTATIC='-V NOSTATICLIB=1'
 	;;
 "CYGWIN_NT"*)
-	HASPIC='-V NOPIC=1'
+	BUILDSHARED='-V NOPIC=1'
 	host_notsupp='yes'
 	;;
 *)
