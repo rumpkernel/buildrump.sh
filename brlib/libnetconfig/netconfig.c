@@ -169,6 +169,7 @@ rump_netconfig_ipv4_gw(const char *gwaddr)
 	rtm.rtm_addrs = RTA_DST | RTA_GATEWAY | RTA_NETMASK;
 
 	m = m_gethdr(M_WAIT, MT_DATA);
+	m->m_pkthdr.len = 0;
 	m_copyback(m, 0, sizeof(rtm), &rtm);
 	off = sizeof(rtm);
 
