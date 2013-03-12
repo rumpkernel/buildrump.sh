@@ -69,6 +69,7 @@ process:
 - cc (gcc or clang)
 - binutils (ld, objcopy, etc.)
 - zlib
+- cvs (required only if you use "checkout")
 
 GNU ld is necessary since the NetBSD kernel Makefiles depend on
 its command line syntax.
