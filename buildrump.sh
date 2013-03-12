@@ -53,17 +53,26 @@ helpme ()
 {
 
 	exec 1>&2
-	echo "Usage: $0 [-h] [-d destdir] [-o objdir] [-s srcdir] [-j num]"
+	echo "Usage: $0 [-h] [options] [command] [command...]"
+	printf "supported options:\n"
 	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
-	printf "\t-s: location of source tree.  default: PWD\n"
+	printf "\t-s: location of source tree.  default: PWD/src\n"
 	printf "\n"
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
-	printf "\t-D: increase debugginess.  default: ok 99%% of the time\n"
+	printf "\t-D: increase debugginess.  default: -O2 -g\n"
+	echo
+	printf "supported commands (none supplied => fullbuild):\n"
+	printf "\tcheckout:\tfetch NetBSD sources to srcdir from anoncvs\n"
+	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
+	printf "\tbuild:\t\tbuild rump kernel components\n"
+	printf "\tinstall:\tinstall rump kernel components into destdir\n"
+	printf "\ttests:\t\trun tests to verify installation is functional\n"
+	printf "\tfullbuild:\talias for \"tools build install tests\"\n"
 	exit 1
 }
 
