@@ -27,10 +27,14 @@ DESTDIR=./rump
 SRCDIR=./src
 JNUM=4
 
-# NetBSD source version requirement
+#
+# NetBSD source params
 NBSRC_DATE=20130307
 NBSRC_SUB=0
 
+# for fetching the sources
+NBSRC_CVSDATE="20130312 0000UTC"
+NBSRC_CVSFLAGS='-z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
 # support routines
@@ -211,6 +215,45 @@ EOF
 	[ $? -ne 0 ] && die build.sh tools failed
 }
 
+# Fetches NetBSD source tree from anoncvs.netbsd.org
+# Uses the version tag indicated at the start of this script.
+checkout ()
+{
+
+	# make sure we know where SRCDIR is
+	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
+	abspath SRCDIR
+
+	if ! type cvs >/dev/null 2>&1 ;then
+		echo '>> Need cvs for checkout functionality'
+		echo '>> Ensure that cvs is in PATH and run again'
+		echo '>> or fetch the NetBSD sources manually'
+		die No cvs in PATH
+	fi
+
+	echo ">> Fetching the necessary subset of NetBSD source tree to:"
+	echo "   ${SRCDIR}"
+	echo '>> This will take a few minutes and requires ~200MB of disk space'
+
+	cd ${SRCDIR}
+	# trick cvs into "skipping" the module name so that we get
+	# all the sources directly into $SRCDIR
+	rm -f src
+	ln -s . src
+
+	# Next, we need listsrcdirs.  For some reason, we also need to
+	# check out one file directly under src or we get weird errors later
+	cvs ${NBSRC_CVSFLAGS} co -P -D "${NBSRC_CVSDATE}" \
+	    src/build.sh src/sys/rump/listsrcdirs || die checkout failed
+
+	# now, do the real checkout
+	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
+	    -D "${NBSRC_CVSDATE}" || die checkout failed
+
+	# remove the symlink used to trick cvs
+	rm -f src
+	echo '>> checkout done'
+}
 
 #
 # BEGIN SCRIPT
@@ -275,19 +318,15 @@ BEQUIET="-N${NOISE}"
 [ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 
 #
-# Determine what which parts we should execute.  Default: all
+# Determine what which parts we should execute.
 #
-allcmds="tools build install tests"
+allcmds="checkout tools build install tests fullbuild"
+fullbuildcmds="tools build install tests"
 
-if [ $# -eq 0 ]; then
-	for cmd in ${allcmds}; do
-		eval do${cmd}=true
-	done
-else
-	for cmd in ${allcmds}; do
-		eval do${cmd}=false
-	done
-
+for cmd in ${allcmds}; do
+	eval do${cmd}=false
+done
+if [ $# -ne 0 ]; then
 	for arg in $*; do
 		while true ; do
 			for cmd in ${allcmds}; do
@@ -299,10 +338,18 @@ else
 			die "Invalid arg $arg"
 		done
 	done
+else
+	dofullbuild=true
+fi
+if ${dofullbuild} ; then
+	for cmd in ${fullbuildcmds}; do
+		eval do${cmd}=true
+	done
 fi
 
-[ ! -f "${SRCDIR}/build.sh" ] && \
-    die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
+if [ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ]; then
+	[ $? -ne 0 ] && die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
+fi
 
 mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
 mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
@@ -320,9 +367,11 @@ abspath ()
 # resolve critical directories
 abspath DESTDIR
 abspath OBJDIR
-abspath SRCDIR
 abspath BRTOOLDIR
 abspath BRDIR
+
+${docheckout} && checkout
+abspath SRCDIR
 
 # source test routines, to be run after build
 . ${BRDIR}/tests/testrump.sh
