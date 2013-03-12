@@ -113,5 +113,6 @@ alltests ()
 	donetrouted
 	dofs
 
+	echo
 	echo Success
 }
