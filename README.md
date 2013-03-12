@@ -1,11 +1,11 @@
-Running NetBSD-based rump kernels on non-NetBSD
-================================================
+Running NetBSD's Rump Kernels On Any Host
+=========================================
 
-The buildrump.sh script builds NetBSD kernel drivers such as file systems
-and the TCP/IP stack for non-NetBSD targets.  The drivers can be run
-in rump kernels on the target host.  The script and the resulting rump
-kernel components can/should be run as an unprivileged user, i.e. no
-root account is required.
+The buildrump.sh script builds NetBSD kernel drivers such as file
+systems and the TCP/IP stack for targets such a Linux and the other
+BSDs.  The drivers can then be run in userspace inside rump kernels.
+Using this script and the resulting rump kernel components does not
+require a root account.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -13,18 +13,31 @@ For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 Instructions
 ============
 
-Get a copy of the NetBSD source tree.  The easiest way is to fetch
-the entire tree, e.g. using anoncvs:
-`env CVS_RSH=ssh cvs -z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot co -P src`.
-The minimum necessary subset of the NetBSD source tree is documented in
-a script available from the NetBSD repository at src/sys/rump/listsrcdirs.
+Clone the repository and run:
 
-Run the `buildrump.sh` script and specify the NetBSD source directory
-with `-s`.  Use `-h` to see other options.
+- `./buildrump.sh checkout fullbuild`
+
+You will now find the kernel drivers and necessary headers in `./rump`
+ready for use.  Examples on how to use the resulting drivers are available
+in the `tests` directory.  It is not necessary to read this document
+further unless you are interested in details.
+
+
+The long(er) version
+--------------------
+
+The above will fetch the necessary subset of the NetBSD source tree from
+anoncvs.netbsd.org into `./src`.  You are also free to use any other
+method for fetching NetBSD sources.  The script will refuse to use a
+source tree which is too old to contain the necessary support.
+
+The script will then proceed to build the necessary set of tools for
+building rump kernels for the current host, after which it will build
+the rump kernels.
 
 After a successful build, the script will run some simple tests to
 check that e.g. file systems and the TCP/IP stack work correctly.
-If the tests are successful, the final output is:
+If everything was successfully completed, the final output is:
 
 	[...]
 	rump kernel halting...
@@ -39,9 +52,12 @@ If the tests are successful, the final output is:
 	Success
 	$ 
 
+To learn more about command line parameters, run the buildrump.sh
+script with the `-h` flag.
+
 
 Build dependencies
-------------
+==================
 
 The toolchain in PATH is used to produce the target binaries (support
 for cross-compilation may be added at a later date).  The script builds
