@@ -259,6 +259,14 @@ checkout ()
 	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
+	# checkout a few newer files that are necessary.  i can't update
+	# the blanket tag due to NetBSD PR toolchain/47644, so just handle
+	# it like this.  if this becomes a habit, need to consider other
+	# approaches, but that's premature for now.
+	cvs ${NBSRC_CVSFLAGS} co -P -D "20130313 2130UTC" \
+	    src/sys/rump/net/lib/libvirtif \
+	    src/lib/librumpuser || die checkout failed
+
 	# remove the symlink used to trick cvs
 	rm -f src
 	echo '>> checkout done'
