@@ -119,7 +119,7 @@ send_request(struct interface *iface)
 
 /* wait for 5s by default */
 #define RESPWAIT 5000
-static void
+static bool
 get_network(struct interface *iface, uint8_t *raw,
 	const struct dhcp_message **dhcpp)
 {
@@ -138,8 +138,7 @@ get_network(struct interface *iface, uint8_t *raw,
 		ts.tv_sec = 5;
 		ts.tv_nsec = 0;
 		if (pollcommon(rv, &pfd, 1, &ts, NULL) != 0 || rv[0] != 1) {
-			printf("poll failed\n");
-			return;
+			return false;
 		}
 			
 		if ((n = get_raw_packet(iface, ETHERTYPE_IP,
@@ -175,9 +174,10 @@ get_network(struct interface *iface, uint8_t *raw,
 	}
 
 	*dhcpp = dhcp;
+	return true;
 }
 
-static void
+static bool
 get_offer(struct interface *iface)
 {
 	const struct dhcp_message *dhcp;
@@ -185,7 +185,8 @@ get_offer(struct interface *iface)
 	uint8_t type;
 
 	raw = kmem_alloc(udp_dhcp_len, KM_SLEEP);
-	get_network(iface, raw, &dhcp);
+	if (!get_network(iface, raw, &dhcp))
+		return false;
 
 	get_option_uint8(&type, dhcp, DHO_MESSAGETYPE);
 	switch (type) {
@@ -193,10 +194,10 @@ get_offer(struct interface *iface)
 		break;
 	case DHCP_NAK:
 		printf("dhcp: got NAK from dhcp server\n");
-		return;
+		return false;
 	default:
 		printf("dhcp: didn't receive offer\n");
-		return;
+		return false;
 	}
 
 	iface->state->offer = kmem_alloc(sizeof(*iface->state->offer), KM_SLEEP);
@@ -204,6 +205,8 @@ get_offer(struct interface *iface)
 	iface->state->lease.addr.s_addr = dhcp->yiaddr;
 	iface->state->lease.cookie = dhcp->cookie;
 	kmem_free(raw, udp_dhcp_len);
+
+	return true;
 }
 
 static void
@@ -226,12 +229,14 @@ get_ack(struct interface *iface)
 	kmem_free(raw, udp_dhcp_len);
 }
 
+#define MAXTRIES 10
 int
 rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 {
 	struct interface *iface;
 	struct if_options *ifo;
-	int error;
+	int error, tries = 0;
+	bool rv;
 
 	/*
 	 * first, create outselves a new process context, since we're
@@ -267,8 +272,12 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 		return error;
 	}
 
-	send_discover(iface);
-	get_offer(iface);
+	do {
+		send_discover(iface);
+		rv = get_offer(iface);
+	} while (!rv && tries++ < MAXTRIES);
+	if (!rv)
+		return 1;
 
 	send_request(iface);
 	get_ack(iface);
