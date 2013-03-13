@@ -243,12 +243,16 @@ checkout ()
 	echo ">> Fetching the necessary subset of NetBSD source tree to:"
 	echo "   ${SRCDIR}"
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
+	echo '>> You may be prompted to accept the anoncvs.netbsd.org ssh key'
 
 	cd ${SRCDIR}
 	# trick cvs into "skipping" the module name so that we get
 	# all the sources directly into $SRCDIR
 	rm -f src
 	ln -s . src
+
+	# believe it or not, some installations default to rsh
+	export CVS_RSH=ssh
 
 	# Next, we need listsrcdirs.  For some reason, we also need to
 	# check out one file directly under src or we get weird errors later
@@ -266,6 +270,8 @@ checkout ()
 	cvs ${NBSRC_CVSFLAGS} co -P -D "20130313 2130UTC" \
 	    src/sys/rump/net/lib/libvirtif \
 	    src/lib/librumpuser || die checkout failed
+
+	unset CVS_RSH
 
 	# remove the symlink used to trick cvs
 	rm -f src
