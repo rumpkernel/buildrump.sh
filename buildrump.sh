@@ -465,7 +465,7 @@ fi
 
 mach_arch=`uname -m`
 case ${mach_arch} in
-"amd64")
+"amd64"|"i86pc")
 	machine="amd64"
 	mach_arch="x86_64"
 	;;
