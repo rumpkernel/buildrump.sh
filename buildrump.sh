@@ -163,6 +163,12 @@ maketools ()
 	rm -f test.c a.out ldscript.test
 
 	#
+	# Check if the host supports posix_memalign()
+	printf '#include <stdlib.h>\nmain(){posix_memalign(NULL,0,0);}\n'>test.c
+	cc test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
+	rm -f test.c a.out
+
+	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
 	for x in ${CC} ${TOOLS}; do
@@ -178,6 +184,7 @@ maketools ()
 NOGCCERROR=1
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
 CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
+CPPFLAGS+=${POSIX_MEMALIGN}
 LIBDO.pthread=_external
 RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
 INSTPRIV=-U
