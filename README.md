@@ -96,7 +96,8 @@ The following platforms have been tested:
 
 - Solaris
     - SunOS hutcs 5.10 Generic_142900-15 sun4v sparc SUNW,T5240 Solaris (needs xpg4/bin/sh, sparc64)
-    - SunOS pkgsrc-dev 5.11 joyent_20120126T071347Z i86pc i386 i86pc (amd64)
+    - SunOS pkgsrc-dev 5.11 joyent_20120126T071347Z i86pc i386 i86pc (with thanks to Jonathan for test host access, amd64)
 
 There is also initial support for Cygwin, but it will not work
-out-of-the-box.
+out-of-the-box due to object format issues (ELF vs. PE-COFF).
+Mac OS X is likely to require support for its linker.
