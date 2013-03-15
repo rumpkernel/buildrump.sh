@@ -553,7 +553,7 @@ setupdest ()
 #
 
 ${dobuild} && targets="obj includes dependall"
-${doinstall} && setupdest
+${dobuild} && setupdest
 ${doinstall} && targets="${targets} install"
 
 ALLDIRS="lib/librumpuser lib/librumpclient
