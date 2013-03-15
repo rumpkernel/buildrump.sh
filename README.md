@@ -71,8 +71,7 @@ process:
 - zlib
 - cvs (required only if you use "checkout")
 
-GNU ld is necessary since the NetBSD kernel Makefiles depend on
-its command line syntax.
+A GNU or Solaris linker is required.
 
 
 Tested hosts
@@ -97,6 +96,7 @@ The following platforms have been tested:
 
 - Solaris
     - SunOS hutcs 5.10 Generic_142900-15 sun4v sparc SUNW,T5240 Solaris (needs xpg4/bin/sh, sparc64)
+    - SunOS pkgsrc-dev 5.11 joyent_20120126T071347Z i86pc i386 i86pc (amd64)
 
 There is also initial support for Cygwin, but it will not work
 out-of-the-box.
