@@ -5,8 +5,8 @@ The buildrump.sh script builds NetBSD kernel drivers such as file systems
 and the TCP/IP stack as components for hosts such as Linux and other BSDs.
 These components can be linked in a variety of configurations to form
 *rump kernels*, which provide services to applications directly on
-the host.  In other words, the overhead of OS virtualization is avoided
-and root privileges are not mandated.
+the host.  The benefits of this approach include avoiding the overhead
+of OS virtualization.  Also, root privileges are not mandated.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -27,10 +27,10 @@ further unless you are interested in details.
 The long(er) version
 --------------------
 
-The above will fetch the necessary subset of the NetBSD source tree from
-anoncvs.netbsd.org into `./src`.  You are also free to use any other
-method for fetching NetBSD sources.  The script will refuse to use a
-source tree which is too old to contain the necessary support.
+The `checkout` command above will fetch the necessary subset of the
+NetBSD source tree from anoncvs.netbsd.org into `./src`.  You are also
+free to use any other method for fetching NetBSD sources, though the
+only officially supported way is to let the script handle the checkout.
 
 The script will then proceed to build the necessary set of tools for
 building rump kernels for the current host, after which it will build
