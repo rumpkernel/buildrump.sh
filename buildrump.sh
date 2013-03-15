@@ -126,16 +126,6 @@ maketools ()
 	fi
 
 	#
-	# Check for ld because we need to make some adjustments based on it
-	if cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
-		LD_FLAVOR=GNU
-	elif cc -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
-		LD_FLAVOR=sun
-	else
-		die 'GNU or Solaris ld required'
-	fi
-
-	#
 	# Perform some toolchain feature tests to determine what options
 	# we need to use for building.
 	#
@@ -293,6 +283,20 @@ checkout ()
 	echo '>> checkout done'
 }
 
+probehost ()
+{
+
+	#
+	# Check for ld because we need to make some adjustments based on it
+	if cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+		LD_FLAVOR=GNU
+	elif cc -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+		LD_FLAVOR=sun
+	else
+		die 'GNU or Solaris ld required'
+	fi
+}
+
 #
 # BEGIN SCRIPT
 #
@@ -354,6 +358,8 @@ done
 shift $((${OPTIND} - 1))
 BEQUIET="-N${NOISE}"
 [ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+
+probehost
 
 #
 # Determine what which parts we should execute.
