@@ -33,7 +33,7 @@ NBSRC_DATE=20130307
 NBSRC_SUB=0
 
 # for fetching the sources
-NBSRC_CVSDATE="20130312 0000UTC"
+NBSRC_CVSDATE="20130315 1245UTC"
 NBSRC_CVSFLAGS='-z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
@@ -112,8 +112,7 @@ chkcrt ()
 # TODO2: cpp missing
 maketools ()
 {
-	local TOOLS='ar as ld nm objcopy objdump ranlib size strip'
-	local CC
+	TOOLS='ar as ld nm objcopy objdump ranlib size strip'
 
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
@@ -127,10 +126,13 @@ maketools ()
 	fi
 
 	#
-	# Check for GNU ld (as invoked by cc, since that's how the
-	# NetBSD Makefiles invoke it)
-	if ! cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
-		die "GNU ld required (by NetBSD Makefiles)"
+	# Check for ld because we need to make some adjustments based on it
+	if cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+		LD_FLAVOR=GNU
+	elif cc -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+		LD_FLAVOR=sun
+	else
+		die 'GNU or Solaris ld required'
 	fi
 
 	#
@@ -155,12 +157,14 @@ maketools ()
 	# Check if the linker supports all the features of the rump kernel
 	# component ldscript used for linking shared libraries.
 	# If not, build only static rump kernel components.
-	echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
-	echo 'int main(void) {return 0;}' > test.c
-	if ! cc test.c -Wl,-T ldscript.test; then
-		BUILDSHARED='-V NOPIC=1'
+	if [ ${LD_FLAVOR} = 'GNU' ]; then
+		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
+		echo 'int main(void) {return 0;}' > test.c
+		if ! cc test.c -Wl,-T ldscript.test; then
+			BUILDSHARED='-V NOPIC=1'
+		fi
+		rm -f test.c a.out ldscript.test
 	fi
-	rm -f test.c a.out ldscript.test
 
 	#
 	# Check if the host supports posix_memalign()
@@ -174,9 +178,20 @@ maketools ()
 	for x in ${CC} ${TOOLS}; do
 		# ok, it's not really --netbsd, but let's make-believe!
 		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
-		[ -f ${tname} ] && continue
 
-		printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+		# Make the compiler wrapper mangle arguments suitable for ld.
+		# Messy to plug it in here, but ...
+		if [ $x = $CC -a ${LD_FLAVOR} = 'sun' ]; then
+			exec 3>&1 1>${tname}
+			printf '#!/bin/sh\n\nfor x in $*; do\n'
+        		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
+	        	printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
+			printf '&& continue\n\tnewargs="${newargs} $x"\n'
+			printf 'done\nexec gcc ${newargs}\n'
+			exec 1>&3 3>&-
+		else
+			printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+		fi
 		chmod 755 ${tname}
 	done
 
@@ -200,6 +215,7 @@ EOF
 	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf "${DBG}" "DBG"
+	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'yes' 'HAVE_SUN_LD'
 
 	chkcrt begins
 	chkcrt ends
@@ -269,14 +285,6 @@ checkout ()
 	# now, do the real checkout
 	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
-
-	# checkout a few newer files that are necessary.  i can't update
-	# the blanket tag due to NetBSD PR toolchain/47644, so just handle
-	# it like this.  if this becomes a habit, need to consider other
-	# approaches, but that's premature for now.
-	cvs ${NBSRC_CVSFLAGS} co -P -D "20130313 2130UTC" \
-	    src/sys/rump/net/lib/libvirtif \
-	    src/lib/librumpuser || die checkout failed
 
 	unset CVS_RSH
 
@@ -388,7 +396,7 @@ mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
 abspath ()
 {
 
-	local curdir=`pwd -P`
+	curdir=`pwd -P`
 	eval cd \${${1}}
 	eval ${1}=`pwd -P`
 	cd ${curdir}
@@ -437,8 +445,8 @@ case ${hostos} in
 	;;
 "SunOS")
 	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-	EXTRA_RUMPUSER='-lsocket -lrt -ldl'
-	EXTRA_RUMPCLIENT='-lsocket -ldl'
+	EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
+	EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 	binsh=/usr/xpg4/bin/sh
 
 	# do some random test to check for gnu foolchain

@@ -17,7 +17,7 @@ doremote ()
 	set -x
 	cc -g -o ${TESTOBJ}/simpleserver ${TESTDIR}/simpleserver.c	\
 	    -I${DESTDIR}/include					\
-	    -Wl,--no-as-needed -Wl,--whole-archive -lrump -lrumpuser	\
+	    ${AS_NEEDED} -Wl,--whole-archive -lrump -lrumpuser		\
 	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread		\
 	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 
@@ -43,7 +43,7 @@ dofs ()
 
 	set -x
 	cc -g -o ${TESTOBJ}/fstest ${TESTDIR}/fstest.c			\
-	    -I${DESTDIR}/include -Wl,--no-as-needed 			\
+	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
 	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
@@ -61,7 +61,7 @@ donet ()
 
 	set -x
 	cc -g -o ${TESTOBJ}/nettest_simple ${TESTDIR}/nettest_simple.c	\
-	    -I${DESTDIR}/include -Wl,--no-as-needed 			\
+	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
@@ -82,7 +82,7 @@ donetrouted ()
 
 	set -x
 	cc -g -o ${TESTOBJ}/nettest_routed ${TESTDIR}/nettest_routed.c	\
-	    -I${DESTDIR}/include -Wl,--no-as-needed 			\
+	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
@@ -105,6 +105,9 @@ alltests ()
 {
 
 	echo Running simple tests
+
+	# XXX: needs tools to be run
+	[ ${LD_FLAVOR} = 'sun' ] || AS_NEEDED='-Wl,--no-as-needed'
 
 	mkdir -p ${TESTOBJ}
 	cd ${TESTOBJ}
