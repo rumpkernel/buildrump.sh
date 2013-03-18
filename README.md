@@ -10,7 +10,8 @@ of OS virtualization.  Also, root privileges are not mandated.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
-See also the [wiki](wiki/TODO) for a short-term TODO list.
+See also the [wiki](github.com/anttikantee/buildrump.sh/wiki/TODO) for
+a short-term TODO list.
 
 
 Instructions
