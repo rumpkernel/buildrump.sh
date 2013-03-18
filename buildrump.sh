@@ -265,6 +265,9 @@ checkout ()
 	rm -f src
 	ln -s . src
 
+	# squelch .cvspass whine
+	export CVS_PASSFILE=/dev/null
+
 	# Next, we need listsrcdirs.  For some reason, we also need to
 	# check out one file directly under src or we get weird errors later
 	cvs ${NBSRC_CVSFLAGS} co -P -D "${NBSRC_CVSDATE}" \
