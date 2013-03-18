@@ -1,12 +1,13 @@
 Running NetBSD's Rump Kernels On Any Host
 =========================================
 
-The buildrump.sh script builds NetBSD kernel drivers such as file systems
-and the TCP/IP stack as components for hosts such as Linux and other BSDs.
-These components can be linked in a variety of configurations to form
-*rump kernels*, which provide services to applications directly on
-the host.  The benefits of this approach include avoiding the overhead
-of OS virtualization.  Also, root privileges are not mandated.
+The buildrump.sh script builds unmodified NetBSD kernel drivers such
+as file systems and the TCP/IP stack as components for hosts such as
+Linux and other BSDs.  These components can be linked in a variety
+of configurations to form *rump kernels*, which provide services to
+applications directly on the host.  The benefits of this approach include
+avoiding the overhead of OS virtualization.  Also, root privileges are
+not mandated.
 
 For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
@@ -23,8 +24,10 @@ Clone the repository and run:
 
 You will now find the kernel drivers and necessary headers in `./rump`
 ready for use.  Examples on how to use the resulting drivers are available
-in the `tests` directory.  It is not necessary to read this document
-further unless you are interested in details.
+in the `tests` and `examples` directories.
+
+It is not necessary to read this document further unless you are
+interested in details.
 
 
 The long(er) version
