@@ -520,7 +520,6 @@ esac
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${dotools} && maketools
-[ ! -f ${RUMPMAKE} ] && die "No ${RUMPMAKE}! Forgot the \"tools\" command?"
 
 # this helper makes sure we get some output with the
 # NetBSD noisybuild stuff (-q to this script)
