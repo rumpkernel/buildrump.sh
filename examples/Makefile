@@ -5,4 +5,7 @@ RD=../rump
 all: webbrowser
 
 webbrowser: webbrowser.c
-	cc $< -o $@ -I${RD}/include -L${RD}/lib -Wl,-R${RD}/lib -lrumpnet_virtif -lrumpnet_config -lrumpdev_bpf -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump -lrumpuser -lpthread -ldl
+	cc -g $< -o $@ -I${RD}/include -L${RD}/lib -Wl,-R${RD}/lib -lrumpnet_virtif -lrumpnet_config -lrumpdev_bpf -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump -lrumpuser -lpthread -ldl
+
+clean:
+	rm -f webbrowser *core
