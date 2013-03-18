@@ -17,8 +17,10 @@
 
 #
 # This script will build rump kernel components and the hypervisor
-# on a non-NetBSD host and hopefully leave you with a usable installation.
-# This is a slightly preliminary version.
+# on a non-NetBSD host.  It will install the components as libraries
+# to rump/lib and headers to rump/include.  For information on how to
+# convert the installed files into running rump kernels, see the examples
+# and tests directories.
 #
 
 # defaults
