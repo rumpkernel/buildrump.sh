@@ -267,7 +267,7 @@ checkout ()
 	ln -s . src
 
 	# believe it or not, some installations default to rsh
-	export CVS_RSH=ssh
+	export ${CVS_RSH:=ssh}
 
 	# Next, we need listsrcdirs.  For some reason, we also need to
 	# check out one file directly under src or we get weird errors later
@@ -282,8 +282,6 @@ checkout ()
 	# (this is suboptimal, but be happy with it for now)
 	cvs ${NBSRC_CVSFLAGS} co -P -D'20130318 2101UTC' \
 	    src/lib/librumpuser/rumpuser.c
-
-	unset CVS_RSH
 
 	# remove the symlink used to trick cvs
 	rm -f src
