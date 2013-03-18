@@ -278,6 +278,11 @@ checkout ()
 	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
+	# some patches not included in the blanket
+	# (this is suboptimal, but be happy with it for now)
+	cvs ${NBSRC_CVSFLAGS} co -P -D'20130318 2101UTC' \
+	    src/lib/librumpuser/rumpuser.c
+
 	unset CVS_RSH
 
 	# remove the symlink used to trick cvs
