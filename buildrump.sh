@@ -36,7 +36,7 @@ NBSRC_SUB=0
 
 # for fetching the sources
 NBSRC_CVSDATE="20130315 1245UTC"
-NBSRC_CVSFLAGS='-z3 -d anoncvs@anoncvs.netbsd.org:/cvsroot'
+NBSRC_CVSFLAGS='-z3 -d :pserver:anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
 # support routines
@@ -258,16 +258,12 @@ checkout ()
 	echo ">> Fetching the necessary subset of NetBSD source tree to:"
 	echo "   ${SRCDIR}"
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
-	echo '>> You may be prompted to accept the anoncvs.netbsd.org ssh key'
 
 	cd ${SRCDIR}
 	# trick cvs into "skipping" the module name so that we get
 	# all the sources directly into $SRCDIR
 	rm -f src
 	ln -s . src
-
-	# believe it or not, some installations default to rsh
-	export ${CVS_RSH:=ssh}
 
 	# Next, we need listsrcdirs.  For some reason, we also need to
 	# check out one file directly under src or we get weird errors later
