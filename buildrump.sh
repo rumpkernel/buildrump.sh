@@ -581,3 +581,5 @@ done
 
 # run tests from testrump.sh we sourced earlier
 ${dotests} && alltests
+
+exit 0
