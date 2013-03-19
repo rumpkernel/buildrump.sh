@@ -63,6 +63,15 @@ To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.
 
 
+Packages
+--------
+
+Some operating systems provide rump kernels as a package:
+
+* [Arch Linux](http://aur.archlinux.org/packages/netbsd-rump-cvs/)
+* [Void Linux](http://github.com/xtraeme/xbps-packages/blob/master/srcpkgs/netbsd-rumpkernel/template)
+
+
 Build dependencies
 ==================
 
