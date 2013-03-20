@@ -29,10 +29,6 @@ DESTDIR=./rump
 SRCDIR=./src
 JNUM=4
 
-# Don't inherit these from environment.
-unset AR CPP NM OBJCOPY
-[ -z "$CC" ] && CC=cc
-
 #
 # NetBSD source params
 NBSRC_DATE=20130307
@@ -123,10 +119,10 @@ maketools ()
 
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
-	if $CC --version | grep -q 'Free Software Foundation'; then
-		HOST_CC=gcc
-	elif $CC --version | grep -q clang; then
-		HOST_CC=clang
+	if ${CC} --version | grep -q 'Free Software Foundation'; then
+		CC_FLAVOR=gcc
+	elif ${CC} --version | grep -q clang; then
+		CC_FLAVOR=clang
 		LLVM='-V HAVE_LLVM=1'
 	else
 		die Unsupported cc "(`which cc`)"
@@ -144,7 +140,7 @@ maketools ()
 	# doesn't support it unless there is some other error to complain
 	# about as well.  So we try compiling a broken source file...
 	echo 'no you_shall_not_compile' > broken.c
-	$CC -Wno-unused-but-set-variable broken.c > broken.out 2>&1
+	${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
 	if ! grep -q Wno-unused-but-set-variable broken.out ; then
 		W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
 	fi
@@ -166,20 +162,20 @@ maketools ()
 	#
 	# Check if the host supports posix_memalign()
 	printf '#include <stdlib.h>\nmain(){posix_memalign(NULL,0,0);}\n'>test.c
-	$CC test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
+	${CC} test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
 	rm -f test.c a.out
 
 	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
-	for x in ${HOST_CC} ${TOOLS}; do
-		_target=$($CC -dumpmachine)
+	target=$($CC -dumpmachine)
+	for x in ${CC_FLAVOR} ${TOOLS}; do
 		# ok, it's not really --netbsd, but let's make-believe!
 		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
 
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
-		if [ $x = $HOST_CC -a ${LD_FLAVOR} = 'sun' ]; then
+		if [ $x = ${CC_FLAVOR} -a ${LD_FLAVOR} = 'sun' ]; then
 			exec 3>&1 1>${tname}
 			printf '#!/bin/sh\n\nfor x in $*; do\n'
         		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
@@ -188,12 +184,14 @@ maketools ()
 			printf 'done\nexec gcc ${newargs}\n'
 			exec 1>&3 3>&-
 		else
-			if [ "$HOST_CC" = 'clang' -o "$CC" = 'cc' -o "$CC" = 'gcc' ]; then
+			if ${NATIVEBUILD}; then
 				# native build or !gcc
-				printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+				printf '#!/bin/sh\nexec %s $*\n' \
+				    ${x} > ${tname}
 			else
 				# cross build gcc
-				printf "#!/bin/sh\nexec ${_target}-%s \$*\n" ${x} > ${tname}
+				printf '#!/bin/sh\nexec ${target}-%s \$*\n' \
+				    ${x} > ${tname}
 			fi
 		fi
 		chmod 755 ${tname}
@@ -317,6 +315,18 @@ probehost ()
 #
 # BEGIN SCRIPT
 #
+
+# scrub env in case they're set for crossbuilds
+# (we handle these when creating wrappers)
+unset AR CPP NM OBJCOPY
+
+# check for crossbuild
+NATIVEBUILD=true
+if [ -z "${CC}" ]; then
+	CC=cc
+fi
+[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] && NATIVEBUILD=false
+type ${CC} || die cannot find \$CC: \"${CC}\".  check env.
 
 DBG='-O2 -g'
 ANYHOSTISGOOD=false
@@ -557,7 +567,7 @@ case ${target_arch} in
 	THIRTYTWO=false
 	;;
 esac
-[ -z "${machine}" ] && die script does not know machine \"${targetarch}\"
+[ -z "${machine}" ] && die script does not know machine \"${target_arch}\"
 
 ${THIRTYTWO} && die compat for 32bit rump kernels not supported on this platform
 
