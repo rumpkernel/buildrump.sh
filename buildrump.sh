@@ -67,6 +67,7 @@ helpme ()
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
+	printf "\t-32: on supported hosts, build 32bit binaries.  default: 64\n"
 	echo
 	printf "supported commands (none supplied => fullbuild):\n"
 	printf "\tcheckout:\tfetch NetBSD sources to srcdir from anoncvs\n"
@@ -279,8 +280,9 @@ checkout ()
 
 	# some patches not included in the blanket
 	# (this is suboptimal, but be happy with it for now)
-	cvs ${NBSRC_CVSFLAGS} co -P -D'20130318 2101UTC' \
-	    src/lib/librumpuser/rumpuser.c
+	cvs ${NBSRC_CVSFLAGS} co -P -D'20130320 1300UTC' \
+	    src/lib/librumpuser/rumpuser.c src/lib/librumpuser/rumpuser_dl.c \
+	    src/lib/librumpuser/rumpuser_port.h
 
 	# remove the symlink used to trick cvs
 	rm -f src
@@ -310,9 +312,13 @@ ANYHOSTISGOOD=false
 NOISE=2
 debugginess=0
 BRDIR=$(dirname $0)
-
-while getopts 'd:DhHj:o:qrs:T:V:' opt; do
+THIRTYTWO=false
+while getopts '3:d:DhHj:o:qrs:T:V:' opt; do
 	case "$opt" in
+	3)
+		[ ${OPTARG} != '2' ] && die 'invalid option. did you mean -32?'
+		THIRTYTWO=true
+		;;
 	j)
 		JNUM=${OPTARG}
 		;;
@@ -483,12 +489,26 @@ fi
 
 mach_arch=`uname -m`
 case ${mach_arch} in
-"amd64"|"i86pc")
+"amd64")
 	machine="amd64"
 	mach_arch="x86_64"
 	;;
 "x86_64")
 	machine="amd64"
+	;;
+"i86pc")
+	if ${THIRTYTWO} ; then
+		machine="i386"
+		mach_arch="i486"
+		toolabi="elf"
+		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+		EXTRA_LDFLAGS='-m32'
+		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+	else
+		machine="amd64"
+		mach_arch="x86_64"
+	fi
+	THIRTYTWO=false
 	;;
 "armv6l")
 	machine="evbarm"
@@ -507,16 +527,25 @@ case ${mach_arch} in
 	toolabi="elf"
 	;;
 "sun4v")
-	machine="sparc64"
-	mach_arch="sparc64"
-	# assume gcc.  i'm not going to start trying to
-	# remember what the magic incantation for sunpro was
-	EXTRA_CFLAGS='-m64'
-	EXTRA_LDFLAGS='-m64'
-	EXTRA_AFLAGS='-m64'
+	if ${THIRTYTWO} ; then
+		machine="sparc"
+		mach_arch="sparc"
+		toolabi="elf"
+		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
+		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
+	else
+		machine="sparc64"
+		mach_arch="sparc64"
+		EXTRA_CFLAGS='-m64'
+		EXTRA_LDFLAGS='-m64'
+		EXTRA_AFLAGS='-m64'
+	fi
+	THIRTYTWO=false
 	;;
 esac
 [ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
+
+${THIRTYTWO} && die compat for 32bit rump kernels not supported on this platform
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${dotools} && maketools
