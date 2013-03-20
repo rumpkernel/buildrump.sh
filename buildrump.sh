@@ -168,7 +168,6 @@ maketools ()
 	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
-	target=$($CC -dumpmachine)
 	for x in ${CC_FLAVOR} ${TOOLS}; do
 		# ok, it's not really --netbsd, but let's make-believe!
 		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
@@ -185,12 +184,10 @@ maketools ()
 			exec 1>&3 3>&-
 		else
 			if ${NATIVEBUILD}; then
-				# native build or !gcc
 				printf '#!/bin/sh\nexec %s $*\n' \
 				    ${x} > ${tname}
 			else
-				# cross build gcc
-				printf '#!/bin/sh\nexec ${target}-%s \$*\n' \
+				printf '#!/bin/sh\nexec ${mach_arch}-%s \$*\n' \
 				    ${x} > ${tname}
 			fi
 		fi
@@ -326,7 +323,7 @@ if [ -z "${CC}" ]; then
 	CC=cc
 fi
 [ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] && NATIVEBUILD=false
-type ${CC} || die cannot find \$CC: \"${CC}\".  check env.
+type ${CC} > /dev/null 2>&1 || die cannot find \$CC: \"${CC}\".  check env.
 
 DBG='-O2 -g'
 ANYHOSTISGOOD=false
@@ -465,6 +462,7 @@ IFS="${oIFS}"
 
 hostos=`uname -s`
 binsh=sh
+THIRTYTWO_SUPPORT=false
 case ${hostos} in
 "DragonFly")
 	RUMPKERN_UNDEF='-U__DragonFly__'
@@ -485,6 +483,8 @@ case ${hostos} in
 	EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
 	EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 	binsh=/usr/xpg4/bin/sh
+
+	THIRTYTWO_SUPPORT=true
 
 	# do some random test to check for gnu foolchain
 	if ! ar --version 2>/dev/null | grep -q 'GNU ar' ; then
@@ -508,19 +508,19 @@ if [ "${host_notsupp}" = 'yes' ]; then
 	${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
 fi
 
-target_arch=$($CC -dumpmachine)
-target_arch=${target_arch%%-*}
+if ${THIRTYTWO}; then
+	 ( ${THIRTYTWO_HOST} && ${ANYHOSTISGOOD} ) || \
+	    die 'host not known to support 32bit.  get lucky with -H?'
+fi
 
-case ${target_arch} in
-"amd64")
-	machine="amd64"
-	mach_arch="x86_64"
-	;;
+# Check the arch we're building for so as to work out the necessary
+# NetBSD machine code we need to use.  Use ${CC} -v instead of -dumpmachine
+# since at least older versions of clang don't support -dumpmachine ... yay!
+mach_arch=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //;s/-.*//p}')
+[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
+
+case ${mach_arch} in
 "x86_64")
-	machine="amd64"
-	mach_arch="x86_64"
-	;;
-"i86pc")
 	if ${THIRTYTWO} ; then
 		machine="i386"
 		mach_arch="i486"
@@ -530,9 +530,12 @@ case ${target_arch} in
 		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 	else
 		machine="amd64"
-		mach_arch="x86_64"
 	fi
-	THIRTYTWO=false
+	;;
+"i386"|"i686")
+	machine="i386"
+	mach_arch="i486"
+	toolabi="elf"
 	;;
 "arm")
 	machine="evbarm"
@@ -545,12 +548,9 @@ case ${target_arch} in
 	# force hardfloat, the default (i.e. soft) doesn't work on all hosts
 	SOFTFLOAT='-V MKSOFTFLOAT=no'
 	;;
-"i386"|"i686")
-	machine="i386"
-	mach_arch="i486"
-	toolabi="elf"
-	;;
-"sun4v")
+"sparc")
+	# We assume it's an UltraSPARC.  If someone wants to build on
+	# an actual 32bit SPARC, send patches (or always use -32)
 	if ${THIRTYTWO} ; then
 		machine="sparc"
 		mach_arch="sparc"
@@ -564,12 +564,9 @@ case ${target_arch} in
 		EXTRA_LDFLAGS='-m64'
 		EXTRA_AFLAGS='-m64'
 	fi
-	THIRTYTWO=false
 	;;
 esac
 [ -z "${machine}" ] && die script does not know machine \"${target_arch}\"
-
-${THIRTYTWO} && die compat for 32bit rump kernels not supported on this platform
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${dotools} && maketools
