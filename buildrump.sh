@@ -462,7 +462,7 @@ IFS="${oIFS}"
 
 hostos=`uname -s`
 binsh=sh
-THIRTYTWO_SUPPORT=false
+THIRTYTWO_HOST=false
 case ${hostos} in
 "DragonFly")
 	RUMPKERN_UNDEF='-U__DragonFly__'
@@ -484,7 +484,7 @@ case ${hostos} in
 	EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 	binsh=/usr/xpg4/bin/sh
 
-	THIRTYTWO_SUPPORT=true
+	THIRTYTWO_HOST=true
 
 	# do some random test to check for gnu foolchain
 	if ! ar --version 2>/dev/null | grep -q 'GNU ar' ; then
@@ -509,7 +509,7 @@ if [ "${host_notsupp}" = 'yes' ]; then
 fi
 
 if ${THIRTYTWO}; then
-	 ( ${THIRTYTWO_HOST} && ${ANYHOSTISGOOD} ) || \
+	${THIRTYTWO_HOST} || ${ANYHOSTISGOOD} || \
 	    die 'host not known to support 32bit.  get lucky with -H?'
 fi
 
