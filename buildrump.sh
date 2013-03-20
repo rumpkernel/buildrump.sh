@@ -516,7 +516,7 @@ fi
 # Check the arch we're building for so as to work out the necessary
 # NetBSD machine code we need to use.  Use ${CC} -v instead of -dumpmachine
 # since at least older versions of clang don't support -dumpmachine ... yay!
-mach_arch=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //;s/-.*//p}')
+mach_arch=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //;s/-.*//p;}')
 [ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
 
 case ${mach_arch} in
