@@ -187,8 +187,8 @@ maketools ()
 				printf '#!/bin/sh\nexec %s $*\n' \
 				    ${x} > ${tname}
 			else
-				printf '#!/bin/sh\nexec ${mach_arch}-%s \$*\n' \
-				    ${x} > ${tname}
+				printf '#!/bin/sh\nexec %s-%s \$*\n' \
+				    ${mach_arch} ${x} > ${tname}
 			fi
 		fi
 		chmod 755 ${tname}
