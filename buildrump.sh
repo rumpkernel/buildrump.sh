@@ -29,6 +29,10 @@ DESTDIR=./rump
 SRCDIR=./src
 JNUM=4
 
+# Don't inherit these from environment.
+unset AR CPP NM OBJCOPY
+[ -z "$CC" ] && CC=cc
+
 #
 # NetBSD source params
 NBSRC_DATE=20130307
@@ -119,10 +123,10 @@ maketools ()
 
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
-	if cc --version | grep -q 'Free Software Foundation'; then
-		CC=gcc
-	elif cc --version | grep -q clang; then
-		CC=clang
+	if $CC --version | grep -q 'Free Software Foundation'; then
+		HOST_CC=gcc
+	elif $CC --version | grep -q clang; then
+		HOST_CC=clang
 		LLVM='-V HAVE_LLVM=1'
 	else
 		die Unsupported cc "(`which cc`)"
@@ -140,7 +144,7 @@ maketools ()
 	# doesn't support it unless there is some other error to complain
 	# about as well.  So we try compiling a broken source file...
 	echo 'no you_shall_not_compile' > broken.c
-	${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
+	$CC -Wno-unused-but-set-variable broken.c > broken.out 2>&1
 	if ! grep -q Wno-unused-but-set-variable broken.out ; then
 		W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
 	fi
@@ -153,7 +157,7 @@ maketools ()
 	if [ ${LD_FLAVOR} = 'GNU' ]; then
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 		echo 'int main(void) {return 0;}' > test.c
-		if ! cc test.c -Wl,-T ldscript.test; then
+		if ! $CC test.c -Wl,-T ldscript.test; then
 			BUILDSHARED='-V NOPIC=1'
 		fi
 		rm -f test.c a.out ldscript.test
@@ -162,19 +166,20 @@ maketools ()
 	#
 	# Check if the host supports posix_memalign()
 	printf '#include <stdlib.h>\nmain(){posix_memalign(NULL,0,0);}\n'>test.c
-	cc test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
+	$CC test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
 	rm -f test.c a.out
 
 	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
-	for x in ${CC} ${TOOLS}; do
+	for x in ${HOST_CC} ${TOOLS}; do
+		_target=$($CC -dumpmachine)
 		# ok, it's not really --netbsd, but let's make-believe!
 		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
 
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
-		if [ $x = $CC -a ${LD_FLAVOR} = 'sun' ]; then
+		if [ $x = $HOST_CC -a ${LD_FLAVOR} = 'sun' ]; then
 			exec 3>&1 1>${tname}
 			printf '#!/bin/sh\n\nfor x in $*; do\n'
         		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
@@ -183,7 +188,13 @@ maketools ()
 			printf 'done\nexec gcc ${newargs}\n'
 			exec 1>&3 3>&-
 		else
-			printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+			if [ "$HOST_CC" = 'clang' -o "$CC" = 'cc' -o "$CC" = 'gcc' ]; then
+				# native build or !gcc
+				printf '#!/bin/sh\nexec %s $*\n' ${x} > ${tname}
+			else
+				# cross build gcc
+				printf "#!/bin/sh\nexec ${_target}-%s \$*\n" ${x} > ${tname}
+			fi
 		fi
 		chmod 755 ${tname}
 	done
@@ -219,7 +230,7 @@ EOF
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
-	${binsh} build.sh -m ${machine} -u \
+	env CFLAGS= ${binsh} build.sh -m ${machine} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
@@ -487,14 +498,17 @@ if [ "${host_notsupp}" = 'yes' ]; then
 	${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
 fi
 
-mach_arch=`uname -m`
-case ${mach_arch} in
+target_arch=$($CC -dumpmachine)
+target_arch=${target_arch%%-*}
+
+case ${target_arch} in
 "amd64")
 	machine="amd64"
 	mach_arch="x86_64"
 	;;
 "x86_64")
 	machine="amd64"
+	mach_arch="x86_64"
 	;;
 "i86pc")
 	if ${THIRTYTWO} ; then
@@ -510,7 +524,7 @@ case ${mach_arch} in
 	fi
 	THIRTYTWO=false
 	;;
-"armv6l")
+"arm")
 	machine="evbarm"
 	mach_arch="arm"
 	toolabi="elf"
@@ -543,7 +557,7 @@ case ${mach_arch} in
 	THIRTYTWO=false
 	;;
 esac
-[ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
+[ -z "${machine}" ] && die script does not know machine \"${targetarch}\"
 
 ${THIRTYTWO} && die compat for 32bit rump kernels not supported on this platform
 
