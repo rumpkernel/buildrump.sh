@@ -115,7 +115,7 @@ chkcrt ()
 # TODO2: cpp missing
 maketools ()
 {
-	TOOLS='ar as ld nm objcopy objdump ranlib size strip'
+	TOOLS='ar nm objcopy'
 
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
@@ -172,25 +172,29 @@ maketools ()
 		# ok, it's not really --netbsd, but let's make-believe!
 		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
 
+		if ${NATIVEBUILD}; then
+			cmd="${x}"
+		else
+			cmd="${cc_target}-${x}"
+		fi
+		type ${cmd} >/dev/null 2>&1 \
+		    || die Cannot find \"${cmd}\".  Please check \$PATH
+
+		exec 3>&1 1>${tname}
+		printf '#!/bin/sh\n\n'
+
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
 		if [ $x = ${CC_FLAVOR} -a ${LD_FLAVOR} = 'sun' ]; then
-			exec 3>&1 1>${tname}
-			printf '#!/bin/sh\n\nfor x in $*; do\n'
+			printf 'for x in $*; do\n'
         		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
 	        	printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
 			printf '&& continue\n\tnewargs="${newargs} $x"\n'
-			printf 'done\nexec gcc ${newargs}\n'
-			exec 1>&3 3>&-
+			printf 'done\nexec %s ${newargs}\n' ${cmd}
 		else
-			if ${NATIVEBUILD}; then
-				printf '#!/bin/sh\nexec %s $*\n' \
-				    ${x} > ${tname}
-			else
-				printf '#!/bin/sh\nexec %s-%s $*\n' \
-				    ${cc_target} ${x} > ${tname}
-			fi
+			printf 'exec %s $*\n' ${cmd}
 		fi
+		exec 1>&3 3>&-
 		chmod 755 ${tname}
 	done
 
