@@ -39,8 +39,10 @@ free to use any other method for fetching NetBSD sources, though the
 only officially supported way is to let the script handle the checkout.
 
 The script will then proceed to build the necessary set of tools for
-building rump kernels for the current host, after which it will build
-the rump kernels.
+building rump kernels, e.g. the BSD version of `make`, after which it
+will build the rump kernels.  By default, `cc` from path is used along
+with other host tools such as `nm`.  Crosscompilation is documented
+further below.
 
 After a successful build, the script will run some simple tests to
 check that e.g. file systems and the TCP/IP stack work correctly.
@@ -61,6 +63,29 @@ If everything was successfully completed, the final output is:
 
 To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.
+
+
+Crosscompiling
+--------------
+
+If the environment variable `CC` is set, its value is used as the compiler
+instead of `cc`.  This allows not only to select between compiling with
+gcc or clang, but also allows to specify a crosscompiler.  If `CC` is set
+and does not contain the value `cc`, `gcc`, or `clang` the script assumes
+a crosscompiler and will use tools with names based on the target of
+`$CC` with the format `target-tool` (e.g. `target-nm`).
+
+Crosscompiling for an ARM system might look like this (first command
+is purely informational):
+
+	$ arm-linux-gnueabihf-gcc -dumpmachine
+	arm-linux-gnueabihf
+	$ env CC=arm-linux-gnueabihf-gcc ./buildrump.sh [params]
+
+Since the target is `arm-linux-gnueabihf`, `arm-linux-gnueabihf-nm` etc.
+must be found from `PATH`.  The assumption is that the crosscompiler
+can find the target platform headers and libraries which are required
+for building the hypervisor.
 
 
 Packages
@@ -84,7 +109,7 @@ process:
 
 - cc (gcc or clang)
 - ld (GNU or Solaris ld required)
-- binutils (objcopy, etc.)
+- binutils (ar, nm, objcopy)
 - zlib
 - cvs (required only for "checkout")
 
