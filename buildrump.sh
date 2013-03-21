@@ -35,7 +35,7 @@ NBSRC_DATE=20130307
 NBSRC_SUB=0
 
 # for fetching the sources
-NBSRC_CVSDATE="20130315 1245UTC"
+NBSRC_CVSDATE="20130321 2000UTC"
 NBSRC_CVSFLAGS='-z3 -d :pserver:anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
@@ -283,12 +283,6 @@ checkout ()
 	# now, do the real checkout
 	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
-
-	# some patches not included in the blanket
-	# (this is suboptimal, but be happy with it for now)
-	cvs ${NBSRC_CVSFLAGS} co -P -D'20130320 1300UTC' \
-	    src/lib/librumpuser/rumpuser.c src/lib/librumpuser/rumpuser_dl.c \
-	    src/lib/librumpuser/rumpuser_port.h
 
 	# remove the symlink used to trick cvs
 	rm -f src
@@ -621,7 +615,8 @@ ALLDIRS="lib/librumpuser lib/librumpclient
     lib/librump lib/librumpdev lib/librumpnet lib/librumpvfs
     sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
     ${BRDIR}/brlib"
-[ "`uname`" = "Linux" ] && ALLDIRS="${ALLDIRS} sys/rump/kern/lib/libsys_linux"
+[ "`uname`" = "Linux" ] \
+    && ALLDIRS="${ALLDIRS} lib/librumphijack sys/rump/kern/lib/libsys_linux"
 
 cd ${SRCDIR}
 for target in ${targets}; do
