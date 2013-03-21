@@ -68,9 +68,9 @@ script with the `-h` flag.
 Crosscompiling
 --------------
 
-If the environment variable `CC` is set, its value is used as the compiler
+If the environment variable `$CC` is set, its value is used as the compiler
 instead of `cc`.  This allows not only to select between compiling with
-gcc or clang, but also allows to specify a crosscompiler.  If `CC` is set
+gcc or clang, but also allows to specify a crosscompiler.  If `$CC` is set
 and does not contain the value `cc`, `gcc`, or `clang` the script assumes
 a crosscompiler and will use tools with names based on the target of
 `$CC` with the format `target-tool` (e.g. `target-nm`).
@@ -83,7 +83,7 @@ is purely informational):
 	$ env CC=arm-linux-gnueabihf-gcc ./buildrump.sh [params]
 
 Since the target is `arm-linux-gnueabihf`, `arm-linux-gnueabihf-nm` etc.
-must be found from `PATH`.  The assumption is that the crosscompiler
+must be found from `$PATH`.  The assumption is that the crosscompiler
 can find the target platform headers and libraries which are required
 for building the hypervisor.
 
