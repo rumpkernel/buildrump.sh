@@ -96,7 +96,7 @@ appendmkconf ()
 # in question should be left empty.
 chkcrt ()
 {
-	tst=`cc --print-file-name=${1}.o`
+	tst=`${CC} --print-file-name=${1}.o`
 	up=`echo ${1} | tr [a-z] [A-Z]`
 	[ -z "${tst%${1}.o}" ] && echo "_GCC_CRT${up}=" >>"${BRTOOLDIR}/mk.conf"
 }
