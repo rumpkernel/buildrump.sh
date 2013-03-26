@@ -542,7 +542,7 @@ case ${mach_arch} in
 	mach_arch="i486"
 	toolabi="elf"
 	;;
-"arm")
+"arm"|"armv6l")
 	machine="evbarm"
 	mach_arch="arm"
 	toolabi="elf"
@@ -571,7 +571,7 @@ case ${mach_arch} in
 	fi
 	;;
 esac
-[ -z "${machine}" ] && die script does not know machine \"${target_arch}\"
+[ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
 
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${dotools} && maketools
