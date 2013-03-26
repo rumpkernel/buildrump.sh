@@ -298,12 +298,23 @@ probehost ()
 
 	#
 	# Check for ld because we need to make some adjustments based on it
-	if cc -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
-	elif cc -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 	else
 		die 'GNU or Solaris ld required'
+	fi
+
+	# Check for GNU ar
+	# XXX: copypasted tool_ar stuff
+	if ${NATIVEBUILD}; then
+		tool_ar=ar
+	else
+		tool_ar="${cc_target}-ar"
+	fi
+	if ! ${tool_ar} --version 2>/dev/null | grep -q 'GNU ar' ; then
+		die Need GNU toolchain in PATH, `which ar` is not
 	fi
 }
 
@@ -483,11 +494,6 @@ case ${hostos} in
 	binsh=/usr/xpg4/bin/sh
 
 	THIRTYTWO_HOST=true
-
-	# do some random test to check for gnu foolchain
-	if ! ar --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU toolchain in PATH, `which ar` is not
-	fi
 
 	# I haven't managed to get static libs to work on Solaris,
 	# so just be happy with shared ones
