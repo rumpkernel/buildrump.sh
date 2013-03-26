@@ -576,17 +576,6 @@ esac
 RUMPMAKE="${BRTOOLDIR}/rumpmake"
 ${dotools} && maketools
 
-# this helper makes sure we get some output with the
-# NetBSD noisybuild stuff (-q to this script)
-makedirtarget ()
-{
-
-	printf 'iwantitall:\n\t@${MAKEDIRTARGET} %s %s\n' $1 $2 | \
-	    ${RUMPMAKE} -f ${SRCDIR}/share/mk/bsd.own.mk -f - -j ${JNUM} \
-	      iwantitall
-	[ $? -eq 0 ] || die "makedirtarget $1 $2"
-}
-
 setupdest ()
 {
 
@@ -621,18 +610,60 @@ ${dobuild} && targets="obj includes dependall"
 ${dobuild} && setupdest
 ${doinstall} && targets="${targets} install"
 
-ALLDIRS="lib/librumpuser lib/librumpclient
-    lib/librump lib/librumpdev lib/librumpnet lib/librumpvfs
+DIRS_first='lib/librumpuser'
+DIRS_second='lib/librump'
+DIRS_final="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
     sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
     ${BRDIR}/brlib"
-[ "`uname`" = "Linux" ] \
-    && ALLDIRS="${ALLDIRS} lib/librumphijack sys/rump/kern/lib/libsys_linux"
+[ "`uname`" = "Linux" ] && \
+    DIRS_final="${DIRS_final} lib/librumphijack sys/rump/kern/lib/libsys_linux"
 
-cd ${SRCDIR}
-for target in ${targets}; do
-	for dir in ${ALLDIRS}; do
-		makedirtarget ${dir} ${target}
+# create the makefiles used for building
+mkmakefile ()
+{
+
+	makefile=$1
+	shift
+	exec 3>&1 1>${makefile}
+	printf '# GENERATED FILE, MIGHT I SUGGEST NOT EDITING?\n'
+	printf 'SUBDIR='
+	for dir in $*; do
+		case ${dir} in
+		/*)
+			printf ' %s' ${dir}
+			;;
+		*)
+			printf ' %s' ${SRCDIR}/${dir}
+			;;
+		esac
 	done
+
+	printf '\n\n.include <bsd.subdir.mk>\n'
+	exec 1>&3 3>&-
+}
+
+mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
+mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
+mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
+mkmakefile ${OBJDIR}/Makefile.all ${DIRS_first} ${DIRS_second} ${DIRS_final}
+
+domake ()
+{
+
+	${RUMPMAKE} -j ${JNUM} -f ${1} ${2}
+	[ $? -eq 0 ] || die "make $1 $2"
+}
+
+# try to minimize the amount of domake invocations.  this makes a
+# difference especially on systems with a large number of slow cores
+for target in ${targets}; do
+	if [ ${target} = "dependall" ]; then
+		domake ${OBJDIR}/Makefile.first ${target}
+		domake ${OBJDIR}/Makefile.second ${target}
+		domake ${OBJDIR}/Makefile.final ${target}
+	else
+		domake ${OBJDIR}/Makefile.all ${target}
+	fi
 done
 
 # run tests from testrump.sh we sourced earlier
