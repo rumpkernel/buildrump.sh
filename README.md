@@ -44,8 +44,8 @@ will build the rump kernels.  By default, `cc` from path is used along
 with other host tools such as `nm`.  Crosscompilation is documented
 further below.
 
-After a successful build, the script will run some simple tests to
-check that e.g. file systems and the TCP/IP stack work correctly.
+If the command `tests` or `fullbuild` is given, the script will run simple
+tests to check that e.g. file systems and the TCP/IP stack work correctly.
 If everything was successfully completed, the final output is:
 
 	[...]
@@ -107,10 +107,10 @@ In addition from what is expected to be present on a bare-bones host
 (`sh`, `rm`, etc.), the following software is required during the build
 process:
 
-- cc (gcc or clang)
+- cc (gcc and clang are known to work)
 - ld (GNU or Solaris ld required)
 - binutils (ar, nm, objcopy)
-- zlib
+- zlib (not used, but wanted by NetBSD tools/compat/configure)
 - cvs (required only for "checkout")
 
 
