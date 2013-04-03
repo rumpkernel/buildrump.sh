@@ -323,7 +323,7 @@ probehost ()
 		tool_ar="${cc_target}-ar"
 	fi
 	if ! ${tool_ar} --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU ar (`type ${tool_ar}`)
+		die Need GNU ar "(`type ${tool_ar}`)"
 	fi
 }
 
