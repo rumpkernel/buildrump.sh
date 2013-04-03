@@ -323,7 +323,7 @@ probehost ()
 		tool_ar="${cc_target}-ar"
 	fi
 	if ! ${tool_ar} --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU toolchain in PATH, `type ar` is not
+		die Need GNU ar in PATH (`type ar`)
 	fi
 }
 
