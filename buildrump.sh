@@ -134,7 +134,7 @@ maketools ()
 		CC_FLAVOR=clang
 		LLVM='-V HAVE_LLVM=1'
 	else
-		die Unsupported cc "(`which cc`)"
+		die Unsupported cc "(`type cc`)"
 	fi
 
 	#
@@ -323,7 +323,7 @@ probehost ()
 		tool_ar="${cc_target}-ar"
 	fi
 	if ! ${tool_ar} --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU toolchain in PATH, `which ar` is not
+		die Need GNU toolchain in PATH, `type ar` is not
 	fi
 }
 
