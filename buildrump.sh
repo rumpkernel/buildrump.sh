@@ -343,6 +343,13 @@ fi
 [ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] && NATIVEBUILD=false
 type ${CC} > /dev/null 2>&1 || die cannot find \$CC: \"${CC}\".  check env.
 
+# Check the arch we're building for so as to work out the necessary
+# NetBSD machine code we need to use.  Use ${CC} -v instead of -dumpmachine
+# since at least older versions of clang don't support -dumpmachine ... yay!
+cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
+mach_arch=$(echo ${cc_target} | sed 's/-.*//' )
+[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
+
 DBG='-O2 -g'
 ANYHOSTISGOOD=false
 NOISE=2
@@ -525,13 +532,6 @@ if ${THIRTYTWO}; then
 	${THIRTYTWO_HOST} || ${ANYHOSTISGOOD} || \
 	    die 'host not known to support 32bit.  get lucky with -H?'
 fi
-
-# Check the arch we're building for so as to work out the necessary
-# NetBSD machine code we need to use.  Use ${CC} -v instead of -dumpmachine
-# since at least older versions of clang don't support -dumpmachine ... yay!
-cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
-mach_arch=$(echo ${cc_target} | sed 's/-.*//' )
-[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
 
 case ${mach_arch} in
 "x86_64")
