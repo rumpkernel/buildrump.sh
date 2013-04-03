@@ -621,11 +621,14 @@ ${doinstall} && targets="${targets} install"
 
 DIRS_first='lib/librumpuser'
 DIRS_second='lib/librump'
-DIRS_final="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
+DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
     sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
     ${BRDIR}/brlib"
-[ "`uname`" = "Linux" ] && \
-    DIRS_final="${DIRS_final} lib/librumphijack sys/rump/kern/lib/libsys_linux"
+
+if [ "`uname`" = "Linux" ]; then
+	DIRS_final="lib/librumphijack"
+	DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
+fi
 
 # create the makefiles used for building
 mkmakefile ()
@@ -653,8 +656,10 @@ mkmakefile ()
 
 mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
 mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
+mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
 mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
-mkmakefile ${OBJDIR}/Makefile.all ${DIRS_first} ${DIRS_second} ${DIRS_final}
+mkmakefile ${OBJDIR}/Makefile.all \
+    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
 
 domake ()
 {
@@ -669,6 +674,7 @@ for target in ${targets}; do
 	if [ ${target} = "dependall" ]; then
 		domake ${OBJDIR}/Makefile.first ${target}
 		domake ${OBJDIR}/Makefile.second ${target}
+		domake ${OBJDIR}/Makefile.third ${target}
 		domake ${OBJDIR}/Makefile.final ${target}
 	else
 		domake ${OBJDIR}/Makefile.all ${target}
