@@ -120,27 +120,40 @@ chkcrt ()
 # external toolchain links are created in the format that
 # build.sh expects.
 #
-# TODO?: don't hardcore this based on PATH
-# TODO2: cpp missing
 maketools ()
 {
-	TOOLS='ar nm objcopy'
 
+	#
+	# Perform various checks and set values
+	#
+
+	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
-	if ${CC} --version | grep -q 'Free Software Foundation'; then
+	ccver=$(${CC} --version)
+	if echo ${ccver} | grep -q 'Free Software Foundation'; then
 		CC_FLAVOR=gcc
-	elif ${CC} --version | grep -q clang; then
+	elif echo ${ccver} | grep -q clang; then
 		CC_FLAVOR=clang
 		LLVM='-V HAVE_LLVM=1'
 	else
-		die Unsupported cc "(`type ${CC}`)"
+		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
 
 	#
-	# Perform some toolchain feature tests to determine what options
-	# we need to use for building.
-	#
+	# Check for ld because we need to make some adjustments based on it
+	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+		LD_FLAVOR=GNU
+	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+		LD_FLAVOR=sun
+	else
+		die 'GNU or Solaris ld required'
+	fi
+
+	# Check for GNU ar
+	if ! ${AR} --version 2>/dev/null | grep -q 'GNU ar' ; then
+		die Need GNU ar "(`type ${AR}`)"
+	fi
 
 	cd ${OBJDIR}
 	#
@@ -177,31 +190,33 @@ maketools ()
 	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
-	for x in ${CC_FLAVOR} ${TOOLS}; do
+	for x in CC AR NM OBJCOPY; do
 		# ok, it's not really --netbsd, but let's make-believe!
-		tname=${BRTOOLDIR}/bin/${mach_arch}--netbsd${toolabi}-${x}
-
-		if ${NATIVEBUILD}; then
-			cmd="${x}"
+		if [ ${x} = CC ]; then
+			lcx=${CC_FLAVOR}
 		else
-			cmd="${cc_target}-${x}"
+			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
 		fi
-		type ${cmd} >/dev/null 2>&1 \
-		    || die Cannot find \"${cmd}\".  Please check \$PATH
+		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
+
+		eval tool=\${${x}}
+		type ${tool} >/dev/null 2>&1 \
+		    || die Cannot find \$${x} at \"${tool}\".
+		printf 'Tool %s \t: %s\n' ${x} ${tool}
 
 		exec 3>&1 1>${tname}
 		printf '#!/bin/sh\n\n'
 
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
-		if [ $x = ${CC_FLAVOR} -a ${LD_FLAVOR} = 'sun' ]; then
+		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
 			printf 'for x in $*; do\n'
         		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
 	        	printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
 			printf '&& continue\n\tnewargs="${newargs} $x"\n'
-			printf 'done\nexec %s ${newargs}\n' ${cmd}
+			printf 'done\nexec %s ${newargs}\n' ${tool}
 		else
-			printf 'exec %s $*\n' ${cmd}
+			printf 'exec %s $*\n' ${tool}
 		fi
 		exec 1>&3 3>&-
 		chmod 755 ${tname}
@@ -238,7 +253,7 @@ EOF
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
-	env CFLAGS= ${binsh} build.sh -m ${machine} -u \
+	env CFLAGS= ${binsh} build.sh -m ${MACHINE} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
@@ -274,11 +289,11 @@ checkout ()
 		die No cvs in PATH
 	fi
 
+	cd ${SRCDIR}
 	echo ">> Fetching the necessary subset of NetBSD source tree to:"
-	echo "   ${SRCDIR}"
+	echo "   "`pwd -P`
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
 
-	cd ${SRCDIR}
 	# trick cvs into "skipping" the module name so that we get
 	# all the sources directly into $SRCDIR
 	rm -f src
@@ -353,44 +368,14 @@ makebuild ()
 	done
 }
 
-probehost ()
-{
-
-	#
-	# Check for ld because we need to make some adjustments based on it
-	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
-		LD_FLAVOR=GNU
-	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
-		LD_FLAVOR=sun
-	else
-		die 'GNU or Solaris ld required'
-	fi
-
-	# Check for GNU ar
-	# XXX: copypasted tool_ar stuff
-	if ${NATIVEBUILD}; then
-		tool_ar=ar
-	else
-		tool_ar="${cc_target}-ar"
-	fi
-	if ! ${tool_ar} --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU ar "(`type ${tool_ar}`)"
-	fi
-}
-
 evaltools ()
 {
-	# scrub env in case they're set for crossbuilds
-	# (we handle these when creating wrappers)
-	unset AR NM OBJCOPY
 
 	# check for crossbuild
-	NATIVEBUILD=true
-	if [ -z "${CC}" ]; then
-		CC=cc
-	fi
+	: ${CC:=cc}
+	nativebuild=true
 	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] \
-	    && NATIVEBUILD=false
+	    && nativebuild=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
@@ -399,8 +384,19 @@ evaltools ()
 	# of -dumpmachine since at least older versions of clang don't
 	# support -dumpmachine ... yay!
 	cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
-	mach_arch=$(echo ${cc_target} | sed 's/-.*//' )
+	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 	[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
+
+	if ${nativebuild}; then
+		: ${AR:=ar}
+		: ${NM:=nm}
+		: ${OBJCOPY:=objcopy}
+	else
+		: ${AR:=${cc_target}-ar}
+		: ${NM:=${cc_target}-nm}
+		: ${OBJCOPY:=${cc_target}-objcopy}
+	fi
+
 }
 
 parseargs ()
@@ -603,28 +599,28 @@ evaltarget ()
 		    die 'host not known to support 32bit.  get lucky with -H?'
 	fi
 
-	case ${mach_arch} in
+	case ${MACH_ARCH} in
 	"x86_64")
 		if ${THIRTYTWO} ; then
-			machine="i386"
-			mach_arch="i486"
-			toolabi="elf"
+			MACHINE="i386"
+			MACH_ARCH="i486"
+			TOOLABI="elf"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 			EXTRA_LDFLAGS='-m32'
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 		else
-			machine="amd64"
+			MACHINE="amd64"
 		fi
 		;;
 	"i386"|"i686")
-		machine="i386"
-		mach_arch="i486"
-		toolabi="elf"
+		MACHINE="i386"
+		MACH_ARCH="i486"
+		TOOLABI="elf"
 		;;
 	"arm"|"armv6l")
-		machine="evbarm"
-		mach_arch="arm"
-		toolabi="elf"
+		MACHINE="evbarm"
+		MACH_ARCH="arm"
+		TOOLABI="elf"
 		# XXX: assume at least armv6k due to armv6 inaccuracy in NetBSD
 		EXTRA_CFLAGS='-march=armv6k'
 		EXTRA_AFLAGS='-march=armv6k'
@@ -636,21 +632,21 @@ evaltarget ()
 		# We assume it's an UltraSPARC.  If someone wants to build on
 		# an actual 32bit SPARC, send patches (or always use -32)
 		if ${THIRTYTWO} ; then
-			machine="sparc"
-			mach_arch="sparc"
-			toolabi="elf"
+			MACHINE="sparc"
+			MACH_ARCH="sparc"
+			TOOLABI="elf"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
 		else
-			machine="sparc64"
-			mach_arch="sparc64"
+			MACHINE="sparc64"
+			MACH_ARCH="sparc64"
 			EXTRA_CFLAGS='-m64'
 			EXTRA_LDFLAGS='-m64'
 			EXTRA_AFLAGS='-m64'
 		fi
 		;;
 	esac
-	[ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
+	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 }
 
 setupdest ()
@@ -714,10 +710,7 @@ domake ()
 ###
 
 evaltools
-
 parseargs $*
-
-probehost
 
 ${docheckout} && ( checkout )
 
