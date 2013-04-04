@@ -26,7 +26,7 @@
 
 #
 # This script will build rump kernel components and the hypervisor
-# on a non-NetBSD host.  It will install the components as libraries
+# for a non-NetBSD target.  It will install the components as libraries
 # to rump/lib and headers to rump/include.  For information on how to
 # convert the installed files into running rump kernels, see the examples
 # and tests directories.
@@ -76,7 +76,8 @@ helpme ()
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
-	printf "\t-32: on supported hosts, build 32bit binaries.  default: 64\n"
+	# XXX: should be compiler default
+	printf "\t-32: on supported targets, do 32bit build.  default: 64\n"
 	echo
 	printf "supported commands (none supplied => fullbuild):\n"
 	printf "\tcheckout:\tfetch NetBSD sources to srcdir from anoncvs\n"
@@ -182,7 +183,7 @@ maketools ()
 	fi
 
 	#
-	# Check if the host supports posix_memalign()
+	# Check if the target supports posix_memalign()
 	printf '#include <stdlib.h>\nmain(){posix_memalign(NULL,0,0);}\n'>test.c
 	${CC} test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
 	rm -f test.c a.out
@@ -253,7 +254,7 @@ EOF
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
-	env CFLAGS= ${binsh} build.sh -m ${MACHINE} -u \
+	env CFLAGS= ./build.sh -m ${MACHINE} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
@@ -341,8 +342,7 @@ makebuild ()
 	    lib/librumpvfs sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
-	# XXX: not safe for crossbuilding!
-	if [ "`uname`" = "Linux" ]; then
+	if [ ${TARGET} = "linux" ]; then
 		DIRS_final="lib/librumphijack"
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
 	fi
@@ -397,13 +397,37 @@ evaltools ()
 		: ${OBJCOPY:=${cc_target}-objcopy}
 	fi
 
+	# Try to figure out the target system we're building for.
+	case ${cc_target} in
+	*-linux-gnu*)
+		TARGET=linux
+		;;
+	*-dragonfly)
+		TARGET=dragonfly
+		;;
+	*-freebsd)
+		TARGET=freebsd
+		;;
+	*-netbsd*)
+		TARGET=netbsd
+		;;
+	*-sun-solaris*)
+		TARGET=sunos
+		;;
+	*-pc-cygwin)
+		TARGET=cygwin
+		;;
+	*)
+		TARGET=unknown
+		;;
+	esac
 }
 
 parseargs ()
 {
 
 	DBG='-O2 -g'
-	ANYHOSTISGOOD=false
+	ANYTARGETISGOOD=false
 	NOISE=2
 	debugginess=0
 	BRDIR=$(dirname $0)
@@ -432,7 +456,7 @@ parseargs ()
 			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 			;;
 		H)
-			ANYHOSTISGOOD=true
+			ANYTARGETISGOOD=true
 			;;
 		q)
 			# build.sh handles value going negative
@@ -549,54 +573,49 @@ checksrcversion ()
 evaltarget ()
 {
 
-	# XXX: not crossbuild-compatible
-	hostos=`uname -s`
-
-	binsh=sh
-	THIRTYTWO_HOST=false
-	case ${hostos} in
-	"DragonFly")
+	THIRTYTWO_TARGET=false
+	case ${TARGET} in
+	"dragonfly")
 		RUMPKERN_UNDEF='-U__DragonFly__'
 		;;
-	"FreeBSD")
+	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
 		;;
-	"Linux")
+	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		EXTRA_RUMPUSER='-ldl'
 		EXTRA_RUMPCLIENT='-lpthread -ldl'
 		;;
-	"NetBSD")
+	"netbsd")
 		# what do you expect? ;)
 		;;
-	"SunOS")
+	"sunos")
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 		EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
 		EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
-		binsh=/usr/xpg4/bin/sh
 
-		THIRTYTWO_HOST=true
+		THIRTYTWO_TARGET=true
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		BUILDSTATIC='-V NOSTATICLIB=1'
 		;;
-	"CYGWIN_NT"*)
+	"cygwin")
 		BUILDSHARED='-V NOPIC=1'
-		host_notsupp='yes'
+		target_notsupp='yes'
 		;;
-	*)
-		host_notsupp='yes'
+	"unknown"|*)
+		target_notsupp='yes'
 		;;
 	esac
 
-	if [ "${host_notsupp}" = 'yes' ]; then
-		${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
+	if [ "${target_notsupp}" = 'yes' ]; then
+		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
 	fi
 
 	if ${THIRTYTWO}; then
-		${THIRTYTWO_HOST} || ${ANYHOSTISGOOD} || \
-		    die 'host not known to support 32bit.  get lucky with -H?'
+		${THIRTYTWO_TARGET} || ${ANYTARGETISGOOD} || \
+		    die 'target not known to support 32bit.  get lucky with -H?'
 	fi
 
 	TOOLABI=''
@@ -626,7 +645,7 @@ evaltarget ()
 		EXTRA_CFLAGS='-march=armv6k'
 		EXTRA_AFLAGS='-march=armv6k'
 
-		# force hardfloat, the default (soft) doesn't work on all hosts
+		# force hardfloat, default (soft) doesn't work on all targets
 		SOFTFLOAT='-V MKSOFTFLOAT=no'
 		;;
 	"sparc")
