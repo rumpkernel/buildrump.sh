@@ -266,7 +266,6 @@ checkout ()
 
 	# make sure we know where SRCDIR is
 	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
-	abspath SRCDIR
 
 	if ! type cvs >/dev/null 2>&1 ;then
 		echo '>> Need cvs for checkout functionality'
@@ -323,10 +322,11 @@ makebuild ()
 
 	DIRS_first='lib/librumpuser'
 	DIRS_second='lib/librump'
-	DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
-	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
-	    ${BRDIR}/brlib"
+	DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet
+	    lib/librumpvfs sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
+	    sys/rump/include ${BRDIR}/brlib"
 
+	# XXX: not safe for crossbuilding!
 	if [ "`uname`" = "Linux" ]; then
 		DIRS_final="lib/librumphijack"
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
@@ -405,6 +405,13 @@ evaltools ()
 
 parseargs ()
 {
+
+	DBG='-O2 -g'
+	ANYHOSTISGOOD=false
+	NOISE=2
+	debugginess=0
+	BRDIR=$(dirname $0)
+	THIRTYTWO=false
 
 	while getopts '3:d:DhHj:o:qrs:T:V:' opt; do
 		case "$opt" in
@@ -499,6 +506,7 @@ parseargs ()
 
 abspath ()
 {
+
 	curdir=`pwd -P`
 	eval cd \${${1}}
 	eval ${1}=`pwd -P`
@@ -519,11 +527,15 @@ resolvepaths ()
 	abspath OBJDIR
 	abspath BRTOOLDIR
 	abspath SRCDIR
+
+	RUMPMAKE="${BRTOOLDIR}/rumpmake"
 }
 
 checksrcversion ()
 {
 
+	[ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ] && \
+	    die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
 
 	# check if NetBSD src is new enough
 	oIFS="${IFS}"
@@ -538,10 +550,12 @@ checksrcversion ()
 	IFS="${oIFS}"
 }
 
-targetparams ()
+evaltarget ()
 {
 
+	# XXX: not crossbuild-compatible
 	hostos=`uname -s`
+
 	binsh=sh
 	THIRTYTWO_HOST=false
 	case ${hostos} in
@@ -649,15 +663,14 @@ setupdest ()
 	mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
 	mkdir -p ${OBJDIR}/dest/usr/share/man \
 	    || die create ${OBJDIR}/dest/usr/share/man
-	ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/include
-	ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/lib
+	ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/
+	ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/
 	for man in cat man ; do 
 		for x in 1 2 3 4 5 6 7 8 9 ; do
 			mkdir -p ${DESTDIR}/share/man/${man}${x} \
 			    || die create ${DESTDIR}/share/man/${man}${x}
-			rm -f ${OBJDIR}/dest/usr/share/man/${man}${x}
 			ln -sf ${DESTDIR}/share/man/${man}${x} \
-			    ${OBJDIR}/dest/usr/share/man/${man}${x}
+			    ${OBJDIR}/dest/usr/share/man/
 		done
 	done
 }
@@ -689,6 +702,7 @@ mkmakefile ()
 domake ()
 {
 
+	[ ! -x ${RUMPMAKE} ] && die "No rumpmake (${RUMPMAKE}). Forgot tools?"
 	${RUMPMAKE} -j ${JNUM} -f ${1} ${2}
 	[ $? -eq 0 ] || die "make $1 $2"
 }
@@ -701,37 +715,30 @@ domake ()
 
 evaltools
 
-DBG='-O2 -g'
-ANYHOSTISGOOD=false
-NOISE=2
-debugginess=0
-BRDIR=$(dirname $0)
-THIRTYTWO=false
-
 parseargs $*
 
 probehost
 
-# XXX: how does this do anything sensible ???
-if [ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ]; then
-	[ $? -ne 0 ] && die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
-fi
-
 ${docheckout} && ( checkout )
 
+evaltarget
+
 resolvepaths
-RUMPMAKE="${BRTOOLDIR}/rumpmake"
 
-checksrcversion
+if ${dobuild} || ${doinstall}; then
+	# install uses src tree Makefiles
+	checksrcversion
 
-targetparams
+	# build installs headers
+	setupdest
+fi
 
 ${dotools} && maketools
 
+targets=''
 ${dobuild} && targets="obj includes dependall"
-${dobuild} && setupdest
 ${doinstall} && targets="${targets} install"
-makebuild ${targets}
+[ ! -z "${targets}" ] && makebuild ${targets}
 
 if ${dotests}; then
 	. ${BRDIR}/tests/testrump.sh
