@@ -298,7 +298,7 @@ checkout ()
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
 	# some extras
-	cvs ${NBSRC_CVSFLAGS} co -D '20130403 2245UTC'		\
+	cvs ${NBSRC_CVSFLAGS} co -D '20130403 2359UTC'		\
 	    src/sys/rump/librump/rumpvfs/rump_vfs.c			\
 	    src/sys/rump/kern/lib/libsys_linux/component.c ||die checkout failed
 
