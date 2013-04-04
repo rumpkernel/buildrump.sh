@@ -599,6 +599,7 @@ evaltarget ()
 		    die 'host not known to support 32bit.  get lucky with -H?'
 	fi
 
+	TOOLABI=''
 	case ${MACH_ARCH} in
 	"x86_64")
 		if ${THIRTYTWO} ; then
