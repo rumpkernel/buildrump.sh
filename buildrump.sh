@@ -307,6 +307,52 @@ checkout ()
 	echo '>> checkout done'
 }
 
+makebuild ()
+{
+
+	targets=$*
+
+	#
+	# Building takes 4 passes, just like when
+	# building NetBSD the regular way.  The passes are:
+	# 1) obj
+	# 2) includes
+	# 3) dependall
+	# 4) install
+	#
+
+	DIRS_first='lib/librumpuser'
+	DIRS_second='lib/librump'
+	DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
+	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
+	    ${BRDIR}/brlib"
+
+	if [ "`uname`" = "Linux" ]; then
+		DIRS_final="lib/librumphijack"
+		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
+	fi
+
+	mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
+	mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
+	mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
+	mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
+	mkmakefile ${OBJDIR}/Makefile.all \
+	    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
+
+	# try to minimize the amount of domake invocations.  this makes a
+	# difference especially on systems with a large number of slow cores
+	for target in ${targets}; do
+		if [ ${target} = "dependall" ]; then
+			domake ${OBJDIR}/Makefile.first ${target}
+			domake ${OBJDIR}/Makefile.second ${target}
+			domake ${OBJDIR}/Makefile.third ${target}
+			domake ${OBJDIR}/Makefile.final ${target}
+		else
+			domake ${OBJDIR}/Makefile.all ${target}
+		fi
+	done
+}
+
 probehost ()
 {
 
@@ -332,263 +378,266 @@ probehost ()
 	fi
 }
 
-#
-# BEGIN SCRIPT
-#
+evaltools ()
+{
+	# scrub env in case they're set for crossbuilds
+	# (we handle these when creating wrappers)
+	unset AR NM OBJCOPY
 
-# scrub env in case they're set for crossbuilds
-# (we handle these when creating wrappers)
-unset AR CPP NM OBJCOPY
+	# check for crossbuild
+	NATIVEBUILD=true
+	if [ -z "${CC}" ]; then
+		CC=cc
+	fi
+	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] \
+	    && NATIVEBUILD=false
+	type ${CC} > /dev/null 2>&1 \
+	    || die cannot find \$CC: \"${CC}\".  check env.
 
-# check for crossbuild
-NATIVEBUILD=true
-if [ -z "${CC}" ]; then
-	CC=cc
-fi
-[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] && NATIVEBUILD=false
-type ${CC} > /dev/null 2>&1 || die cannot find \$CC: \"${CC}\".  check env.
+	# Check the arch we're building for so as to work out the necessary
+	# NetBSD machine code we need to use.  Use ${CC} -v instead
+	# of -dumpmachine since at least older versions of clang don't
+	# support -dumpmachine ... yay!
+	cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
+	mach_arch=$(echo ${cc_target} | sed 's/-.*//' )
+	[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
+}
 
-# Check the arch we're building for so as to work out the necessary
-# NetBSD machine code we need to use.  Use ${CC} -v instead of -dumpmachine
-# since at least older versions of clang don't support -dumpmachine ... yay!
-cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
-mach_arch=$(echo ${cc_target} | sed 's/-.*//' )
-[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
+parseargs ()
+{
 
-DBG='-O2 -g'
-ANYHOSTISGOOD=false
-NOISE=2
-debugginess=0
-BRDIR=$(dirname $0)
-THIRTYTWO=false
-while getopts '3:d:DhHj:o:qrs:T:V:' opt; do
-	case "$opt" in
-	3)
-		[ ${OPTARG} != '2' ] && die 'invalid option. did you mean -32?'
-		THIRTYTWO=true
-		;;
-	j)
-		JNUM=${OPTARG}
-		;;
-	d)
-		DESTDIR=${OPTARG}
-		;;
-	D)
-		[ ! -z "${RUMP_DIAGNOSTIC}" ]&& die Cannot specify releasy debug
+	while getopts '3:d:DhHj:o:qrs:T:V:' opt; do
+		case "$opt" in
+		3)
+			[ ${OPTARG} != '2' ] \
+			    && die 'invalid option. did you mean -32?'
+			THIRTYTWO=true
+			;;
+		j)
+			JNUM=${OPTARG}
+			;;
+		d)
+			DESTDIR=${OPTARG}
+			;;
+		D)
+			[ ! -z "${RUMP_DIAGNOSTIC}" ] \
+			    && die Cannot specify releasy debug
 
-		debugginess=$((debugginess+1))
-		[ ${debugginess} -gt 0 ] && DBG='-O0 -g'
-		[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
-		[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
-		;;
-	H)
-		ANYHOSTISGOOD=true
-		;;
-	q)
-		# build.sh handles value going negative
-		NOISE=$((NOISE-1))
-		;;
-	o)
-		OBJDIR=${OPTARG}
-		;;
-	r)
-		[ ${debugginess} -gt 0 ] && die Cannot specify debbuggy release
-		RUMP_DIAGNOSTIC=no
-		DBG=''
-		;;
-	s)
-		SRCDIR=${OPTARG}
-		;;
-	T)
-		BRTOOLDIR=${OPTARG}
-		;;
-	V)
-		BUILDSH_VARGS="${BUILDSH_VARGS} -V ${OPTARG}"
-		;;
-	-)
-		break
-		;;
-	h|\?)
-		helpme
-		;;
-	esac
-done
-shift $((${OPTIND} - 1))
-BEQUIET="-N${NOISE}"
-[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+			debugginess=$((debugginess+1))
+			[ ${debugginess} -gt 0 ] && DBG='-O0 -g'
+			[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
+			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
+			;;
+		H)
+			ANYHOSTISGOOD=true
+			;;
+		q)
+			# build.sh handles value going negative
+			NOISE=$((NOISE-1))
+			;;
+		o)
+			OBJDIR=${OPTARG}
+			;;
+		r)
+			[ ${debugginess} -gt 0 ] \
+			    && die Cannot specify debbuggy release
+			RUMP_DIAGNOSTIC=no
+			DBG=''
+			;;
+		s)
+			SRCDIR=${OPTARG}
+			;;
+		T)
+			BRTOOLDIR=${OPTARG}
+			;;
+		V)
+			BUILDSH_VARGS="${BUILDSH_VARGS} -V ${OPTARG}"
+			;;
+		-)
+			break
+			;;
+		h|\?)
+			helpme
+			;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
 
-probehost
+	BEQUIET="-N${NOISE}"
+	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 
-#
-# Determine what which parts we should execute.
-#
-allcmds="checkout tools build install tests fullbuild"
-fullbuildcmds="tools build install tests"
+	#
+	# Determine what which parts we should execute.
+	#
+	allcmds="checkout tools build install tests fullbuild"
+	fullbuildcmds="tools build install tests"
 
-for cmd in ${allcmds}; do
-	eval do${cmd}=false
-done
-if [ $# -ne 0 ]; then
-	for arg in $*; do
-		while true ; do
-			for cmd in ${allcmds}; do
-				if [ "${arg}" = "${cmd}" ]; then
-					eval do${cmd}=true
-					break 2
-				fi
+	for cmd in ${allcmds}; do
+		eval do${cmd}=false
+	done
+	if [ $# -ne 0 ]; then
+		for arg in $*; do
+			while true ; do
+				for cmd in ${allcmds}; do
+					if [ "${arg}" = "${cmd}" ]; then
+						eval do${cmd}=true
+						break 2
+					fi
+				done
+				die "Invalid arg $arg"
 			done
-			die "Invalid arg $arg"
 		done
-	done
-else
-	dofullbuild=true
-fi
-if ${dofullbuild} ; then
-	for cmd in ${fullbuildcmds}; do
-		eval do${cmd}=true
-	done
-fi
-
-if [ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ]; then
-	[ $? -ne 0 ] && die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
-fi
-
-mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
-mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
-mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
+	else
+		dofullbuild=true
+	fi
+	if ${dofullbuild} ; then
+		for cmd in ${fullbuildcmds}; do
+			eval do${cmd}=true
+		done
+	fi
+}
 
 abspath ()
 {
-
 	curdir=`pwd -P`
 	eval cd \${${1}}
 	eval ${1}=`pwd -P`
 	cd ${curdir}
 }
 
-# resolve critical directories
-abspath DESTDIR
-abspath OBJDIR
-abspath BRTOOLDIR
-abspath BRDIR
+resolvepaths ()
+{
 
-${docheckout} && checkout
-abspath SRCDIR
+	# resolve critical directories
+	abspath BRDIR
 
-# source test routines, to be run after build
-. ${BRDIR}/tests/testrump.sh
+	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
+	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
+	mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
 
-# check if NetBSD src is new enough
-oIFS="${IFS}"
-IFS=':'
-exec 3>&2 2>/dev/null
-ver="`sed -n 's/^BUILDRUMP=//p' < ${SRCDIR}/sys/rump/VERSION`"
-exec 2>&3 3>&-
-set ${ver} 0
-[ "1${1}" -lt "1${NBSRC_DATE}" \
-  -o \( "1${1}" -eq "1${NBSRC_DATE}" -a "1${2}" -lt "1${NBSRC_SUB}" \) ] \
-    && die "Update of NetBSD source tree to ${NBSRC_DATE}:${NBSRC_SUB} required"
-IFS="${oIFS}"
+	abspath DESTDIR
+	abspath OBJDIR
+	abspath BRTOOLDIR
+	abspath SRCDIR
+}
 
-hostos=`uname -s`
-binsh=sh
-THIRTYTWO_HOST=false
-case ${hostos} in
-"DragonFly")
-	RUMPKERN_UNDEF='-U__DragonFly__'
-	;;
-"FreeBSD")
-	RUMPKERN_UNDEF='-U__FreeBSD__'
-	;;
-"Linux")
-	RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
-	EXTRA_RUMPUSER='-ldl'
-	EXTRA_RUMPCLIENT='-lpthread -ldl'
-	;;
-"NetBSD")
-	# what do you expect? ;)
-	;;
-"SunOS")
-	RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-	EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
-	EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
-	binsh=/usr/xpg4/bin/sh
+checksrcversion ()
+{
 
-	THIRTYTWO_HOST=true
 
-	# I haven't managed to get static libs to work on Solaris,
-	# so just be happy with shared ones
-	BUILDSTATIC='-V NOSTATICLIB=1'
-	;;
-"CYGWIN_NT"*)
-	BUILDSHARED='-V NOPIC=1'
-	host_notsupp='yes'
-	;;
-*)
-	host_notsupp='yes'
-	;;
-esac
+	# check if NetBSD src is new enough
+	oIFS="${IFS}"
+	IFS=':'
+	exec 3>&2 2>/dev/null
+	ver="`sed -n 's/^BUILDRUMP=//p' < ${SRCDIR}/sys/rump/VERSION`"
+	exec 2>&3 3>&-
+	set ${ver} 0
+	[ "1${1}" -lt "1${NBSRC_DATE}" -o \
+	    \( "1${1}" -eq "1${NBSRC_DATE}" -a "1${2}" -lt "1${NBSRC_SUB}" \) ]\
+	    && die "Update NetBSD src (${SRCDIR}) to ${NBSRC_DATE}:${NBSRC_SUB}"
+	IFS="${oIFS}"
+}
 
-if [ "${host_notsupp}" = 'yes' ]; then
-	${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
-fi
+targetparams ()
+{
 
-if ${THIRTYTWO}; then
-	${THIRTYTWO_HOST} || ${ANYHOSTISGOOD} || \
-	    die 'host not known to support 32bit.  get lucky with -H?'
-fi
+	hostos=`uname -s`
+	binsh=sh
+	THIRTYTWO_HOST=false
+	case ${hostos} in
+	"DragonFly")
+		RUMPKERN_UNDEF='-U__DragonFly__'
+		;;
+	"FreeBSD")
+		RUMPKERN_UNDEF='-U__FreeBSD__'
+		;;
+	"Linux")
+		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		EXTRA_RUMPUSER='-ldl'
+		EXTRA_RUMPCLIENT='-lpthread -ldl'
+		;;
+	"NetBSD")
+		# what do you expect? ;)
+		;;
+	"SunOS")
+		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
+		EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
+		EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
+		binsh=/usr/xpg4/bin/sh
 
-case ${mach_arch} in
-"x86_64")
-	if ${THIRTYTWO} ; then
+		THIRTYTWO_HOST=true
+
+		# I haven't managed to get static libs to work on Solaris,
+		# so just be happy with shared ones
+		BUILDSTATIC='-V NOSTATICLIB=1'
+		;;
+	"CYGWIN_NT"*)
+		BUILDSHARED='-V NOPIC=1'
+		host_notsupp='yes'
+		;;
+	*)
+		host_notsupp='yes'
+		;;
+	esac
+
+	if [ "${host_notsupp}" = 'yes' ]; then
+		${ANYHOSTISGOOD} || die unsupported host OS: ${hostos}
+	fi
+
+	if ${THIRTYTWO}; then
+		${THIRTYTWO_HOST} || ${ANYHOSTISGOOD} || \
+		    die 'host not known to support 32bit.  get lucky with -H?'
+	fi
+
+	case ${mach_arch} in
+	"x86_64")
+		if ${THIRTYTWO} ; then
+			machine="i386"
+			mach_arch="i486"
+			toolabi="elf"
+			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+			EXTRA_LDFLAGS='-m32'
+			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+		else
+			machine="amd64"
+		fi
+		;;
+	"i386"|"i686")
 		machine="i386"
 		mach_arch="i486"
 		toolabi="elf"
-		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-		EXTRA_LDFLAGS='-m32'
-		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-	else
-		machine="amd64"
-	fi
-	;;
-"i386"|"i686")
-	machine="i386"
-	mach_arch="i486"
-	toolabi="elf"
-	;;
-"arm"|"armv6l")
-	machine="evbarm"
-	mach_arch="arm"
-	toolabi="elf"
-	# XXX: assume at least armv6k due to armv6 inaccuracy in NetBSD
-	EXTRA_CFLAGS='-march=armv6k'
-	EXTRA_AFLAGS='-march=armv6k'
-
-	# force hardfloat, the default (i.e. soft) doesn't work on all hosts
-	SOFTFLOAT='-V MKSOFTFLOAT=no'
-	;;
-"sparc")
-	# We assume it's an UltraSPARC.  If someone wants to build on
-	# an actual 32bit SPARC, send patches (or always use -32)
-	if ${THIRTYTWO} ; then
-		machine="sparc"
-		mach_arch="sparc"
+		;;
+	"arm"|"armv6l")
+		machine="evbarm"
+		mach_arch="arm"
 		toolabi="elf"
-		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
-		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
-	else
-		machine="sparc64"
-		mach_arch="sparc64"
-		EXTRA_CFLAGS='-m64'
-		EXTRA_LDFLAGS='-m64'
-		EXTRA_AFLAGS='-m64'
-	fi
-	;;
-esac
-[ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
+		# XXX: assume at least armv6k due to armv6 inaccuracy in NetBSD
+		EXTRA_CFLAGS='-march=armv6k'
+		EXTRA_AFLAGS='-march=armv6k'
 
-RUMPMAKE="${BRTOOLDIR}/rumpmake"
-${dotools} && maketools
+		# force hardfloat, the default (soft) doesn't work on all hosts
+		SOFTFLOAT='-V MKSOFTFLOAT=no'
+		;;
+	"sparc")
+		# We assume it's an UltraSPARC.  If someone wants to build on
+		# an actual 32bit SPARC, send patches (or always use -32)
+		if ${THIRTYTWO} ; then
+			machine="sparc"
+			mach_arch="sparc"
+			toolabi="elf"
+			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
+			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
+		else
+			machine="sparc64"
+			mach_arch="sparc64"
+			EXTRA_CFLAGS='-m64'
+			EXTRA_LDFLAGS='-m64'
+			EXTRA_AFLAGS='-m64'
+		fi
+		;;
+	esac
+	[ -z "${machine}" ] && die script does not know machine \"${mach_arch}\"
+}
 
 setupdest ()
 {
@@ -612,30 +661,6 @@ setupdest ()
 		done
 	done
 }
-
-#
-# Now it's time to build.  This takes 4 passes, just like when
-# building NetBSD the regular way.  The passes are:
-# 1) obj
-# 2) includes
-# 3) dependall
-# 4) install
-#
-
-${dobuild} && targets="obj includes dependall"
-${dobuild} && setupdest
-${doinstall} && targets="${targets} install"
-
-DIRS_first='lib/librumpuser'
-DIRS_second='lib/librump'
-DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet lib/librumpvfs
-    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net sys/rump/include
-    ${BRDIR}/brlib"
-
-if [ "`uname`" = "Linux" ]; then
-	DIRS_final="lib/librumphijack"
-	DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
-fi
 
 # create the makefiles used for building
 mkmakefile ()
@@ -661,13 +686,6 @@ mkmakefile ()
 	exec 1>&3 3>&-
 }
 
-mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
-mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
-mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
-mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
-mkmakefile ${OBJDIR}/Makefile.all \
-    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
-
 domake ()
 {
 
@@ -675,20 +693,49 @@ domake ()
 	[ $? -eq 0 ] || die "make $1 $2"
 }
 
-# try to minimize the amount of domake invocations.  this makes a
-# difference especially on systems with a large number of slow cores
-for target in ${targets}; do
-	if [ ${target} = "dependall" ]; then
-		domake ${OBJDIR}/Makefile.first ${target}
-		domake ${OBJDIR}/Makefile.second ${target}
-		domake ${OBJDIR}/Makefile.third ${target}
-		domake ${OBJDIR}/Makefile.final ${target}
-	else
-		domake ${OBJDIR}/Makefile.all ${target}
-	fi
-done
+###
+###
+### BEGIN SCRIPT
+###
+###
 
-# run tests from testrump.sh we sourced earlier
-${dotests} && alltests
+evaltools
+
+DBG='-O2 -g'
+ANYHOSTISGOOD=false
+NOISE=2
+debugginess=0
+BRDIR=$(dirname $0)
+THIRTYTWO=false
+
+parseargs $*
+
+probehost
+
+# XXX: how does this do anything sensible ???
+if [ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ]; then
+	[ $? -ne 0 ] && die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
+fi
+
+${docheckout} && ( checkout )
+
+resolvepaths
+RUMPMAKE="${BRTOOLDIR}/rumpmake"
+
+checksrcversion
+
+targetparams
+
+${dotools} && maketools
+
+${dobuild} && targets="obj includes dependall"
+${dobuild} && setupdest
+${doinstall} && targets="${targets} install"
+makebuild ${targets}
+
+if ${dotests}; then
+	. ${BRDIR}/tests/testrump.sh
+	alltests
+fi
 
 exit 0
