@@ -578,6 +578,13 @@ checksrcversion ()
 	IFS="${oIFS}"
 }
 
+check64 ()
+{
+
+	${SIXTYFOUR} \
+	    && die Do not know how to do a 64bit build for \"${MACH_ARCH}\"
+}
+
 evaltarget ()
 {
 
@@ -648,11 +655,13 @@ evaltarget ()
 		fi
 		;;
 	"i386"|"i686")
+		check64
 		MACHINE="i386"
 		MACH_ARCH="i486"
 		TOOLABI="elf"
 		;;
 	"arm"|"armv6l")
+		check64
 		MACHINE="evbarm"
 		MACH_ARCH="arm"
 		TOOLABI="elf"
