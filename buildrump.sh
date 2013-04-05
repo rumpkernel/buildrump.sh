@@ -76,8 +76,8 @@ helpme ()
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
-	# XXX: should be compiler default
-	printf "\t-32: on supported targets, do 32bit build.  default: 64\n"
+	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
+	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	echo
 	printf "supported commands (none supplied => fullbuild):\n"
 	printf "\tcheckout:\tfetch NetBSD sources to srcdir from anoncvs\n"
@@ -432,13 +432,21 @@ parseargs ()
 	debugginess=0
 	BRDIR=$(dirname $0)
 	THIRTYTWO=false
+	SIXTYFOUR=false
 
-	while getopts '3:d:DhHj:o:qrs:T:V:' opt; do
+	while getopts '3:6:d:DhHj:o:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
 			    && die 'invalid option. did you mean -32?'
+			${SIXTYFOUR} && die 32+64 given.  Want a 48bit build?
 			THIRTYTWO=true
+			;;
+		6)
+			[ ${OPTARG} != '4' ] \
+			    && die 'invalid option. did you mean -64?'
+			${THIRTYTWO} && die 32+64 given.  Want a 48bit build?
+			SIXTYFOUR=true
 			;;
 		j)
 			JNUM=${OPTARG}
@@ -573,7 +581,7 @@ checksrcversion ()
 evaltarget ()
 {
 
-	THIRTYTWO_TARGET=false
+	MULTILIB_TARGET=false
 	case ${TARGET} in
 	"dragonfly")
 		RUMPKERN_UNDEF='-U__DragonFly__'
@@ -594,7 +602,7 @@ evaltarget ()
 		EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
 		EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 
-		THIRTYTWO_TARGET=true
+		MULTILIB_TARGET=true
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
@@ -613,9 +621,16 @@ evaltarget ()
 		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
 	fi
 
-	if ${THIRTYTWO}; then
-		${THIRTYTWO_TARGET} || ${ANYTARGETISGOOD} || \
-		    die 'target not known to support 32bit.  get lucky with -H?'
+	if ${THIRTYTWO} || ${SIXTYFOUR}; then
+		${MULTILIB_TARGET} || ${ANYTARGETISGOOD} || \
+		    die 'target not known to support 32/64.  get lucky with -H?'
+	else
+		# user did not specify.  probe and use compiler default
+		if ${CC} -E -dM - < /dev/null | grep -q __LP64__; then
+			SIXTYFOUR=true
+		else
+			THIRTYTWO=true
+		fi
 	fi
 
 	TOOLABI=''
