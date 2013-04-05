@@ -664,8 +664,6 @@ evaltarget ()
 		SOFTFLOAT='-V MKSOFTFLOAT=no'
 		;;
 	"sparc")
-		# We assume it's an UltraSPARC.  If someone wants to build on
-		# an actual 32bit SPARC, send patches (or always use -32)
 		if ${THIRTYTWO} ; then
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
