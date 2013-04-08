@@ -405,7 +405,7 @@ evaltools ()
 	*-linux-gnu*)
 		TARGET=linux
 		;;
-	*-dragonfly)
+	*-dragonflybsd)
 		TARGET=dragonfly
 		;;
 	*-freebsd)
