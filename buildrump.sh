@@ -314,11 +314,12 @@ checkout ()
 
 	# some extras
 	cvs ${NBSRC_CVSFLAGS} co -D '20130403 2359UTC'		\
-	    src/sys/rump/librump/rumpvfs/rump_vfs.c			\
-	    src/sys/rump/kern/lib/libsys_linux/component.c ||die checkout failed
-
+	    src/sys/rump/librump/rumpvfs/rump_vfs.c ||die checkout failed
 	cvs ${NBSRC_CVSFLAGS} co -D '20130407 1845UTC'		\
 	    src/sys/rump/librump/rumpvfs/rumpfs.c ||die checkout failed
+	cvs ${NBSRC_CVSFLAGS} co -D '20130408 2100UTC'		\
+	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
+	      ||die checkout failed
 
 	# remove the symlink used to trick cvs
 	rm -f src
