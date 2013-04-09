@@ -313,13 +313,12 @@ checkout ()
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
 	# some extras
-	cvs ${NBSRC_CVSFLAGS} co -D '20130403 2359UTC'		\
-	    src/sys/rump/librump/rumpvfs/rump_vfs.c ||die checkout failed
-	cvs ${NBSRC_CVSFLAGS} co -D '20130407 1845UTC'		\
-	    src/sys/rump/librump/rumpvfs/rumpfs.c ||die checkout failed
-	cvs ${NBSRC_CVSFLAGS} co -D '20130408 2100UTC'		\
+	cvs ${NBSRC_CVSFLAGS} co -D '20130409 1310UTC'		\
+	    src/sys/rump/librump/rumpvfs/rump_vfs.c \
+	    src/sys/rump/librump/rumpvfs/rumpfs.c \
 	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
-	      ||die checkout failed
+	    src/sys/rump/kern/lib/libsys_sunos \
+	      || die checkout failed
 
 	# remove the symlink used to trick cvs
 	rm -f src
@@ -349,6 +348,10 @@ makebuild ()
 	if [ ${TARGET} = "linux" ]; then
 		DIRS_final="lib/librumphijack"
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
+	fi
+
+	if [ ${TARGET} = "sunos" ]; then
+		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_sunos"
 	fi
 
 	mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
