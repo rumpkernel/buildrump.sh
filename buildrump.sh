@@ -318,6 +318,7 @@ checkout ()
 	    src/sys/rump/librump/rumpvfs/rumpfs.c \
 	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
 	    src/sys/rump/kern/lib/libsys_sunos \
+	    src/tools/host-mkdep \
 	      || die checkout failed
 
 	# remove the symlink used to trick cvs
