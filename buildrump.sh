@@ -313,11 +313,12 @@ checkout ()
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
 	# some extras
-	cvs ${NBSRC_CVSFLAGS} co -D '20130409 1310UTC'		\
+	cvs ${NBSRC_CVSFLAGS} co -D '20130410 1650UTC'		\
 	    src/sys/rump/librump/rumpvfs/rump_vfs.c \
 	    src/sys/rump/librump/rumpvfs/rumpfs.c \
 	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
 	    src/sys/rump/kern/lib/libsys_sunos \
+	    src/sys/rump/kern/lib/libsys_cygwin \
 	    src/tools/host-mkdep \
 	      || die checkout failed
 
