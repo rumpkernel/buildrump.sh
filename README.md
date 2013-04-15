@@ -9,7 +9,9 @@ applications directly on the host.  The benefits of this approach include
 avoiding the overhead of OS virtualization.  Also, root privileges are
 not mandated.
 
-For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
+An example use case is [fs-utils](http://github.com/stacktic/fs-utils)
+which uses rump kernels to access file system images.  For more
+information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
 See also the [wiki](http://github.com/anttikantee/buildrump.sh/wiki/TODO) for
 a short-term TODO list.
