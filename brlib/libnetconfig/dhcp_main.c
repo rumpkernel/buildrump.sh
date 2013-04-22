@@ -254,8 +254,8 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 		return EINVAL;
 	}
 	ifaces = iface;
-	if (open_socket(iface, ETHERTYPE_IP) != 0)
-		panic("foo");
+	if ((error = open_socket(iface, ETHERTYPE_IP)) != 0)
+		panic("failed to open socket: %d");
 
 	up_interface(iface);
 
