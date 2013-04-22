@@ -240,6 +240,7 @@ if_route(const struct interface *iface, const struct in_addr *dest,
 
 	m = m_gethdr(M_WAIT, MT_DATA);
 	m->m_pkthdr.len = rtm.hdr.rtm_msglen = l = bp - (char *)&rtm;
+	m->m_len = 0;
 	m_copyback(m, 0, l, &rtm);
 
 	/* XXX: no check */
