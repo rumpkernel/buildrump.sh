@@ -448,8 +448,7 @@ configure(struct interface *iface)
 	if (lease->leasetime == ~0U)
 		printf("infinite\n");
 	else 
-		printf("%u seconds (%.2f days)\n",
-		    lease->leasetime, lease->leasetime / (60*60*24+.0));
+		printf("%u seconds\n", lease->leasetime);
 
 	return 0;
 }
