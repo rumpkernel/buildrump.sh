@@ -663,7 +663,7 @@ evaltarget ()
 			MACHINE="amd64"
 		fi
 		;;
-	"i386"|"i686")
+	"i386"|"i486"|"i686")
 		check64
 		MACHINE="i386"
 		MACH_ARCH="i486"
