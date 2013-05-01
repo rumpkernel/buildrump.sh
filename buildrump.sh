@@ -392,8 +392,8 @@ evaltools ()
 	# NetBSD machine code we need to use.  Use ${CC} -v instead
 	# of -dumpmachine since at least older versions of clang don't
 	# support -dumpmachine ... yay!
-	LC_MESSAGES=C \
-	    cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
+	cc_target=$(LC_ALL=C ${CC} -v 2>&1 \
+	    | sed -n '/^Target/{s/Target: //p;}' )
 	[ $? -ne 0 ] || [ -z "${cc_target}" ] && \
 	    die failed to probe target of \"${CC}\", got \"${cc_target}\"
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
