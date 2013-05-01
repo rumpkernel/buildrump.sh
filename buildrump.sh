@@ -394,8 +394,9 @@ evaltools ()
 	# support -dumpmachine ... yay!
 	LC_MESSAGES=C \
 	    cc_target=$(${CC} -v 2>&1 | sed -n '/^Target/{s/Target: //p;}' )
+	[ $? -ne 0 ] || [ -z "${cc_target}" ] && \
+	    die failed to probe target of \"${CC}\", got \"${cc_target}\"
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
-	[ $? -ne 0 ] && die failed to figure out target arch of \"${CC}\"
 
 	if ${nativebuild}; then
 		: ${AR:=ar}
