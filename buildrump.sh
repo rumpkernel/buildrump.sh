@@ -645,12 +645,12 @@ evaltarget ()
 	# step 2: if the user specified 32/64, try to establish if it will work
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
 		echo 'int main() {return 0;}' | ${CC} -m32 -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER}
+		    ${EXTRA_RUMPUSER} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
 		echo 'int main() {return 0;}' | ${CC} -m64 -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER}
+		    ${EXTRA_RUMPUSER} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
 	else
