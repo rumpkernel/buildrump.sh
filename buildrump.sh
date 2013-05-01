@@ -598,7 +598,6 @@ check64 ()
 evaltarget ()
 {
 
-	MULTILIB_TARGET=false
 	case ${TARGET} in
 	"dragonfly")
 		RUMPKERN_UNDEF='-U__DragonFly__'
@@ -619,8 +618,6 @@ evaltarget ()
 		EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
 		EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 
-		MULTILIB_TARGET=true
-
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		BUILDSTATIC='-V NOSTATICLIB=1'
@@ -638,12 +635,27 @@ evaltarget ()
 		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
 	fi
 
-	if ${THIRTYTWO} || ${SIXTYFOUR}; then
-		${MULTILIB_TARGET} || ${ANYTARGETISGOOD} || \
-		    die 'target not known to support 32/64.  get lucky with -H?'
+	# decide 32/64bit build.  step one: probe compiler default
+	if ${CC} -E -dM - < /dev/null | grep -q __LP64__; then
+		ccdefault=64
 	else
-		# user did not specify.  probe and use compiler default
-		if ${CC} -E -dM - < /dev/null | grep -q __LP64__; then
+		ccdefault=32
+	fi
+
+	# step 2: if the user specified 32/64, try to establish if it will work
+	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
+		echo 'int main() {return 0;}' | ${CC} -m32 -o /dev/null -x c - \
+		    ${EXTRA_RUMPUSER}
+		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
+		    die 'Gave -32, but probe shows it will not work.  Try -H?'
+	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
+		echo 'int main() {return 0;}' | ${CC} -m64 -o /dev/null -x c - \
+		    ${EXTRA_RUMPUSER}
+		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
+		    die 'Gave -64, but probe shows it will not work.  Try -H?'
+	else
+		# not specified.  use compiler default
+		if [ "${ccdefault}" -eq 64 ]; then
 			SIXTYFOUR=true
 		else
 			THIRTYTWO=true
