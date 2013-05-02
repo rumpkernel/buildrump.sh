@@ -97,6 +97,7 @@ Some operating systems provide rump kernels as a package:
 
 * [Arch Linux](http://aur.archlinux.org/packages/netbsd-rump-cvs/)
 * [Void Linux](http://github.com/xtraeme/xbps-packages/blob/master/srcpkgs/netbsd-rumpkernel/template)
+* [pkgsrc](http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/misc/rump/README.html) (NetBSD, Linux, Solaris)
 
 
 Build dependencies
