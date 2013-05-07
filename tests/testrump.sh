@@ -36,7 +36,7 @@ doremote ()
 	echo Done
 }
 
-dofs ()
+dokernfs ()
 {
 
 	echo VFS test
@@ -111,10 +111,10 @@ alltests ()
 
 	mkdir -p ${TESTOBJ}
 	cd ${TESTOBJ}
+	dokernfs
 	doremote
 	donet
 	donetrouted
-	dofs
 
 	echo
 	echo Success

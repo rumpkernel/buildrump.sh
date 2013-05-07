@@ -48,20 +48,8 @@ further below.
 
 If the command `tests` or `fullbuild` is given, the script will run simple
 tests to check that e.g. file systems and the TCP/IP stack work correctly.
-If everything was successfully completed, the final output is:
-
-	[...]
-	rump kernel halting...
-	syncing disks... done
-	unmounting file systems...
-	unmounted kernfs on /kern type kernfs
-	unmounted rumpfs on / type rumpfs
-	unmounting done
-	halted
-	Done
-	
-	Success
-	$ 
+If everything was successfully completed, the final output from the
+script is "Success".
 
 To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.
