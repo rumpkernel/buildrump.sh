@@ -291,25 +291,26 @@ checkout ()
 	fi
 
 	cd ${SRCDIR}
-	echo ">> Fetching the necessary subset of NetBSD source tree to:"
-	echo "   "`pwd -P`
-	echo '>> This will take a few minutes and requires ~200MB of disk space'
+
+	# squelch .cvspass whine
+	export CVS_PASSFILE=/dev/null
+
+	# we need listsrcdirs
+	echo ">> Fetching the list of files we need to checkout ..."
+	cvs ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_CVSDATE}" \
+	    src/sys/rump/listsrcdirs > listsrcdirs 2>/dev/null \
+	    || die listsrcdirs checkout failed
 
 	# trick cvs into "skipping" the module name so that we get
 	# all the sources directly into $SRCDIR
 	rm -f src
 	ln -s . src
 
-	# squelch .cvspass whine
-	export CVS_PASSFILE=/dev/null
-
-	# Next, we need listsrcdirs.  For some reason, we also need to
-	# check out one file directly under src or we get weird errors later
-	cvs ${NBSRC_CVSFLAGS} co -P -D "${NBSRC_CVSDATE}" \
-	    src/build.sh src/sys/rump/listsrcdirs || die checkout failed
-
 	# now, do the real checkout
-	sh ./sys/rump/listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
+	echo ">> Fetching the necessary subset of NetBSD source tree to:"
+	echo "   "`pwd -P`
+	echo '>> This will take a few minutes and requires ~200MB of disk space'
+	sh listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
 	# some extras
@@ -324,6 +325,7 @@ checkout ()
 
 	# remove the symlink used to trick cvs
 	rm -f src
+	rm -f listsrcdirs
 	echo '>> checkout done'
 }
 
