@@ -779,7 +779,7 @@ domake ()
 evaltools
 parseargs $*
 
-${docheckout} && ( checkout ) || exit 1
+${docheckout} && { ( checkout ) ; exit 1; }
 
 evaltarget
 
