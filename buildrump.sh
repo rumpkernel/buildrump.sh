@@ -283,11 +283,12 @@ checkout ()
 	# make sure we know where SRCDIR is
 	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
 
-	if ! type cvs >/dev/null 2>&1 ;then
+	: ${CVS:=cvs}
+	if ! type ${CVS} >/dev/null 2>&1 ;then
 		echo '>> Need cvs for checkout functionality'
-		echo '>> Ensure that cvs is in PATH and run again'
+		echo '>> Set $CVS or ensure that cvs is in PATH'
 		echo '>> or fetch the NetBSD sources manually'
-		die No cvs in PATH
+		die \"${CVS}\" not found
 	fi
 
 	cd ${SRCDIR}
@@ -297,7 +298,7 @@ checkout ()
 
 	# we need listsrcdirs
 	echo ">> Fetching the list of files we need to checkout ..."
-	cvs ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_CVSDATE}" \
+	${CVS} ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_CVSDATE}" \
 	    src/sys/rump/listsrcdirs > listsrcdirs 2>/dev/null \
 	    || die listsrcdirs checkout failed
 
@@ -310,11 +311,11 @@ checkout ()
 	echo ">> Fetching the necessary subset of NetBSD source tree to:"
 	echo "   "`pwd -P`
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
-	sh listsrcdirs -c | xargs cvs ${NBSRC_CVSFLAGS} co -P \
+	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
 	# some extras
-	cvs ${NBSRC_CVSFLAGS} co -D '20130410 1650UTC'		\
+	${CVS} ${NBSRC_CVSFLAGS} co -D '20130410 1650UTC'		\
 	    src/sys/rump/librump/rumpvfs/rump_vfs.c \
 	    src/sys/rump/librump/rumpvfs/rumpfs.c \
 	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
