@@ -54,6 +54,25 @@ dokernfs ()
 	echo Done
 }
 
+dosysvbfs ()
+{
+
+	echo VFS test with actual fs
+
+	set -x
+	cc -g -o ${TESTOBJ}/fstest2 ${TESTDIR}/fstest2.c		\
+	    -I${DESTDIR}/include ${AS_NEEDED} 				\
+	    -Wl,--whole-archive -lrumpfs_sysvbfs -lrumpdev_disk		\
+	    -lrumpdev -lrumpvfs -lrump -lrumpuser			\
+	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
+	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	set +x
+
+	./fstest2 ${TESTDIR}/sysvbfs_le.img || die fstest2 failed
+
+	echo Done
+}
+
 donet ()
 {
 
@@ -112,6 +131,7 @@ alltests ()
 	mkdir -p ${TESTOBJ}
 	cd ${TESTOBJ}
 	dokernfs
+	#dosysvbfs
 	doremote
 	donet
 	donetrouted
