@@ -609,7 +609,7 @@ evaltarget ()
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
-		EXTRA_RUMPUSER='-ldl'
+		EXTRA_RUMPUSER='-ldl -lrt'
 		EXTRA_RUMPCLIENT='-lpthread -ldl'
 		;;
 	"netbsd")
