@@ -249,6 +249,12 @@ EOF
 	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf "${DBG}" "DBG"
+	for x in ${EXTRA_RUMPUSER}; do
+		appendmkconf "${x%-l}" "RUMPUSER_EXTERNAL_DPLIBS"
+	done
+	for x in ${EXTRA_RUMPCLIENT}; do
+		appendmkconf "${x%-l}" "RUMPCLIENT_EXTERNAL_DPLIBS"
+	done
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'yes' 'HAVE_SUN_LD'
 
 	chkcrt begins
