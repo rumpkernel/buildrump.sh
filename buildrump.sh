@@ -176,7 +176,7 @@ maketools ()
 	if [ ${LD_FLAVOR} = 'GNU' ]; then
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 		echo 'int main(void) {return 0;}' > test.c
-		if ! $CC test.c -Wl,-T ldscript.test; then
+		if ! $CC test.c -Wl,-T ldscript.test > /dev/null 2>&1 ; then
 			# We know that older versions of NetBSD
 			# work without an ldscript
 			if [ "${TARGET}" = netbsd ]; then
