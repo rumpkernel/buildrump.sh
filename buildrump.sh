@@ -44,7 +44,7 @@ NBSRC_DATE=20130307
 NBSRC_SUB=0
 
 # for fetching the sources
-NBSRC_CVSDATE="20130321 2000UTC"
+NBSRC_CVSDATE="20130515 1800UTC"
 NBSRC_CVSFLAGS='-z3 -d :pserver:anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
@@ -320,16 +320,6 @@ checkout ()
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
 	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
-
-	# some extras
-	${CVS} ${NBSRC_CVSFLAGS} co -D '20130410 1650UTC'		\
-	    src/sys/rump/librump/rumpvfs/rump_vfs.c \
-	    src/sys/rump/librump/rumpvfs/rumpfs.c \
-	    src/sys/rump/kern/lib/libsys_linux src/sys/compat/linux \
-	    src/sys/rump/kern/lib/libsys_sunos \
-	    src/sys/rump/kern/lib/libsys_cygwin \
-	    src/tools/host-mkdep \
-	      || die checkout failed
 
 	# remove the symlink used to trick cvs
 	rm -f src
