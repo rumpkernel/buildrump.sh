@@ -177,7 +177,13 @@ maketools ()
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 		echo 'int main(void) {return 0;}' > test.c
 		if ! $CC test.c -Wl,-T ldscript.test; then
-			BUILDSHARED='-V NOPIC=1'
+			# We know that older versions of NetBSD
+			# work without an ldscript
+			if [ "${TARGET}" = netbsd ]; then
+				LDSCRIPT='-V RUMP_LDSCRIPT=no'
+			else
+				BUILDSHARED='-V NOPIC=1'
+			fi
 		fi
 		rm -f test.c a.out ldscript.test
 	fi
@@ -258,6 +264,7 @@ EOF
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
+	    ${LDSCRIPT} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
