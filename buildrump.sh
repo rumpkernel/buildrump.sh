@@ -40,11 +40,11 @@ JNUM=4
 
 #
 # NetBSD source params
-NBSRC_DATE=20130307
+NBSRC_DATE=20130515
 NBSRC_SUB=0
 
 # for fetching the sources
-NBSRC_CVSDATE="20130515 1800UTC"
+NBSRC_CVSDATE="20130515 2100UTC"
 NBSRC_CVSFLAGS='-z3 -d :pserver:anoncvs@anoncvs.netbsd.org:/cvsroot'
 
 #
