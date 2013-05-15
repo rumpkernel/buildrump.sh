@@ -131,7 +131,7 @@ alltests ()
 	mkdir -p ${TESTOBJ}
 	cd ${TESTOBJ}
 	dokernfs
-	#dosysvbfs
+	dosysvbfs
 	doremote
 	donet
 	donetrouted

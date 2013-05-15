@@ -8,13 +8,30 @@
 #define EXPECTED \
   "Is that a small file system in your pocket or aren't you happy to see me?\n"
 
+union u {
+	unsigned i;
+	char c;
+};
+
 int
 main(int argc, char *argv[])
 {
 	struct rump_ufs_args args;
+	union u u;
 	char buf[8192];
 	int fd;
 
+	/*
+	 * the file system image we use is little endian and the driver
+	 * we use doesn't support endian-swapping, so run the test only
+	 * on little endian for now
+	 */
+	u.i = 0x12345678;
+	if (u.c == 0x12) {
+		printf("test works only on little endian.  skipping\n");
+		return 0;
+	}
+		
 
         rump_init();
 
