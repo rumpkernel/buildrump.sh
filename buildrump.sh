@@ -262,10 +262,16 @@ EOF
 	chkcrt i
 	chkcrt n
 
+	cd ${SRCDIR}
+
+	# skip the zlib tests run by "make tools", since we don't need zlib
+	# and it's only required by one tools autoconf script
+	export ac_cv_header_zlib_h=yes
+	export ac_cv_lib_z_gzdopen=yes
+
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
-	cd ${SRCDIR}
 	env CFLAGS= ./build.sh -m ${MACHINE} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
@@ -286,6 +292,10 @@ EOF
 	    ${BUILDSH_VARGS} \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
+
+	# clear the env vars required for avoiding the zlib autoconf check
+	unset ac_cv_header_zlib_h
+	unset ac_cv_lib_z_gzdopen
 }
 
 # Fetches NetBSD source tree from anoncvs.netbsd.org

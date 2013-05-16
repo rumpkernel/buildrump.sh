@@ -101,7 +101,6 @@ process:
 - cc (gcc and clang are known to work)
 - ld (GNU or Solaris ld required)
 - binutils (ar, nm, objcopy)
-- zlib (not used, but wanted by NetBSD tools/compat/configure)
 - cvs (required only for "checkout")
 
 
