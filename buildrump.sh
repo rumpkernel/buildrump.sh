@@ -338,6 +338,16 @@ checkout ()
 	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} co -P \
 	    -D "${NBSRC_CVSDATE}" || die checkout failed
 
+	IFS=';'
+	for x in ${NBSRC_EXTRA}; do
+		IFS=':'
+		set -- ${x}
+		unset IFS
+		date=${1}
+		dirs=${2}
+		${CVS} ${NBSRC_CVSFLAGS} co -P -D "${date}" ${dirs} || die co2
+	done
+
 	# remove the symlink used to trick cvs
 	rm -f src
 	rm -f listsrcdirs
