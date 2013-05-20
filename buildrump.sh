@@ -45,8 +45,12 @@ NBSRC_SUB=1
 
 # for fetching the sources
 NBSRC_CVSDATE="20130515 2200UTC"
-NBSRC_CVSFLAGS="-z3
+NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
+
+# Cherry-pick patches are not in $NBSRC_CVSDATE
+# the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
+NBSRC_EXTRA='20130520 1100UTC:src/sys/rump/net/lib/libvirtif;'
 
 #
 # support routines
