@@ -267,29 +267,19 @@ EOF
 	chkcrt i
 	chkcrt n
 
-	cd ${SRCDIR}
-
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
 	# the fun bit is that autoconf wants to use -lz internally,
-	# so we convince $CC not to use it.  *sigh*.  The other option
-	# would be to provide a dummy libz, but I think this is easier.
-	ccwrapper=${BRTOOLDIR}/bin/cc-acwrapper
-	exec 3>&1 1>${ccwrapper}
-	printf '#!/bin/sh\n'
-	printf 'newargs=\n'
-	printf 'for x in $*; do\n'
-	printf '\t[ "$x" = "-lz" ] && continue\n'
-	printf '\tnewargs="${newargs} $x"\n'
-	printf 'done\nexec %s ${newargs}\n' ${CC}
-	exec 1>&3 3>&-
+	# so we provide some foo which macquerades as libz.a.
 	export ac_cv_header_zlib_h=yes
-	export ac_cv_lib_z_gzdopen=yes
+	echo 'int gzdopen(int); int gzdopen(int v) { return 0; }' > fakezlib.c
+	${HOST_CC:-cc} -o libz.a -c fakezlib.c
 
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
-	env CFLAGS= CC=${ccwrapper} ./build.sh -m ${MACHINE} -u \
+	cd ${SRCDIR}
+	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
@@ -309,10 +299,7 @@ EOF
 	    ${BUILDSH_VARGS} \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
-
-	# clear the env vars required for avoiding the zlib autoconf check
 	unset ac_cv_header_zlib_h
-	unset ac_cv_lib_z_gzdopen
 }
 
 # Fetches NetBSD source tree from anoncvs.netbsd.org
