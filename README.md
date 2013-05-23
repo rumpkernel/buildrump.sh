@@ -79,14 +79,33 @@ for building the hypervisor.
 
 
 Packages
---------
+========
 
-Package systems supporting rump kernels:
+Source-based package systems supporting rump kernels:
+----------------------------------------------------
 
 * [Arch Linux](http://aur.archlinux.org/packages/netbsd-rump-cvs/)
 * [Void Linux](http://github.com/xtraeme/xbps-packages/blob/master/srcpkgs/netbsd-rumpkernel/template)
 * [pkgsrc](http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/misc/rump/README.html) (NetBSD, Linux, Solaris)
-* [OpenSuse Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978)
+
+Binary-based package systems supporting rump kernels:
+----------------------------------------------------
+
+Binary packages for a range of Linux-based distributions are built and packaged via the 
+OpenSuse [Open Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978)
+
+* [Arch Linux] (http://download.opensuse.org/repositories/home:/staal1978/Arch_Core/)
+* OpenSUSE
+|| [12.3] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_12.3/)
+|| [Tumbleweed] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Tumbleweed/)
+|| [Factory] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Factory/)
+|| [SLE_11_SP2] (http://download.opensuse.org/repositories/home:/staal1978/SLE_11_SP2/)
+* Fedora
+|| [17] (http://download.opensuse.org/repositories/home:/staal1978/Fedora_17/)
+|| [18] (http://download.opensuse.org/repositories/home:/staal1978/Fedora_18/)
+|| [RHEL 6] (http://download.opensuse.org/repositories/home:/staal1978/RedHat_RHEL-6/)
+|| [CentOS 6] (http://download.opensuse.org/repositories/home:/staal1978/CentOS_CentOS-6/)
+* [Mandriva 2011] (http://download.opensuse.org/repositories/home:/staal1978/Mandriva_2011/)
 
 
 Build dependencies
