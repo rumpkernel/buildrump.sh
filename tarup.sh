@@ -50,7 +50,9 @@ echo "Generating temporary directory to be compressed"
 rm -rf buildrump # starting fresh
 mkdir -p buildrump
 #directories
-cp -r {.git,brlib,examples,obj,rump,src,tests} buildrump/
+cp -r {.git,brlib,examples,src,tests} buildrump/
+#directories that should be empty
+mkdir -p buildrump/{obj,rump}
 #files
 cp {AUTHORS,buildrump.sh,LICENSE,tarup.sh} buildrump/
 
