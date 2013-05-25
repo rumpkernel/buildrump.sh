@@ -65,7 +65,7 @@ main()
 		err(1, "connect");
 	printf("connected\n");
 
-#define WANTHTML "GET / HTTP/1.0\n\n"
+#define WANTHTML "GET / HTTP/1.1\nHost: www.netbsd.org\n\n"
 	nn = rump_sys_write(s, WANTHTML, sizeof(WANTHTML)-1);
 	printf("write rv %zd\n", nn);
 
