@@ -10,15 +10,57 @@ avoiding the overhead of OS virtualization.  Also, root privileges are
 not mandated.
 
 An example use case is [fs-utils](http://github.com/stacktic/fs-utils)
-which uses rump kernels to access file system images.  For more
-information on rump kernels, see http://www.NetBSD.org/docs/rump/
+which uses rump kernels to access file system images.  Another example
+is using the TCP/IP stack in conjunction with the Data Plane Development
+Kit, available [here](http://github.com/anttikantee/dpdk-rumptcpip).
+For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
 
-See also the [wiki](http://github.com/anttikantee/buildrump.sh/wiki/TODO) for
-a short-term TODO list.
+
+Installation Instructions
+=========================
+
+The easiest way to install rump kernel components is to use a binary
+package for your OS/distribution/architecture.
+
+* Void Linux: `xbps-install -S netbsd-rumpkernel`
+* Arch Linux: [download](http://download.opensuse.org/repositories/home:/staal1978/Arch_Core/)
+* OpenSUSE Linux
+|| 12.3: [download](http://download.opensuse.org/repositories/home:/staal1978/openSUSE_12.3/)
+|| Tumbleweed: [download](http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Tumbleweed/)
+|| Factory: [download](http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Factory/)
+|| SLE_11_SP2: [download](http://download.opensuse.org/repositories/home:/staal1978/SLE_11_SP2/)
+* Fedora Linux
+|| 17: [download](http://download.opensuse.org/repositories/home:/staal1978/Fedora_17/)
+|| 18 :[download](http://download.opensuse.org/repositories/home:/staal1978/Fedora_18/)
+|| RHEL 6: [download](http://download.opensuse.org/repositories/home:/staal1978/RedHat_RHEL-6/)
+|| CentOS 6: [download](http://download.opensuse.org/repositories/home:/staal1978/CentOS_CentOS-6/)
+* Mandriva Linux 2011: [download](http://download.opensuse.org/repositories/home:/staal1978/Mandriva_2011/)
+* NetBSD: pkgsrc/misc/rump
+* Solaris: pkgsrc/misc/rump
+
+The download links for some of the above distributions are provided by the
+[openSUSE Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978).
 
 
-Instructions
-============
+Building from Source Code
+=========================
+
+Building from source may be necessary of there are no binary packages
+for your systems, or if you wish to source level modifications to the
+rump kernel components.
+
+Build dependencies
+------------------
+
+The following are required for building from source:
+
+- cc (gcc and clang are known to work)
+- ld (GNU or Solaris ld required)
+- binutils (ar, nm, objcopy)
+- cvs (required only for "checkout")
+
+The short version
+-----------------
 
 Clone the repository and run:
 
@@ -27,10 +69,6 @@ Clone the repository and run:
 You will now find the kernel drivers and necessary headers in `./rump`
 ready for use.  Examples on how to use the resulting drivers are available
 in the `tests` and `examples` directories.
-
-It is not necessary to read this document further unless you are
-interested in details.
-
 
 The long(er) version
 --------------------
@@ -53,7 +91,6 @@ script is "Success".
 
 To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.
-
 
 Crosscompiling
 --------------
@@ -78,56 +115,10 @@ can find the target platform headers and libraries which are required
 for building the hypervisor.
 
 
-Packages
-========
-
-Source-based package systems supporting rump kernels:
-----------------------------------------------------
-
-* [Arch Linux](http://aur.archlinux.org/packages/netbsd-rump-cvs/)
-* [Void Linux](http://github.com/xtraeme/xbps-packages/blob/master/srcpkgs/netbsd-rumpkernel/template)
-* [pkgsrc](http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/misc/rump/README.html) (NetBSD, Linux, Solaris)
-
-Binary-based package systems supporting rump kernels:
-----------------------------------------------------
-
-Binary packages for a range of Linux-based distributions are built and packaged via the 
-OpenSuse [Open Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978)
-
-* [Arch Linux] (http://download.opensuse.org/repositories/home:/staal1978/Arch_Core/)
-* OpenSUSE
-|| [12.3] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_12.3/)
-|| [Tumbleweed] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Tumbleweed/)
-|| [Factory] (http://download.opensuse.org/repositories/home:/staal1978/openSUSE_Factory/)
-|| [SLE_11_SP2] (http://download.opensuse.org/repositories/home:/staal1978/SLE_11_SP2/)
-* Fedora
-|| [17] (http://download.opensuse.org/repositories/home:/staal1978/Fedora_17/)
-|| [18] (http://download.opensuse.org/repositories/home:/staal1978/Fedora_18/)
-|| [RHEL 6] (http://download.opensuse.org/repositories/home:/staal1978/RedHat_RHEL-6/)
-|| [CentOS 6] (http://download.opensuse.org/repositories/home:/staal1978/CentOS_CentOS-6/)
-* [Mandriva 2011] (http://download.opensuse.org/repositories/home:/staal1978/Mandriva_2011/)
-
-
-Build dependencies
-==================
-
-The toolchain in PATH is used to produce the target binaries (support
-for cross-compilation may be added at a later date).  The script builds
-other necessary tools out of the NetBSD source tree using `build.sh`.
-In addition from what is expected to be present on a bare-bones host
-(`sh`, `rm`, etc.), the following software is required during the build
-process:
-
-- cc (gcc and clang are known to work)
-- ld (GNU or Solaris ld required)
-- binutils (ar, nm, objcopy)
-- cvs (required only for "checkout")
-
-
 Tested hosts
 ============
 
-The following platforms have been tested:
+examples of hosts buildrump.sh has been tested on:
 
 - Linux
     - Linux Ubuntu-1210-quantal-64-minimal 3.5.0-18-generic #29-Ubuntu SMP Fri Oct 19 10:26:51 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux (with thanks to Zafer Aydogan for providing access, amd64)
