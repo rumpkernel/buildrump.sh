@@ -26,11 +26,14 @@
 #
 
 # This script will generate a tar.bz2 archive of the current git checkout
+# The "version number" of the tarball is in unix time format 
 
 echo "Detecting buildrump.sh git revision"
 
 _revision=$(git rev-parse HEAD)
 _date=$(git show -s --format="%ci" ${_revision})
+#incremental "version number" in unix time format
+_time_unix=$(git show -s --format="%ct" ${_revision})
 
 if [ -z "${_revision}" ]
 then
@@ -50,7 +53,7 @@ echo "Generating temporary directory to be compressed"
 rm -rf buildrump # starting fresh
 mkdir -p buildrump
 #directories
-cp -r {.git,brlib,examples,src,tests} buildrump/
+cp -r {brlib,examples,src,tests} buildrump/
 #directories that should be empty
 mkdir -p buildrump/{obj,rump}
 #files
@@ -61,9 +64,9 @@ echo ${_date} > buildrump/revisiondate
 
 echo "Compressing sources to a snapshot release"
 
-tar -cjf buildrump-${_revision}.tar.bz2 buildrump
+tar -cjf buildrump-${_time_unix}.tar.bz2 buildrump
 
-echo "Congratulations! our archive should be
-      at buildrump-${_revision}.tar.bz2"
+echo "Congratulations! Your archive should be
+      at buildrump-${_time_unix}.tar.bz2"
       
       
