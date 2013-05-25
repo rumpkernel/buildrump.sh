@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <err.h>
+#include <netdb.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,17 +29,21 @@
 
 #include <netinet/in.h>
 
-/* www.netbsd.org */
-#define DESTADDR "149.20.53.67"
+#define DESTHOST "www.netbsd.org"
 
 int
 main()
 {
 	struct sockaddr_in sin;
 	char buf[65535];
+	struct hostent *hp;
 	ssize_t nn;
 	ssize_t off;
 	int s;
+
+	hp = gethostbyname(DESTHOST);
+	if (!hp || hp->h_addrtype != AF_INET)
+		errx(1, "failed to resolve \"%s\"", DESTHOST);
 
 	rump_init();
 	rump_pub_netconfig_ifcreate("virt0");
@@ -54,7 +59,7 @@ main()
 	sin.sin_len = sizeof(sin);
 #endif
 	sin.sin_port = htons(80);
-	sin.sin_addr.s_addr = inet_addr(DESTADDR);
+	memcpy(&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
 
 	if (rump_sys_connect(s, (struct sockaddr *)&sin, sizeof(sin)) == -1)
 		err(1, "connect");
