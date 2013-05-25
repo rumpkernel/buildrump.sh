@@ -36,6 +36,7 @@ package for your OS/distribution/architecture.
 || CentOS 6: [download](http://download.opensuse.org/repositories/home:/staal1978/CentOS_CentOS-6/)
 * Mandriva Linux 2011: [download](http://download.opensuse.org/repositories/home:/staal1978/Mandriva_2011/)
 * NetBSD: pkgsrc/misc/rump
+* DragonFly BSD: pkgsrc/misc/rump
 * Solaris: pkgsrc/misc/rump
 
 The download links for some of the above distributions are provided by the
