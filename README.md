@@ -24,6 +24,7 @@ package for your OS/distribution/architecture.
 
 * Void Linux: `xbps-install -S netbsd-rumpkernel`
 * Arch Linux: [download](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Arch_Core )
+|| [AUR](https://aur.archlinux.org/packages/netbsd-rump-cvs/)
 * OpenSUSE Linux
 || 12.3: [download](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_12.3)
 || Tumbleweed: [download](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory)
