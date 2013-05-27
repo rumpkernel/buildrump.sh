@@ -31,7 +31,7 @@ package for your OS/distribution/architecture.
 || Factory [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory)
 || SLE_11_SP2 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=SLE_11_SP2)
 * Fedora Linux:
-|| 17 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_17)
+17 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_17)
 || 18 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_18)
 || RHEL 6 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=RedHat_RHEL-6)
 || CentOS 6 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=CentOS_CentOS-6)
