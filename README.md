@@ -23,24 +23,23 @@ The easiest way to install rump kernel components is to use a binary
 package for your OS/distribution/architecture.
 
 * Void Linux: `xbps-install -S netbsd-rumpkernel`
-* Arch Linux: [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Arch_Core ),
-[AUR](https://aur.archlinux.org/packages/netbsd-rump-cvs/)
+* Arch Linux: [AUR](https://aur.archlinux.org/packages/netbsd-rump-cvs/) (via [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Arch_Core))
 * OpenSUSE Linux:
-12.3 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_12.3)
-|| Tumbleweed [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory)
-|| Factory [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory)
-|| SLE_11_SP2 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=SLE_11_SP2)
+12.3 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_12.3) (OBS)
+|| Tumbleweed [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory) (OBS)
+|| Factory [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory) (OBS)
+|| SLE_11_SP2 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=SLE_11_SP2) (OBS)
 * Fedora Linux:
-17 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_17)
-|| 18 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_18)
-|| RHEL 6 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=RedHat_RHEL-6)
-|| CentOS 6 [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=CentOS_CentOS-6)
-* Mandriva Linux 2011: [OBS](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Mandriva_2011)
+17 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_17) (OBS)
+|| 18 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Fedora_18) (OBS)
+|| RHEL 6 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=RedHat_RHEL-6) (OBS)
+|| CentOS 6 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=CentOS_CentOS-6) (OBS)
+* Mandriva Linux 2011: [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Mandriva_2011) (OBS)
 * NetBSD: pkgsrc/misc/rump
 * DragonFly BSD: pkgsrc/misc/rump
 * Solaris: pkgsrc/misc/rump
 
-The OBS links for some of the above distributions are provided by the
+The links for some of packages are provided by the
 [openSUSE Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978). 
 You can download and install the packages manually, but it is highly recommended to add the OBS repositories for the right distro and architecture to the package manager. This way, updates and dependencies will be automatically resolved other packages depending on rump kernels.
 
