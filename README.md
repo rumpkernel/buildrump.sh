@@ -42,7 +42,7 @@ package for your OS/distribution/architecture.
 
 The OBS links for some of the above distributions are provided by the
 [openSUSE Build Service](https://build.opensuse.org/package/show?package=rump&project=home%3Astaal1978). 
-For advanced users, it is highly recommended to add the OBS repositories for the right distro and architecture to the package manager. This way, updates will be automatic and dependencies will be automatically resolved for rump-dependent packages.
+You can download and install the packages manually, but it is highly recommended to add the OBS repositories for the right distro and architecture to the package manager. This way, updates and dependencies will be automatically resolved other packages depending on rump kernels.
 
 
 Building from Source Code
