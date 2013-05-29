@@ -35,7 +35,7 @@ echo "Detecting buildrump.sh git revision"
 _revision=$(git rev-parse HEAD)
 _date=$(git show -s --format="%ci" ${_revision})
 #incremental "version number" in unix time format
-_time_unix=$(git show -s --format="%ct" ${_revision})
+_date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
 
 if [ -z "${_revision}" ]
 then
@@ -72,10 +72,10 @@ echo ${_date} > "${DEST}/revisiondate"
 
 echo "Compressing sources to a snapshot release"
 
-tar -cjf buildrump-${_time_unix}.tar.bz2 "${DEST}"
+tar -cjf buildrump-${_date_filename}.tar.bz2 "${DEST}"
 
 echo "Removing temporary directory"
 rm -rf "${DEST}"
 
 echo "Congratulations! Your archive should be
-      at buildrump-${_time_unix}.tar.bz2"
+      at buildrump-${_date_filename}.tar.bz2"
