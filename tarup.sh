@@ -59,20 +59,20 @@ echo "Checkout done"
 echo "Generating temporary directory to be compressed"
 
 #directories
-cp -r {brlib,examples,tests} buildrump/
+cp -r {brlib,examples,tests} "${DEST}/"
 
 #directories that should be empty
-mkdir -p buildrump/{obj,rump}
+mkdir -p "${DEST}"/{obj,rump}
 
 #files
-cp {AUTHORS,buildrump.sh,LICENSE,tarup.sh} buildrump/
+cp {AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
 
-echo ${_revision} > buildrump/gitrevision
-echo ${_date} > buildrump/revisiondate
+echo ${_revision} > "${DEST}/gitrevision"
+echo ${_date} > "${DEST}/revisiondate"
 
 echo "Compressing sources to a snapshot release"
 
-tar -cjf buildrump-${_time_unix}.tar.bz2 buildrump
+tar -cjf buildrump-${_time_unix}.tar.bz2 "${DEST}"
 
 echo "Removing temporary directory"
 rm -rf "${DEST}"
