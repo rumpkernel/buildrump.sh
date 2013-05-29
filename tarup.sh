@@ -28,6 +28,8 @@
 # This script will generate a tar.bz2 archive of the current git checkout
 # The "version number" of the tarball is in unix time format 
 
+DEST=buildrump
+
 echo "Detecting buildrump.sh git revision"
 
 _revision=$(git rev-parse HEAD)
@@ -43,19 +45,25 @@ else
   echo "buildrump.sh git revision is ${_revision}"
 fi
 
+if ! mkdir "${DEST}"; then
+	echo "Error: failed to create directory \"${DEST}\""
+	exit 1
+fi
+
 echo "Checking out cvs sources"
 
-./buildrump.sh checkout
+./buildrump.sh -s ${DEST}/src checkout
 
 echo "Checkout done"
 
 echo "Generating temporary directory to be compressed"
-rm -rf buildrump # starting fresh
-mkdir -p buildrump
+
 #directories
-cp -r {brlib,examples,src,tests} buildrump/
+cp -r {brlib,examples,tests} buildrump/
+
 #directories that should be empty
 mkdir -p buildrump/{obj,rump}
+
 #files
 cp {AUTHORS,buildrump.sh,LICENSE,tarup.sh} buildrump/
 
@@ -66,7 +74,8 @@ echo "Compressing sources to a snapshot release"
 
 tar -cjf buildrump-${_time_unix}.tar.bz2 buildrump
 
+echo "Removing temporary directory"
+rm -rf "${DEST}"
+
 echo "Congratulations! Your archive should be
       at buildrump-${_time_unix}.tar.bz2"
-      
-      
