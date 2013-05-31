@@ -233,6 +233,36 @@ get_ack(struct interface *iface)
 }
 
 /*
+ * release our called.  called at reboot-time.  we use the original
+ * proc/lwp context here to avoid having to open new file descriptors.
+ */
+static void
+send_release(void *arg)
+{
+	struct interface *iface = ifaces;
+	struct dhcp_message *dhcp;
+	uint8_t *udp;
+	ssize_t mlen, ulen;
+	struct in_addr ia;
+	struct lwp *l = curlwp;
+
+	rump_lwproc_switch(NULL);
+	rump_lwproc_switch(arg);
+
+	memset(&ia, 0, sizeof(ia));
+
+	mlen = make_message(&dhcp, iface, DHCP_RELEASE);
+	ulen = make_udp_packet(&udp, (void *)dhcp, mlen, ia, ia);
+	send_raw_packet(iface, ETHERTYPE_IP, udp, ulen);
+
+	/* give it a chance to fly */
+	kpause("dhcprel", false, 1, NULL);
+
+	rump_lwproc_switch(NULL);
+	rump_lwproc_switch(l);
+}
+
+/*
  * Configure an address for one interface.  Not very robust and
  * does not clean up after itself.
  */
@@ -303,7 +333,8 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 	}
 
 	error = configure(iface);
+	if (!error)
+		shutdownhook_establish(send_release, curlwp);
  out:
-	rump_lwproc_releaselwp();
 	return error;
 }
