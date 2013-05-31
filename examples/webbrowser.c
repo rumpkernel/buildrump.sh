@@ -80,5 +80,6 @@ main()
 		printf("%s", buf);
 	}
 
+	rump_sys_reboot(0, NULL);
 	return 0;
 }
