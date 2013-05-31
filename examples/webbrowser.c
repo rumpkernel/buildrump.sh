@@ -69,16 +69,14 @@ main()
 	nn = rump_sys_write(s, WANTHTML, sizeof(WANTHTML)-1);
 	printf("write rv %zd\n", nn);
 
-	off = 0;
-	do {
-		nn = rump_sys_read(s, buf+off, (sizeof(buf)-off)-1);
-		off += nn;
-		assert(off < sizeof(buf));
-	} while (nn > 0);
-
-	printf("read %zd\n", off);
-	if (off > 0) {
-		buf[off] = '\0';
+	for (;;) {
+		nn = rump_sys_read(s, buf, sizeof(buf)-1);
+		if (nn == -1)
+			errx(1, "read failed: %zd", nn);
+		if (nn == 0)
+			break;
+		
+		buf[nn] = '\0';
 		printf("%s", buf);
 	}
 
