@@ -101,7 +101,7 @@ int do_mtu(const char *, short int);
 int inet_ntocidr(struct in_addr);
 int inet_cidrtoaddr(int, struct in_addr *);
 
-int up_interface(struct interface *);
+void up_interface(struct interface *);
 int if_conf(struct interface *);
 int if_init(struct interface *);
 

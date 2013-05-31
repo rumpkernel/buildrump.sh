@@ -237,12 +237,11 @@ carrier_status(struct interface *iface)
 	return ret;
 }
 
-int
+void
 up_interface(struct interface *iface)
 {
 
 	if_up(iface->ifp);
-	return 0;
 }
 
 int

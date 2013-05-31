@@ -200,7 +200,8 @@ get_offer(struct interface *iface)
 		return false;
 	}
 
-	iface->state->offer = kmem_alloc(sizeof(*iface->state->offer), KM_SLEEP);
+	iface->state->offer = kmem_alloc(sizeof(*iface->state->offer),
+	    KM_SLEEP);
 	memcpy(iface->state->offer, dhcp, sizeof(*iface->state->offer));
 	iface->state->lease.addr.s_addr = dhcp->yiaddr;
 	iface->state->lease.cookie = dhcp->cookie;
@@ -209,7 +210,7 @@ get_offer(struct interface *iface)
 	return true;
 }
 
-static void
+static bool
 get_ack(struct interface *iface)
 {
 	const struct dhcp_message *dhcp;
@@ -221,14 +222,20 @@ get_ack(struct interface *iface)
 	get_option_uint8(&type, dhcp, DHO_MESSAGETYPE);
 	if (type != DHCP_ACK) {
 		printf("dhcp: didn't receive ack\n");
-		return;
+		return false;
 	}
 
 	iface->state->new = iface->state->offer;
 	get_lease(&iface->state->lease, iface->state->new);
 	kmem_free(raw, udp_dhcp_len);
+
+	return true;
 }
 
+/*
+ * Configure an address for one interface.  Not very robust and
+ * does not clean up after itself.
+ */
 #define MAXTRIES 10
 int
 rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
@@ -246,16 +253,16 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 
 	if ((error = init_sockets()) != 0) {
 		printf("failed to init sockets\n");
-		return error;
+		goto out;
 	}
 
 	if ((error = init_interface(ifname, &iface)) != 0) {
 		printf("cannot init %s (%d)\n", ifname, error);
-		return EINVAL;
+		goto out;
 	}
 	ifaces = iface;
 	if ((error = open_socket(iface, ETHERTYPE_IP)) != 0)
-		panic("failed to open socket: %d");
+		panic("failed to open socket: %d", error);
 
 	up_interface(iface);
 
@@ -269,20 +276,34 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 
 	if ((error = get_hwaddr(iface)) != 0) {
 		printf("failed to get hwaddr for %s\n", iface->name);
-		return error;
+		goto out;
 	}
 
-	do {
-		send_discover(iface);
+	for (rv = false; !rv && tries < MAXTRIES; tries++) {
+		if (send_discover(iface) != 0) {
+			kpause("dhcpdis", false, hz, NULL);
+			continue;
+		}
 		rv = get_offer(iface);
-	} while (!rv && tries++ < MAXTRIES);
-	if (!rv)
-		return 1;
+	}
+	if (!rv) {
+		error = EADDRNOTAVAIL; /* heh heh heh */
+		goto out;
+	}
 
-	send_request(iface);
-	get_ack(iface);
+	for (tries = 0; tries < MAXTRIES; tries++) {
+		if (send_request(iface) == 0)
+			break;
+		kpause("dhcpreq", false, hz, NULL);
+	}
 
-	configure(iface);
+	if (!get_ack(iface)) {
+		error = EADDRNOTAVAIL; /* hoh hoh hoh */
+		goto out;
+	}
 
-	return 0;
+	error = configure(iface);
+ out:
+	rump_lwproc_releaselwp();
+	return error;
 }
