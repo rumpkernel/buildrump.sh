@@ -18,9 +18,11 @@
 
 #include <assert.h>
 #include <err.h>
+#include <errno.h>
 #include <netdb.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <rump/rump.h>
@@ -31,6 +33,16 @@
 
 #define DESTHOST "www.netbsd.org"
 
+static void __attribute__((__noreturn__))
+die(int e, const char *msg)
+{
+
+	if (msg)
+		warnx("%s: %d", msg, e);
+	rump_sys_reboot(0, NULL);
+	exit(e);
+}
+
 int
 main()
 {
@@ -39,19 +51,21 @@ main()
 	struct hostent *hp;
 	ssize_t nn;
 	ssize_t off;
-	int s;
+	int s, e;
 
 	hp = gethostbyname(DESTHOST);
 	if (!hp || hp->h_addrtype != AF_INET)
 		errx(1, "failed to resolve \"%s\"", DESTHOST);
 
 	rump_init();
-	rump_pub_netconfig_ifcreate("virt0");
-	rump_pub_netconfig_dhcp_ipv4_oneshot("virt0");
+	if ((e = rump_pub_netconfig_ifcreate("virt0")) != 0)
+		die(e, "create virt0");
+	if ((e = rump_pub_netconfig_dhcp_ipv4_oneshot("virt0")) != 0)
+		die(e, "dhcp address");
 
 	s = rump_sys_socket(PF_INET, SOCK_STREAM, 0);
 	if (s == -1)
-		err(1,"socket");
+		die(errno, "socket");
 	
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
@@ -62,7 +76,7 @@ main()
 	memcpy(&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
 
 	if (rump_sys_connect(s, (struct sockaddr *)&sin, sizeof(sin)) == -1)
-		err(1, "connect");
+		die(errno, "connect");
 	printf("connected\n");
 
 #define WANTHTML "GET / HTTP/1.1\nHost: www.netbsd.org\n\n"
@@ -72,7 +86,7 @@ main()
 	for (;;) {
 		nn = rump_sys_read(s, buf, sizeof(buf)-1);
 		if (nn == -1)
-			errx(1, "read failed: %zd", nn);
+			die(errno, "read failed");
 		if (nn == 0)
 			break;
 		
@@ -80,6 +94,5 @@ main()
 		printf("%s", buf);
 	}
 
-	rump_sys_reboot(0, NULL);
-	return 0;
+	die(0, NULL);
 }
