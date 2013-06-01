@@ -58,10 +58,13 @@ main()
 		errx(1, "failed to resolve \"%s\"", DESTHOST);
 
 	rump_init();
+
+#ifndef USE_SOCKIN
 	if ((e = rump_pub_netconfig_ifcreate("virt0")) != 0)
 		die(e, "create virt0");
 	if ((e = rump_pub_netconfig_dhcp_ipv4_oneshot("virt0")) != 0)
 		die(e, "dhcp address");
+#endif
 
 	s = rump_sys_socket(PF_INET, SOCK_STREAM, 0);
 	if (s == -1)
@@ -93,6 +96,7 @@ main()
 		buf[nn] = '\0';
 		printf("%s", buf);
 	}
+	rump_sys_close(s);
 
 	die(0, NULL);
 }
