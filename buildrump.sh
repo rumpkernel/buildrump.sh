@@ -50,7 +50,14 @@ NBSRC_CVSFLAGS="-z3 \
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='20130520 1100UTC:src/sys/rump/net/lib/libvirtif;'
+NBSRC_EXTRA='20130601 1200UTC:
+    src/sys/rump/net/lib/libvirtif
+    src/sys/rump/librump/rumpkern/rump.c
+    src/sys/rump/net/lib/libnet
+    src/sys/rump/net/lib/libnetinet
+    src/sys/rump/net/lib/libsockin
+    src/sys/rump/include/rump
+    src/sys/netinet/portalgo.c;'
 
 #
 # support routines
