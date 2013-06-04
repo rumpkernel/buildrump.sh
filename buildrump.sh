@@ -98,6 +98,7 @@ helpme ()
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
 	printf "\tfullbuild:\talias for \"tools build install tests\"\n"
+	printf "\tsetupdest:\tcreate destdirs (implicit for \"install\")\n"
 	exit 1
 }
 
@@ -553,7 +554,7 @@ parseargs ()
 	#
 	# Determine what which parts we should execute.
 	#
-	allcmds="checkout tools build install tests fullbuild"
+	allcmds="checkout tools build install tests fullbuild setupdest"
 	fullbuildcmds="tools build install tests"
 
 	for cmd in ${allcmds}; do
@@ -825,9 +826,10 @@ if ${dobuild} || ${doinstall}; then
 	# install uses src tree Makefiles
 	checksrcversion
 
-	# build installs headers
-	setupdest
+	# build implies we need a dest
+	dosetupdest=true
 fi
+${dosetupdest} && setupdest
 
 ${dotools} && maketools
 
