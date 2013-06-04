@@ -47,7 +47,7 @@
 #include "dhcp_bpf-filter.h"
 
 int
-open_socket(struct interface *iface, int protocol)
+dhcp_open_socket(struct interface *iface, int protocol)
 {
 	struct lwp *l = curlwp;
 	struct file *fp;
@@ -126,7 +126,7 @@ open_socket(struct interface *iface, int protocol)
 }
 
 int
-send_raw_packet(const struct interface *iface, int protocol,
+dhcp_send_raw_packet(const struct interface *iface, int protocol,
     const void *data, ssize_t len)
 {
 	struct uio uio;
@@ -167,7 +167,7 @@ send_raw_packet(const struct interface *iface, int protocol,
 /* BPF requires that we read the entire buffer.
  * So we pass the buffer in the API so we can loop on >1 packet. */
 ssize_t
-get_raw_packet(struct interface *iface, int protocol,
+dhcp_get_raw_packet(struct interface *iface, int protocol,
     void *data, ssize_t len)
 {
 	struct file *fp;

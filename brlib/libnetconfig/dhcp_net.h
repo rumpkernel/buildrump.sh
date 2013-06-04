@@ -138,12 +138,10 @@ ssize_t make_udp_packet(uint8_t **, const uint8_t *, size_t,
 ssize_t get_udp_data(const uint8_t **, const uint8_t *);
 int valid_udp_packet(const uint8_t *, size_t, struct in_addr *);
 
-int open_socket(struct interface *, int);
-ssize_t send_packet(const struct interface *, struct in_addr, 
-    const uint8_t *, ssize_t);
-int send_raw_packet(const struct interface *, int,
+int dhcp_open_socket(struct interface *, int);
+int dhcp_send_raw_packet(const struct interface *, int,
     const void *, ssize_t);
-ssize_t get_raw_packet(struct interface *, int, void *, ssize_t);
+ssize_t dhcp_get_raw_packet(struct interface *, int, void *, ssize_t);
 
 int init_sockets(void);
 int open_link_socket(void);

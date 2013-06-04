@@ -94,7 +94,7 @@ send_discover(struct interface *iface)
 
 	mlen = make_message(&dhcp, iface, DHCP_DISCOVER);
 	ulen = make_udp_packet(&udp, (void *)dhcp, mlen, ia, ia);
-	if ((error = send_raw_packet(iface, ETHERTYPE_IP, udp, ulen)) != 0)
+	if ((error = dhcp_send_raw_packet(iface, ETHERTYPE_IP, udp, ulen)) != 0)
 		printf("dhcp: sending discover failed\n");
 	return error;
 }
@@ -112,7 +112,7 @@ send_request(struct interface *iface)
 
 	mlen = make_message(&dhcp, iface, DHCP_REQUEST);
 	ulen = make_udp_packet(&udp, (void *)dhcp, mlen, ia, ia);
-	if ((error = send_raw_packet(iface, ETHERTYPE_IP, udp, ulen)) != 0)
+	if ((error = dhcp_send_raw_packet(iface, ETHERTYPE_IP, udp, ulen)) != 0)
 		printf("dhcp: sending discover failed\n");
 	return error;
 }
@@ -141,7 +141,7 @@ get_network(struct interface *iface, uint8_t *raw,
 			return false;
 		}
 			
-		if ((n = get_raw_packet(iface, ETHERTYPE_IP,
+		if ((n = dhcp_get_raw_packet(iface, ETHERTYPE_IP,
 		    raw, udp_dhcp_len)) < 1)
 			continue;
 
@@ -253,7 +253,7 @@ send_release(void *arg)
 
 	mlen = make_message(&dhcp, iface, DHCP_RELEASE);
 	ulen = make_udp_packet(&udp, (void *)dhcp, mlen, ia, ia);
-	send_raw_packet(iface, ETHERTYPE_IP, udp, ulen);
+	dhcp_send_raw_packet(iface, ETHERTYPE_IP, udp, ulen);
 
 	/* give it a chance to fly */
 	kpause("dhcprel", false, 1, NULL);
@@ -291,7 +291,7 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 		goto out;
 	}
 	ifaces = iface;
-	if ((error = open_socket(iface, ETHERTYPE_IP)) != 0)
+	if ((error = dhcp_open_socket(iface, ETHERTYPE_IP)) != 0)
 		panic("failed to open socket: %d", error);
 
 	up_interface(iface);
