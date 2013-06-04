@@ -134,6 +134,18 @@ chkcrt ()
 # external toolchain links are created in the format that
 # build.sh expects.
 #
+probeld ()
+{
+
+	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+		LD_FLAVOR=GNU
+	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+		LD_FLAVOR=sun
+	else
+		die 'GNU or Solaris ld required'
+	fi
+}
+
 maketools ()
 {
 
@@ -156,13 +168,7 @@ maketools ()
 
 	#
 	# Check for ld because we need to make some adjustments based on it
-	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
-		LD_FLAVOR=GNU
-	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
-		LD_FLAVOR=sun
-	else
-		die 'GNU or Solaris ld required'
-	fi
+	probeld
 
 	# Check for GNU ar
 	if ! ${AR} --version 2>/dev/null | grep -q 'GNU ar' ; then

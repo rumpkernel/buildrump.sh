@@ -125,7 +125,7 @@ alltests ()
 
 	echo Running simple tests
 
-	# XXX: needs tools to be run
+	[ -z "${LD_FLAVOR}" ] && probeld
 	[ ${LD_FLAVOR} = 'sun' ] || AS_NEEDED='-Wl,--no-as-needed'
 
 	mkdir -p ${TESTOBJ}
