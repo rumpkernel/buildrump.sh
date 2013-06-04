@@ -145,3 +145,13 @@ examples of hosts buildrump.sh has been tested on:
 There is also initial support for Cygwin, but it will not work
 out-of-the-box due to object format issues (ELF vs. PE-COFF).
 Mac OS X is likely to require support for its linker.
+
+
+Tip(s) for advanced users
+=========================
+
+Place your buildtools in a separate directory, e.g. `$HOME/rumptools`
+using `./buildrump.sh -T $HOME/rumptools tools`.  Put that directory in
+`$PATH`.  You can now do fast build interation for kernel components by
+going to the appropriate directory and running `rumpmake dependall &&
+rumpmake install`.
