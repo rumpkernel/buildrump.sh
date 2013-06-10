@@ -57,7 +57,9 @@ NBSRC_EXTRA='20130601 2100UTC:
     src/sys/rump/net/lib/libnetinet
     src/sys/rump/net/lib/libsockin
     src/sys/rump/include/rump
-    src/sys/netinet/portalgo.c;'
+    src/sys/netinet/portalgo.c;
+	20130610 1500UTC:
+    src/sys/rump/librump/rumpvfs/rumpfs.c;'
 
 #
 # support routines
