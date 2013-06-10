@@ -437,10 +437,17 @@ evaltools ()
 	# NetBSD machine code we need to use.  Use ${CC} -v instead
 	# of -dumpmachine since at least older versions of clang don't
 	# support -dumpmachine ... yay!
+
+	# first check "${CC} -v" ... just in case it fails, we want a
+	# sensible return value instead of it being lost in the pipeline
+	# (this is easier than adjusting IFS)
+	${CC} -v >/dev/null 2>&1 || \
+	    die Cannot run \"${CC} -v\". Check that \"${CC}\" is a compiler
+
+	# then actually process the output of ${CC} -v
 	cc_target=$(LC_ALL=C ${CC} -v 2>&1 \
 	    | sed -n '/^Target/{s/Target: //p;}' )
-	[ $? -ne 0 ] || [ -z "${cc_target}" ] && \
-	    die failed to probe target of \"${CC}\", got \"${cc_target}\"
+	[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 
 	if ${nativebuild}; then
