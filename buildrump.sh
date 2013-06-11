@@ -447,8 +447,7 @@ evaltools ()
 	    die Cannot run \"${CC} -v\". Check that \"${CC}\" is a compiler
 
 	# then actually process the output of ${CC} -v
-	cc_target=$(LC_ALL=C ${CC} -v 2>&1 \
-	    | sed -n '/^Target/{s/Target: //p;}' )
+	cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
 	[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 
