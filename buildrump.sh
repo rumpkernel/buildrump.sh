@@ -463,7 +463,7 @@ evaltools ()
 
 	# Try to figure out the target system we're building for.
 	case ${cc_target} in
-	*-linux-gnu*)
+	*-linux*)
 		TARGET=linux
 		;;
 	*-dragonflybsd)
