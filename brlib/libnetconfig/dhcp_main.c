@@ -145,7 +145,7 @@ get_network(struct interface *iface, uint8_t *raw,
 		    raw, udp_dhcp_len)) < 1)
 			continue;
 
-		if (valid_udp_packet(raw, n, NULL) == -1) {
+		if (valid_udp_packet(raw, n, NULL) != 0) {
 			printf("dhcp get: invalid packet received. retrying\n");
 			continue;
 		}
