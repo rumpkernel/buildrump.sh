@@ -72,10 +72,10 @@ echo ${_date} > "${DEST}/revisiondate"
 
 echo "Compressing sources to a snapshot release"
 
-tar -cjf buildrump-${_date_filename}.tar.bz2 "${DEST}"
+tar -cvf buildrump-${_date_filename}.tar.gz "${DEST}"
 
 echo "Removing temporary directory"
 rm -rf "${DEST}"
 
 echo "Congratulations! Your archive should be
-      at buildrump-${_date_filename}.tar.bz2"
+      at buildrump-${_date_filename}.tar.gz"
