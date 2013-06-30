@@ -13,8 +13,8 @@ An example use case is [fs-utils](http://github.com/stacktic/fs-utils)
 which uses rump kernels to access file system images.  Another example
 is using the TCP/IP stack in conjunction with the Data Plane Development
 Kit, available [here](http://github.com/anttikantee/dpdk-rumptcpip).
-For more information on rump kernels, see http://www.NetBSD.org/docs/rump/
-
+For more information on rump kernels, read http://www.NetBSD.org/docs/rump/
+or watch a [video from FOSDEM 2013](http://video.fosdem.org/2013/maintracks/K.1.105/The_Anykernel_and_Rump_Kernels.webm).
 
 Installation Instructions
 =========================
@@ -39,7 +39,6 @@ package for your OS/distribution/architecture.
 7 [DEB](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Debian_7.0) (OBS)
 * Ubuntu Linux:
 13.04 [DEB](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=xUbuntu_13.04) (OBS)
-
 * NetBSD: pkgsrc/misc/rump
 * DragonFly BSD: pkgsrc/misc/rump
 * Solaris: pkgsrc/misc/rump
