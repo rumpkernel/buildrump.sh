@@ -1,9 +1,9 @@
-Running NetBSD's Rump Kernels On Any Host
-=========================================
+Rump Kernels for POSIX Hosts
+============================
 
 The buildrump.sh script builds unmodified NetBSD kernel drivers such
 as file systems and the TCP/IP stack as components for hosts such as
-Linux and other BSDs.  These components can be linked in a variety
+Linux and BSDs.  These components can be linked in a variety
 of configurations to form *rump kernels*, which provide services to
 applications directly on the host.  The benefits of this approach include
 avoiding the overhead of OS virtualization.  Also, root privileges are
@@ -13,8 +13,11 @@ An example use case is [fs-utils](http://github.com/stacktic/fs-utils)
 which uses rump kernels to access file system images.  Another example
 is using the TCP/IP stack in conjunction with the Data Plane Development
 Kit, available [here](http://github.com/anttikantee/dpdk-rumptcpip).
-For more information on rump kernels, read http://www.NetBSD.org/docs/rump/
-or watch a [video from FOSDEM 2013](http://video.fosdem.org/2013/maintracks/K.1.105/The_Anykernel_and_Rump_Kernels.webm).
+
+For full details on rump kernels, read http://www.NetBSD.org/docs/rump/
+and follow the links.
+For a video overview including various demos, watch the
+[FOSDEM 2013 presenation](http://video.fosdem.org/2013/maintracks/K.1.105/The_Anykernel_and_Rump_Kernels.webm).
 
 Installation Instructions
 =========================
