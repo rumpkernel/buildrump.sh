@@ -24,9 +24,19 @@
 # SUCH DAMAGE.
 #
 
-# Fetches NetBSD source tree from anoncvs.netbsd.org
+# Fetches subset of the NetBSD source tree relevant for buildrump.sh
 
-# for fetching the sources
+#
+#	NOTE!
+#
+# DO NOT CHANGE THE VALUES WITHOUT UPDATING THE GIT REPO!
+#
+# The procedure is:
+# 1) change the cvs tags, commit the change, DO NOT PUSH
+# 2) run "./checkout.sh githubdate rumpkernel-netbsd-src"
+# 3) push rumpkernel-netbsd-src
+# 4) push buildrump.sh
+#
 NBSRC_CVSDATE="20130515 2200UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
@@ -50,6 +60,10 @@ NBSRC_EXTRA='20130601 2100UTC:
     src/sys/rump/librump/rumpnet/net_stub.c
     src/sys/rump/net/lib/libnetinet/component.c'
 
+GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
+GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
+GITREVFILE='.srcgitrev'
+
 die ()
 {
 
@@ -59,6 +73,7 @@ die ()
 
 checkoutcvs ()
 {
+	cd ${SRCDIR}
 
 	: ${CVS:=cvs}
 	if ! type ${CVS} >/dev/null 2>&1 ;then
@@ -103,15 +118,81 @@ checkoutcvs ()
 	rm -f listsrcdirs
 }
 
+# Check out sources via git.  If there's already a git repo in the
+# destination directory, assume that it's the correct repo.
+checkoutgit ()
+{
+
+	if [ -d ${SRCDIR}/.git ] ; then
+		cd ${SRCDIR}
+		[ -z "$(git status --porcelain)" ] \
+		    || die "Cloned repo in ${SRCDIR} is not clean, aborting."
+		git fetch origin master
+	else
+		git clone -n ${GITREPO} ${SRCDIR}
+		cd ${SRCDIR}
+	fi
+
+	git checkout $(cat ${GITREVFILE}) \
+	    || die 'Could not find git revision. Wrong repo?'
+}
+
+# do a cvs checkout and push the results into the github mirror
+githubdate ()
+{
+
+	[ -z "$(git status --porcelain | grep 'M checkout.sh')" ] \
+	    || die checkout.sh contains uncommitted changes!
+	gitrev=$(git rev-parse HEAD)
+
+	[ -f ${SRCDIR} ] && die Error, ${SRCDIR} exists
+
+	set -e
+
+	git clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
+
+	# checkoutcvs does cd to SRCDIR
+	curdir="$(pwd)"
+	checkoutcvs
+
+	git add -A
+	git commit -m "NetBSD cvs for buildrump.sh git rev ${gitrev}"
+	git checkout master
+	git merge netbsd-cvs
+	gitsrcrev=$(git rev-parse HEAD)
+	cd "${curdir}"
+	echo ${gitsrcrev} > ${GITREVFILE}
+	git commit -m "Source revision for buildrump.sh git rev ${gitrev}"
+
+	set +e
+}
+
 [ $# -ne 2 ] && die Invalid usage.  Run this script via buildrump.sh
-[ "${1}" = "cvs" ] || die Invalid usage.  Run this script via buildrump.sh
 SRCDIR=${2}
 
-mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
-cd ${SRCDIR}
-
-checkoutcvs
-
-echo '>> checkout done'
+case "${1}" in
+cvs)
+	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
+	checkoutcvs
+	echo '>> checkout done'
+	;;
+git)
+	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
+	checkoutgit
+	echo '>> checkout done'
+	;;
+githubdate)
+	[ $(dirname $0) != '.' ] && die Script must be run as ./checkout.sh
+	githubdate
+	echo '>>'
+	echo '>> Update done'
+	echo '>>'
+	echo ">> REMEMBER TO PUSH ${SRCDIR}"
+	echo '>>'
+	;;
+*)
+	die Invalid usage.  Run this script via buildrump.sh
+	;;
+esac
 
 exit 0
