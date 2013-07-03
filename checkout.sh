@@ -76,7 +76,7 @@ checkoutcvs ()
 
 	: ${CVS:=cvs}
 	if ! type ${CVS} >/dev/null 2>&1 ;then
-		echo '>> Need cvs for checkout-cvs functionality'
+		echo '>> Need cvs for checkoutcvs functionality'
 		echo '>> Set $CVS or ensure that cvs is in PATH'
 		die \"${CVS}\" not found
 	fi
