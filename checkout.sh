@@ -131,7 +131,7 @@ checkoutcvs ()
 checkoutgit ()
 {
 
-	gitrev=$(cat ${GITREVFILE})
+	gitrev=$(cat ${BRDIR}/${GITREVFILE})
 	[ $? -eq 0 ] || die Cannot determine relevant git revision
 	if [ -d ${SRCDIR}/.git ] ; then
 		cd ${SRCDIR}
@@ -182,6 +182,7 @@ githubdate ()
 }
 
 [ $# -ne 2 ] && die Invalid usage.  Run this script via buildrump.sh
+BRDIR=$(dirname $0)
 SRCDIR=${2}
 
 case "${1}" in
