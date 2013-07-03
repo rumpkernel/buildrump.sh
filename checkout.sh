@@ -162,7 +162,7 @@ githubdate ()
 	gitsrcrev=$(git rev-parse HEAD)
 	cd "${curdir}"
 	echo ${gitsrcrev} > ${GITREVFILE}
-	git commit -m "Source revision for buildrump.sh git rev ${gitrev}"
+	git commit -m "Source for buildrump.sh git rev ${gitrev}" ${GITREVFILE}
 
 	set +e
 }
