@@ -113,6 +113,14 @@ checkoutcvs ()
 		${CVS} ${NBSRC_CVSFLAGS} co -P -D "${date}" ${dirs} || die co2
 	done
 
+	# One silly workaround for case-insensitive file systems and cvs.
+	# Both src/lib/libc/{DB,db} exist.  While the former is empty,
+	# since DB exists when db is checked out, they go into the same
+	# place.  So in case "DB" exists, rename it to "db" after cvs
+	# is done with its business.
+	[ -d lib/libc/DB ] && \
+	    { mv lib/libc/DB lib/libc/db.tmp ; mv lib/libc/db.tmp lib/libc/db }
+
 	# remove the symlink used to trick cvs
 	rm -f src
 	rm -f listsrcdirs
