@@ -161,12 +161,16 @@ githubdate ()
 
 	git clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
 
+	echo '>> checking out source tree via anoncvs'
 	# checkoutcvs does cd to SRCDIR
 	curdir="$(pwd)"
 	checkoutcvs
 
+	echo '>> adding files to the "netbsd-cvs" branch'
 	git add -A
+	echo '>> committing'
 	git commit -m "NetBSD cvs for buildrump.sh git rev ${gitrev}"
+	echo '>> merging "netbsd-cvs" to "master"'
 	git checkout master
 	git merge netbsd-cvs
 	gitsrcrev=$(git rev-parse HEAD)
