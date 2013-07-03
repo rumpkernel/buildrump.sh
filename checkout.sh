@@ -123,6 +123,8 @@ checkoutcvs ()
 checkoutgit ()
 {
 
+	gitrev=$(cat ${GITREVFILE})
+	[ $? -eq 0 ] || die Cannot determine relevant git revision
 	if [ -d ${SRCDIR}/.git ] ; then
 		cd ${SRCDIR}
 		[ -z "$(git status --porcelain)" ] \
@@ -133,8 +135,8 @@ checkoutgit ()
 		cd ${SRCDIR}
 	fi
 
-	git checkout $(cat ${GITREVFILE}) \
-	    || die 'Could not find git revision. Wrong repo?'
+	git checkout ${gitrev} || \
+	    die 'Could not checkout correct git revision. Wrong repo?'
 }
 
 # do a cvs checkout and push the results into the github mirror
