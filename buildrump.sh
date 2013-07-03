@@ -76,7 +76,9 @@ helpme ()
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	echo
 	printf "supported commands (none supplied => fullbuild):\n"
-	printf "\tcheckout:\tfetch NetBSD sources to srcdir from anoncvs\n"
+	printf "\tcheckout-git:\tfetch NetBSD sources to srcdir from github\n"
+	printf "\tcheckout-cvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
+	printf "\tcheckout:\talias for checkout-cvs\n"
 	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
 	printf "\tbuild:\t\tbuild rump kernel components\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
@@ -494,7 +496,8 @@ parseargs ()
 	#
 	# Determine what which parts we should execute.
 	#
-	allcmds="checkout tools build install tests fullbuild setupdest"
+	allcmds='checkout checkoutcvs checkoutgit tools build install
+	    tests fullbuild setupdest'
 	fullbuildcmds="tools build install tests"
 
 	for cmd in ${allcmds}; do
@@ -519,6 +522,15 @@ parseargs ()
 		for cmd in ${fullbuildcmds}; do
 			eval do${cmd}=true
 		done
+	fi
+
+	if ${docheckout} || ${docheckoutcvs} ; then
+		docheckout=true
+		checkoutstyle=cvs
+	fi
+	if ${docheckoutgit} ; then
+		docheckout=true
+		checkoutstyle=git
 	fi
 }
 
@@ -756,7 +768,7 @@ domake ()
 evaltools
 parseargs $*
 
-${docheckout} && { ${BRDIR}/checkout.sh cvs ${SRCDIR} || exit 1; }
+${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
 evaltarget
 
