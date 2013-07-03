@@ -76,9 +76,9 @@ helpme ()
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	echo
 	printf "supported commands (none supplied => fullbuild):\n"
-	printf "\tcheckout-git:\tfetch NetBSD sources to srcdir from github\n"
-	printf "\tcheckout-cvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
-	printf "\tcheckout:\talias for checkout-cvs\n"
+	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
+	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
+	printf "\tcheckout:\talias for checkoutcvs\n"
 	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
 	printf "\tbuild:\t\tbuild rump kernel components\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
