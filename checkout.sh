@@ -119,7 +119,7 @@ checkoutcvs ()
 	# place.  So in case "DB" exists, rename it to "db" after cvs
 	# is done with its business.
 	[ -d lib/libc/DB ] && \
-	    { mv lib/libc/DB lib/libc/db.tmp ; mv lib/libc/db.tmp lib/libc/db }
+	    { mv lib/libc/DB lib/libc/db.tmp ; mv lib/libc/db.tmp lib/libc/db ;}
 
 	# remove the symlink used to trick cvs
 	rm -f src
