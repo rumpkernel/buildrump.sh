@@ -133,6 +133,9 @@ checkoutcvs ()
 checkoutgit ()
 {
 
+	[ -e "${SRCDIR}" -a ! -e "${SRCDIR}/.git" ] && \
+	    die Not a git repository: ${SRCDIR}
+
 	gitrev=$(cat ${BRDIR}/${GITREVFILE})
 	[ $? -eq 0 ] || die Cannot determine relevant git revision
 	if [ -d ${SRCDIR}/.git ] ; then
@@ -157,7 +160,7 @@ githubdate ()
 	    || die checkout.sh contains uncommitted changes!
 	gitrev=$(${GIT} rev-parse HEAD)
 
-	[ -f ${SRCDIR} ] && die Error, ${SRCDIR} exists
+	[ -e ${SRCDIR} ] && die Error, ${SRCDIR} exists
 
 	set -e
 
