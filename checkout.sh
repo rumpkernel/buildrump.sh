@@ -73,7 +73,6 @@ die ()
 
 checkoutcvs ()
 {
-	cd ${SRCDIR}
 
 	: ${CVS:=cvs}
 	if ! type ${CVS} >/dev/null 2>&1 ;then
@@ -81,6 +80,9 @@ checkoutcvs ()
 		echo '>> Set $CVS or ensure that cvs is in PATH'
 		die \"${CVS}\" not found
 	fi
+
+	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
+	cd ${SRCDIR} || die cannot access ${SRCDIR}
 
 	# squelch .cvspass whine
 	export CVS_PASSFILE=/dev/null
@@ -135,15 +137,15 @@ checkoutgit ()
 	[ $? -eq 0 ] || die Cannot determine relevant git revision
 	if [ -d ${SRCDIR}/.git ] ; then
 		cd ${SRCDIR}
-		[ -z "$(git status --porcelain)" ] \
+		[ -z "$(${GIT} status --porcelain)" ] \
 		    || die "Cloned repo in ${SRCDIR} is not clean, aborting."
-		git fetch origin master || die Failed to update git repo
+		${GIT} fetch origin master || die Failed to update git repo
 	else
-		git clone -n ${GITREPO} ${SRCDIR} || die Clone failed
+		${GIT} clone -n ${GITREPO} ${SRCDIR} || die Clone failed
 		cd ${SRCDIR}
 	fi
 
-	git checkout ${gitrev} || \
+	${GIT} checkout ${gitrev} || \
 	    die 'Could not checkout correct git revision. Wrong repo?'
 }
 
@@ -151,15 +153,15 @@ checkoutgit ()
 githubdate ()
 {
 
-	[ -z "$(git status --porcelain | grep 'M checkout.sh')" ] \
+	[ -z "$(${GIT} status --porcelain | grep 'M checkout.sh')" ] \
 	    || die checkout.sh contains uncommitted changes!
-	gitrev=$(git rev-parse HEAD)
+	gitrev=$(${GIT} rev-parse HEAD)
 
 	[ -f ${SRCDIR} ] && die Error, ${SRCDIR} exists
 
 	set -e
 
-	git clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
+	${GIT} clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
 
 	echo '>> checking out source tree via anoncvs'
 	# checkoutcvs does cd to SRCDIR
@@ -167,18 +169,30 @@ githubdate ()
 	checkoutcvs
 
 	echo '>> adding files to the "netbsd-cvs" branch'
-	git add -A
+	${GIT} add -A
 	echo '>> committing'
-	git commit -m "NetBSD cvs for buildrump.sh git rev ${gitrev}"
+	${GIT} commit -m "NetBSD cvs for buildrump.sh git rev ${gitrev}"
 	echo '>> merging "netbsd-cvs" to "master"'
-	git checkout master
-	git merge netbsd-cvs
-	gitsrcrev=$(git rev-parse HEAD)
+	${GIT} checkout master
+	${GIT} merge netbsd-cvs
+	gitsrcrev=$(${GIT} rev-parse HEAD)
 	cd "${curdir}"
 	echo ${gitsrcrev} > ${GITREVFILE}
-	git commit -m "Source for buildrump.sh git rev ${gitrev}" ${GITREVFILE}
+	${GIT} commit -m "Source for buildrump.sh git rev ${gitrev}" \
+	    ${GITREVFILE}
 
 	set +e
+}
+
+setgit ()
+{
+
+	: ${GIT:=git}
+	if ! type ${GIT} >/dev/null 2>&1 ;then
+		echo '>> Need git for checkoutgit functionality'
+		echo '>> Set $GIT or ensure that git is in PATH'
+		die \"${GIT}\" not found
+	fi
 }
 
 [ $# -ne 2 ] && die Invalid usage.  Run this script via buildrump.sh
@@ -187,17 +201,17 @@ SRCDIR=${2}
 
 case "${1}" in
 cvs)
-	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
 	checkoutcvs
 	echo '>> checkout done'
 	;;
 git)
-	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
+	setgit
 	checkoutgit
 	echo '>> checkout done'
 	;;
 githubdate)
 	[ $(dirname $0) != '.' ] && die Script must be run as ./checkout.sh
+	setgit
 	githubdate
 	echo '>>'
 	echo '>> Update done'
