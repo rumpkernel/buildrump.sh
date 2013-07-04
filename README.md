@@ -72,7 +72,7 @@ The short version
 
 Clone the repository and run:
 
-- `./buildrump.sh
+- `./buildrump.sh`
 
 You will now find the kernel drivers and necessary headers in `./rump`
 ready for use.  Examples on how to use the resulting drivers are available
