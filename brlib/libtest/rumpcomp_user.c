@@ -8,6 +8,8 @@
 
 #include <rump/rumpuser_component.h>
 
+#include "rumpcomp_user.h"
+
 void
 rumpcomp_user_testride(int justnum)
 {
