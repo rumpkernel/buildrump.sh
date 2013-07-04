@@ -66,14 +66,13 @@ The following are required for building from source:
 - cc (gcc and clang are known to work)
 - ld (GNU or Solaris ld required)
 - binutils (ar, nm, objcopy)
-- cvs (required only for "checkout")
 
 The short version
 -----------------
 
 Clone the repository and run:
 
-- `./buildrump.sh checkout fullbuild`
+- `./buildrump.sh
 
 You will now find the kernel drivers and necessary headers in `./rump`
 ready for use.  Examples on how to use the resulting drivers are available
@@ -82,16 +81,20 @@ in the `tests` and `examples` directories.
 The long(er) version
 --------------------
 
-The `checkout` command above will fetch the necessary subset of the
-NetBSD source tree from anoncvs.netbsd.org into `./src`.  You are also
-free to use any other method for fetching NetBSD sources, though the
-only officially supported way is to let the script handle the checkout.
+When run without parameters, `buildrump.sh` implicitly assumes that the
+given commands were `checkout fullbuild`.  You can override this default
+by giving explicit commands.
 
-The script will then proceed to build the necessary set of tools for
-building rump kernels, e.g. the BSD version of `make`, after which it
-will build the rump kernels.  By default, `cc` from path is used along
-with other host tools such as `nm`.  Crosscompilation is documented
-further below.
+The `checkout` command will fetch the necessary subset of the NetBSD
+source tree from github into `./src`.  You are free to use any method
+for fetching NetBSD sources, though the only officially supported way
+is to let the script handle the checkout.
+
+The `fullbuild` command will then instruct the script to to build the
+necessary set of tools for building rump kernels, e.g. the BSD version
+of `make`, after which it will build the rump kernels.  By default,
+`cc` from path is used along with other host tools such as `nm`.
+Crosscompilation is documented further below.
 
 If the command `tests` or `fullbuild` is given, the script will run simple
 tests to check that e.g. file systems and the TCP/IP stack work correctly.
