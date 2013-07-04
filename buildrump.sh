@@ -75,10 +75,10 @@ helpme ()
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	echo
-	printf "supported commands (none supplied => fullbuild):\n"
+	printf "supported commands (none supplied => checkout+fullbuild):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
 	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
-	printf "\tcheckout:\talias for checkoutcvs\n"
+	printf "\tcheckout:\talias for checkoutgit\n"
 	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
 	printf "\tbuild:\t\tbuild rump kernel components\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
@@ -516,6 +516,7 @@ parseargs ()
 			done
 		done
 	else
+		docheckoutgit=true
 		dofullbuild=true
 	fi
 	if ${dofullbuild} ; then
@@ -524,11 +525,11 @@ parseargs ()
 		done
 	fi
 
-	if ${docheckout} || ${docheckoutcvs} ; then
+	if ${docheckoutcvs} ; then
 		docheckout=true
 		checkoutstyle=cvs
 	fi
-	if ${docheckoutgit} ; then
+	if ${docheckout} || ${docheckoutgit} ; then
 		docheckout=true
 		checkoutstyle=git
 	fi
