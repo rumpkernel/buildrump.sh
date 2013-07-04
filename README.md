@@ -26,7 +26,7 @@ The easiest way to install rump kernel components is to use a binary
 package for your OS/distribution/architecture.
 
 * Void Linux: `xbps-install -S netbsd-rumpkernel`
-* Arch Linux: [pacman](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Arch_Core) (OBS), [AUR](https://aur.archlinux.org/packages/netbsd-rump-cvs/) 
+* Arch Linux: [pacman](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=Arch_Core) (OBS), [AUR](https://aur.archlinux.org/packages/netbsd-rump-git/) 
 * OpenSUSE Linux:
 12.3 [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_12.3) (OBS)
 || Tumbleweed [RPM](https://build.opensuse.org/package/binaries?package=rump&project=home%3Astaal1978&repository=openSUSE_Factory) (OBS)
