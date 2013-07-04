@@ -66,9 +66,6 @@ echo "Generating temporary directory to be compressed"
 #directories
 cp -r {brlib,examples,tests} "${DEST}/"
 
-#directories that should be empty
-mkdir -p "${DEST}"/{obj,rump}
-
 #files
 cp -p {.srcgitrev,checkout.sh,AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
 
