@@ -52,7 +52,12 @@ fi
 
 echo "Checking out cvs sources"
 
-./buildrump.sh -s ${DEST}/src checkout
+if ! ./buildrump.sh -s ${DEST}/src checkoutgit ; then
+	echo "Checkout failed!"
+	exit 1
+fi
+# don't need .git in the tarball
+rm -rf ${DEST}/src/.git
 
 echo "Checkout done"
 
@@ -65,7 +70,7 @@ cp -r {brlib,examples,tests} "${DEST}/"
 mkdir -p "${DEST}"/{obj,rump}
 
 #files
-cp {AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
+cp -p {.srcgitrev,checkout.sh,AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
 
 echo ${_revision} > "${DEST}/gitrevision"
 echo ${_date} > "${DEST}/revisiondate"
