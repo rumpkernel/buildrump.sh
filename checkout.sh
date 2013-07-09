@@ -76,6 +76,8 @@ die ()
 checkoutcvs ()
 {
 
+	echo ">> Fetching NetBSD sources to ${SRCDIR} using cvs"
+
 	: ${CVS:=cvs}
 	if ! type ${CVS} >/dev/null 2>&1 ;then
 		echo '>> Need cvs for checkoutcvs functionality'
@@ -134,6 +136,8 @@ checkoutcvs ()
 # destination directory, assume that it's the correct repo.
 checkoutgit ()
 {
+
+	echo ">> Fetching NetBSD sources to ${SRCDIR} using git"
 
 	[ -e "${SRCDIR}" -a ! -e "${SRCDIR}/.git" ] && \
 	    die Not a git repository: ${SRCDIR}
