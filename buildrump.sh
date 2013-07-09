@@ -609,6 +609,14 @@ probearm ()
 	if ${CC} -E -dM - < /dev/null | grep -q __VFP_FP__; then
 		SOFTFLOAT='-V MKSOFTFLOAT=no'
 	fi
+
+	# A thumb build does not work due to assembler containing
+	# opcodes that are not permitted. If the environment defaults
+	# to thumb, force to full ARM instructions instead.
+	if ${CC} -E -dM - < /dev/null | grep -q __THUMBEL__; then
+                EXTRA_CFLAGS='-marm'
+                EXTRA_AFLAGS='-marm'
+	fi
 }
 
 evaltarget ()
