@@ -589,6 +589,28 @@ check64 ()
 	    && die Do not know how to do a 64bit build for \"${MACH_ARCH}\"
 }
 
+# ARM targets require a few extra checks
+probearm ()
+{
+
+	# If target compiler produces ARMv6 by default, force armv6k
+	# due to NetBSD bug port-arm/47401.  This was originally a
+	# hack for Raspberry Pi support, but maybe we should attempt
+	# to remove it?
+	if ${CC} -E -dM - < /dev/null | grep -q __ARM_ARCH_6__; then
+		EXTRA_CFLAGS='-march=armv6k'
+		EXTRA_AFLAGS='-march=armv6k'
+	fi
+
+	# NetBSD/evbarm is softfloat by default, but force the NetBSD
+	# build to use hardfloat if the compiler defaults to VFP.
+	# This is because the softfloat env is not always functional
+	# in case hardfloat is the compiler default.
+	if ${CC} -E -dM - < /dev/null | grep -q __VFP_FP__; then
+		SOFTFLOAT='-V MKSOFTFLOAT=no'
+	fi
+}
+
 evaltarget ()
 {
 
@@ -681,12 +703,7 @@ evaltarget ()
 		MACHINE="evbarm"
 		MACH_ARCH="arm"
 		TOOLABI="elf"
-		# XXX: assume at least armv6k due to armv6 inaccuracy in NetBSD
-		EXTRA_CFLAGS='-march=armv6k'
-		EXTRA_AFLAGS='-march=armv6k'
-
-		# force hardfloat, default (soft) doesn't work on all targets
-		SOFTFLOAT='-V MKSOFTFLOAT=no'
+		probearm
 		;;
 	"sparc")
 		if ${THIRTYTWO} ; then
