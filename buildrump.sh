@@ -92,11 +92,39 @@ helpme ()
 # toolchain creation helper routines
 #
 
+printoneconfig ()
+{
+
+	printf "%-5s %-18s: %s\n" "${1}" "${2}" "${3}"
+}
+
+printenv ()
+{
+
+	echo '>> Build environment (from shell)'
+	printoneconfig 'Env' 'BUILDRUMP_CPPFLAGS' "${BUILDRUMP_CPPFLAGS}"
+	printoneconfig 'Env' 'BUILDRUMP_CFLAGS' "${BUILDRUMP_CFLAGS}"
+	printoneconfig 'Env' 'BUILDRUMP_AFLAGS' "${BUILDRUMP_AFLAGS}"
+}
+
 appendmkconf ()
 {
-	if [ ! -z "${1}" ]; then
-		printf "%-30s: ${1}\n" $2
-		echo "${2}${3}=${1}" >> "${BRTOOLDIR}/mk.conf"
+	if [ ! -z "${2}" ]; then
+		# cheat a bit: output BUILDRUMP_CFLAGS/AFLAGS without
+		# the prefix as the name so to as not confuse the user
+		# (the reason why it's BUILDRUMP_CFLAGS instead of
+		# CFLAGS is so that we get the flags right for
+		# the RUMPCOMP_USER case)
+		case $3 in
+		'BUILDRUMP_CFLAGS'|'BUILDRUMP_AFLAGS')
+			name=${3#BUILDRUMP_}
+			;;
+		*)
+			name=${3}
+		esac
+
+		printoneconfig "${1}" "${name}" "${2}"
+		echo "${3}${4}=${2}" >> "${BRTOOLDIR}/mk.conf"
 	fi
 }
 
@@ -225,7 +253,7 @@ maketools ()
 		eval tool=\${${x}}
 		type ${tool} >/dev/null 2>&1 \
 		    || die Cannot find \$${x} at \"${tool}\".
-		printf 'Tool %s \t: %s\n' ${x} ${tool}
+		printoneconfig 'Tool' "${x}" "${tool}"
 
 		exec 3>&1 1>${tname}
 		printf '#!/bin/sh\n\n'
@@ -247,13 +275,15 @@ maketools ()
 
 	cat > "${BRTOOLDIR}/mk.conf" << EOF
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
-CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
-CFLAGS+=\${BUILDRUMP_CFLAGS}
-AFLAGS+=\${BUILDRUMP_AFLAGS}
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
 EOF
+
+	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
+	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
+	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
+	appendmkconf 'Cmd' "${DBG}" "DBG"
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
 	# uses the different flavor of size_t (int vs. long) than what
@@ -261,34 +291,39 @@ EOF
 	# since we need to testbuild kernel code, not host code,
 	# and we're only setting up the build now.  So we just
 	# disable format warnings on all 32bit targets.
-	${THIRTYTWO} && appendmkconf '-Wno-format' 'CWARNFLAGS' +
+	${THIRTYTWO} && appendmkconf 'Probe' '-Wno-format' 'CWARNFLAGS' +
 
-	appendmkconf "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
-	appendmkconf "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
-	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
-	appendmkconf "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
-	appendmkconf "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
-	appendmkconf "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
-	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
-	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
-	appendmkconf "${DBG}" "DBG"
+	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
+	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
+	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
 	unset _tmpvar
 	for x in ${EXTRA_RUMPUSER}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
-	appendmkconf "${_tmpvar# }" "RUMPUSER_EXTERNAL_DPLIBS" +
+	appendmkconf 'Probe' "${_tmpvar# }" "RUMPUSER_EXTERNAL_DPLIBS" +
 	unset _tmpvar
 	for x in ${EXTRA_RUMPCLIENT}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
-	appendmkconf "${_tmpvar# }" "RUMPCLIENT_EXTERNAL_DPLIBS" +
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'yes' 'HAVE_SUN_LD'
+	appendmkconf 'Probe' "${_tmpvar# }" "RUMPCLIENT_EXTERNAL_DPLIBS" +
+	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
+
+	printenv
 
 	chkcrt begins
 	chkcrt ends
 	chkcrt i
 	chkcrt n
+
+	# add vars from env last (so that they can be used for overriding)
+	cat >> "${BRTOOLDIR}/mk.conf" << EOF
+CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
+CFLAGS+=\${BUILDRUMP_CFLAGS}
+AFLAGS+=\${BUILDRUMP_AFLAGS}
+EOF
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
@@ -327,6 +362,8 @@ EOF
 
 makebuild ()
 {
+
+	printenv
 
 	targets=$*
 
