@@ -227,7 +227,7 @@ maketools ()
 			if [ "${TARGET}" = netbsd ]; then
 				LDSCRIPT='-V RUMP_LDSCRIPT=no'
 			else
-				BUILDSHARED='-V NOPIC=1'
+				NOPIC=yes
 			fi
 		fi
 		rm -f test.c a.out ldscript.test
@@ -311,6 +311,9 @@ EOF
 	done
 	appendmkconf 'Probe' "${_tmpvar# }" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
+	appendmkconf 'Probe' "${NOSTATICLIB}"  "NOSTATICLIB"
+	appendmkconf 'Probe' "${NOPIC}"  "NOPIC"
+	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
 
 	printenv
 
@@ -341,8 +344,7 @@ EOF
 	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
 	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
-	    ${LLVM} ${BEQUIET} ${BUILDSHARED} ${BUILDSTATIC} ${SOFTFLOAT} \
-	    ${LDSCRIPT} \
+	    ${LLVM} ${BEQUIET} ${LDSCRIPT} \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
@@ -668,7 +670,7 @@ probearm ()
 	# This is because the softfloat env is not always functional
 	# in case hardfloat is the compiler default.
 	if cppdefines __VFP_FP__; then
-		SOFTFLOAT='-V MKSOFTFLOAT=no'
+		MKSOFTFLOAT=no
 	fi
 
 	# A thumb build does not work due to assembler containing
@@ -705,10 +707,10 @@ evaltarget ()
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
-		BUILDSTATIC='-V NOSTATICLIB=1'
+		NOSTATICLIB=yes
 		;;
 	"cygwin")
-		BUILDSHARED='-V NOPIC=1'
+		NOPIC=yes
 		target_notsupp='yes'
 		;;
 	"unknown"|*)
