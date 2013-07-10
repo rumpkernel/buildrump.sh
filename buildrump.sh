@@ -245,12 +245,10 @@ maketools ()
 	cat > "${BRTOOLDIR}/mk.conf" << EOF
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
 CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
-CPPFLAGS+=${POSIX_MEMALIGN}
-LIBDO.pthread=_external
-RUMPKERN_UNDEF=${RUMPKERN_UNDEF}
-INSTPRIV=-U
 CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
+LIBDO.pthread=_external
+INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
 EOF
 
@@ -262,6 +260,8 @@ EOF
 	# disable format warnings on all 32bit targets.
 	${THIRTYTWO} && appendmkconf '-Wno-format' 'CWARNFLAGS' +
 
+	appendmkconf "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
+	appendmkconf "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
 	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
