@@ -101,6 +101,7 @@ printoneconfig ()
 printenv ()
 {
 
+	# XXX: this is not yet functional the way I want it to be
 	echo '>> Build environment (from shell)'
 	printoneconfig 'Env' 'BUILDRUMP_CPPFLAGS' "${BUILDRUMP_CPPFLAGS}"
 	printoneconfig 'Env' 'BUILDRUMP_CFLAGS' "${BUILDRUMP_CFLAGS}"
