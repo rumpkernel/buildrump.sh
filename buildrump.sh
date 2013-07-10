@@ -243,7 +243,6 @@ maketools ()
 	done
 
 	cat > "${BRTOOLDIR}/mk.conf" << EOF
-NOGCCERROR=1
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
 CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 CPPFLAGS+=${POSIX_MEMALIGN}
@@ -254,6 +253,14 @@ CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
 AFLAGS+=-Wa,--noexecstack
 EOF
+
+	# The compiler cannot do %zd/u warnings if the NetBSD kernel
+	# uses the different flavor of size_t (int vs. long) than what
+	# the compiler was built with.  Probing is not entirely easy
+	# since we need to testbuild kernel code, not host code,
+	# and we're only setting up the build now.  So we just
+	# disable format warnings on all 32bit targets.
+	${THIRTYTWO} && appendmkconf '-Wno-format' 'CWARNFLAGS' +
 
 	appendmkconf "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
 	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
