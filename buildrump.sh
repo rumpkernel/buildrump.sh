@@ -94,7 +94,10 @@ helpme ()
 
 appendmkconf ()
 {
-	[ ! -z "${1}" ] && echo "${2}${3}=${1}" >> "${BRTOOLDIR}/mk.conf"
+	if [ ! -z "${1}" ]; then
+		printf "%-30s: ${1}\n" $2
+		echo "${2}${3}=${1}" >> "${BRTOOLDIR}/mk.conf"
+	fi
 }
 
 #
@@ -270,12 +273,16 @@ EOF
 	appendmkconf "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf "${DBG}" "DBG"
+	unset _tmpvar
 	for x in ${EXTRA_RUMPUSER}; do
-		appendmkconf "${x#-l}" "RUMPUSER_EXTERNAL_DPLIBS" +
+		_tmpvar="${_tmpvar} ${x#-l}"
 	done
+	appendmkconf "${_tmpvar# }" "RUMPUSER_EXTERNAL_DPLIBS" +
+	unset _tmpvar
 	for x in ${EXTRA_RUMPCLIENT}; do
-		appendmkconf "${x#-l}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
+		_tmpvar="${_tmpvar} ${x#-l}"
 	done
+	appendmkconf "${_tmpvar# }" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'yes' 'HAVE_SUN_LD'
 
 	chkcrt begins
