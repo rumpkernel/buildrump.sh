@@ -255,7 +255,7 @@ AFLAGS+=\${BUILDRUMP_AFLAGS}
 AFLAGS+=-Wa,--noexecstack
 EOF
 
-	appendmkconf "${W_UNUSED_BUT_SET}" "CFLAGS" +
+	appendmkconf "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
 	appendmkconf "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
 	appendmkconf "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
