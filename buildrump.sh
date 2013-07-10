@@ -136,7 +136,7 @@ probeld ()
 cppdefines ()
 {
 
-	${CC} -E -dM - < /dev/null | grep -q "${1}"
+	${CC} -E -dM - < /dev/null | egrep -q "${1}"
 	return $?
 }
 
@@ -621,7 +621,7 @@ probearm ()
 	# A thumb build does not work due to assembler containing
 	# opcodes that are not permitted. If the environment defaults
 	# to thumb, force to full ARM instructions instead.
-	if cppdefines __THUMBEL__; then
+	if cppdefines '__THUMBE[BL]__'; then
                 EXTRA_CFLAGS='-marm'
                 EXTRA_AFLAGS='-marm'
 	fi
