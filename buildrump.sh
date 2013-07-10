@@ -549,6 +549,7 @@ abspath ()
 
 	curdir=`pwd -P`
 	eval cd \${${1}}
+	[ $? -ne 0 ] && die Failed to resolve path "${1}"
 	eval ${1}=`pwd -P`
 	cd ${curdir}
 }
