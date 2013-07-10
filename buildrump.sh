@@ -132,6 +132,14 @@ probeld ()
 	fi
 }
 
+# saves some typing.  not invoked often enough for caching output
+cppdefines ()
+{
+
+	${CC} -E -dM - < /dev/null | grep -q "${1}"
+	return $?
+}
+
 maketools ()
 {
 
@@ -597,7 +605,7 @@ probearm ()
 	# due to NetBSD bug port-arm/47401.  This was originally a
 	# hack for Raspberry Pi support, but maybe we should attempt
 	# to remove it?
-	if ${CC} -E -dM - < /dev/null | grep -q __ARM_ARCH_6__; then
+	if cppdefines __ARM_ARCH_6__; then
 		EXTRA_CFLAGS='-march=armv6k'
 		EXTRA_AFLAGS='-march=armv6k'
 	fi
@@ -606,14 +614,14 @@ probearm ()
 	# build to use hardfloat if the compiler defaults to VFP.
 	# This is because the softfloat env is not always functional
 	# in case hardfloat is the compiler default.
-	if ${CC} -E -dM - < /dev/null | grep -q __VFP_FP__; then
+	if cppdefines __VFP_FP__; then
 		SOFTFLOAT='-V MKSOFTFLOAT=no'
 	fi
 
 	# A thumb build does not work due to assembler containing
 	# opcodes that are not permitted. If the environment defaults
 	# to thumb, force to full ARM instructions instead.
-	if ${CC} -E -dM - < /dev/null | grep -q __THUMBEL__; then
+	if cppdefines __THUMBEL__; then
                 EXTRA_CFLAGS='-marm'
                 EXTRA_AFLAGS='-marm'
 	fi
@@ -660,7 +668,7 @@ evaltarget ()
 	fi
 
 	# decide 32/64bit build.  step one: probe compiler default
-	if ${CC} -E -dM - < /dev/null | grep -q __LP64__; then
+	if cppdefines __LP64__; then
 		ccdefault=64
 	else
 		ccdefault=32
