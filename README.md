@@ -130,7 +130,12 @@ for building the hypervisor.
 Tested hosts
 ============
 
-examples of hosts buildrump.sh has been tested on:
+Continuous testing on Linux/amd64 + gcc/clang is done by
+[Travis CI](https://travis-ci.org/anttikantee/buildrump.sh)
+for every commit.
+
+Examples of hosts buildrump.sh has manually been tested on are
+as follows:
 
 - Linux
     - Linux Ubuntu-1210-quantal-64-minimal 3.5.0-18-generic #29-Ubuntu SMP Fri Oct 19 10:26:51 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux (with thanks to Zafer Aydogan for providing access, amd64)
