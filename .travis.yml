@@ -1,4 +1,5 @@
 language: c
 compiler:
   - gcc
-script: ./buildrump.sh -qq
+  - clang
+script: ./buildrump.sh -qq -j32
