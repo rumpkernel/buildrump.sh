@@ -38,8 +38,6 @@ DESTDIR=./rump
 SRCDIR=./src
 JNUM=4
 
-export
-
 #
 # NetBSD source timestamp minimum requirement
 NBSRC_DATE=20130515
