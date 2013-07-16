@@ -304,6 +304,7 @@ EOF
 	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf 'Cmd' "${DBG}" "DBG"
+	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
