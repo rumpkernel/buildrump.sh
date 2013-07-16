@@ -225,6 +225,14 @@ maketools ()
 	cctestW 'no-unused-but-set-variable'
 	cctestW 'no-unused-local-typedefs'
 
+	# The compiler cannot do %zd/u warnings if the NetBSD kernel
+	# uses the different flavor of size_t (int vs. long) than what
+	# the compiler was built with.  Probing is not entirely easy
+	# since we need to testbuild kernel code, not host code,
+	# and we're only setting up the build now.  So we just
+	# disable format warnings on all 32bit targets.
+	${THIRTYTWO} && EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -Wno-format"
+
 	#
 	# Check if the linker supports all the features of the rump kernel
 	# component ldscript used for linking shared libraries.
@@ -296,14 +304,6 @@ EOF
 	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf 'Cmd' "${DBG}" "DBG"
-
-	# The compiler cannot do %zd/u warnings if the NetBSD kernel
-	# uses the different flavor of size_t (int vs. long) than what
-	# the compiler was built with.  Probing is not entirely easy
-	# since we need to testbuild kernel code, not host code,
-	# and we're only setting up the build now.  So we just
-	# disable format warnings on all 32bit targets.
-	${THIRTYTWO} && appendmkconf 'Probe' '-Wno-format' 'CWARNFLAGS' +
 
 	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
