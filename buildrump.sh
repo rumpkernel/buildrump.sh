@@ -124,8 +124,9 @@ appendmkconf ()
 			name=${3}
 		esac
 
-		printoneconfig "${1}" "${name}" "${2}"
-		echo "${3}${4}=${2}" >> "${BRTOOLDIR}/mk.conf"
+		val=${2# }
+		printoneconfig "${1}" "${name}" "${val}"
+		echo "${3}${4}=${val}" >> "${BRTOOLDIR}/mk.conf"
 	fi
 }
 
@@ -172,6 +173,25 @@ cppdefines ()
 	return $?
 }
 
+cctestW ()
+{
+
+	[ "`pwd`" = "${OBJDIR}" ] || die call cctestW only when in OBJDIR
+
+	#
+	# Try to test if cc supports the given warning flag.
+	# This is a bit tricky since apparently some version of gcc
+	# don't complain about the flag unless there is some other
+	# error to complain about as well.
+	# So we try compiling a broken source file...
+	echo 'no you_shall_not_compile' > broken.c
+	${CC} -W${1} broken.c > broken.out 2>&1
+	if ! grep -q "W${1}" broken.out ; then
+		EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -W${1}"
+	fi
+	rm -f broken.c broken.out
+}
+
 maketools ()
 {
 
@@ -202,17 +222,8 @@ maketools ()
 	fi
 
 	cd ${OBJDIR}
-	#
-	# Try to test if cc supports -Wno-unused-but-set-variable.
-	# This is a bit tricky since apparently gcc doesn't tell it
-	# doesn't support it unless there is some other error to complain
-	# about as well.  So we try compiling a broken source file...
-	echo 'no you_shall_not_compile' > broken.c
-	${CC} -Wno-unused-but-set-variable broken.c > broken.out 2>&1
-	if ! grep -q Wno-unused-but-set-variable broken.out ; then
-		W_UNUSED_BUT_SET=-Wno-unused-but-set-variable
-	fi
-	rm -f broken.c broken.out
+	cctestW 'no-unused-but-set-variable'
+	cctestW 'no-unused-local-typedefs'
 
 	#
 	# Check if the linker supports all the features of the rump kernel
@@ -296,7 +307,7 @@ EOF
 
 	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${W_UNUSED_BUT_SET}" "CWARNFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
 	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
@@ -304,12 +315,12 @@ EOF
 	for x in ${EXTRA_RUMPUSER}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
-	appendmkconf 'Probe' "${_tmpvar# }" "RUMPUSER_EXTERNAL_DPLIBS" +
+	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
 	unset _tmpvar
 	for x in ${EXTRA_RUMPCLIENT}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
-	appendmkconf 'Probe' "${_tmpvar# }" "RUMPCLIENT_EXTERNAL_DPLIBS" +
+	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
 	appendmkconf 'Probe' "${NOSTATICLIB}"  "NOSTATICLIB"
 	appendmkconf 'Probe' "${NOPIC}"  "NOPIC"
