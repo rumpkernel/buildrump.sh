@@ -2,4 +2,4 @@ language: c
 compiler:
   - gcc
   - clang
-script: ./buildrump.sh -qq -j32
+script: ./buildrump.sh -qq -j16 -V NOSTATICLIC=1
