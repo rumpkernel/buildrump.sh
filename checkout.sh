@@ -58,7 +58,11 @@ NBSRC_EXTRA='20130601 2100UTC:
 	20130630 1715UTC:
     src/sys/rump/librump/rumpnet/net_stub.c
     src/sys/rump/net/lib/libnetinet/component.c;
-	20130717 1600UTC:
+	20130717 2130UTC:
+    src/sys/sys/vnode_if.h
+    src/sys/kern/vnode_if.c
+    src/sys/rump/include/rump/rumpvnode_if.h
+    src/sys/rump/librump/rumpvfs/rumpvnode_if.c
     src/sys/rump/dev/lib/libugenhc
     src/sys/sys/queue.h
     src/sys/rump/net/lib/libvirtif
