@@ -437,8 +437,8 @@ evaltools ()
 	# check for crossbuild
 	: ${CC:=cc}
 	nativebuild=true
-	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] \
-	    && nativebuild=false
+	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a \
+	    ${CC} != 'clang' -a ${CC} != 'musl-gcc' ] && nativebuild=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
