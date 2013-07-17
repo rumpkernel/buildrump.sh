@@ -443,19 +443,21 @@ evaltools ()
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
 	# Check the arch we're building for so as to work out the necessary
-	# NetBSD machine code we need to use.  Use ${CC} -v instead
-	# of -dumpmachine since at least older versions of clang don't
-	# support -dumpmachine ... yay!
+	# NetBSD machine code we need to use.  First try -dumpmachine,
+	# and if that works, be happy with it.  Not all compilers support
+	# it (e.g. older versions of clang), so if that doesn't work,
+	# try parsing the output of -v
+	if ! cc_target=$(${CC} -dumpmachine) ; then
+		# first check "${CC} -v" ... just in case it fails, we want a
+		# sensible return value instead of it being lost in the pipeline
+		# (this is easier than adjusting IFS)
+		${CC} -v >/dev/null 2>&1 || \
+		    die \"${CC} -v failed\". Check that \"${CC}\" is a compiler
 
-	# first check "${CC} -v" ... just in case it fails, we want a
-	# sensible return value instead of it being lost in the pipeline
-	# (this is easier than adjusting IFS)
-	${CC} -v >/dev/null 2>&1 || \
-	    die Cannot run \"${CC} -v\". Check that \"${CC}\" is a compiler
-
-	# then actually process the output of ${CC} -v
-	cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
-	[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
+		# then actually process the output of ${CC} -v
+		cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
+		[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
+	fi
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 
 	if ${nativebuild}; then
