@@ -833,6 +833,13 @@ setupdest ()
 			    ${OBJDIR}/dest/usr/share/man/
 		done
 	done
+
+	# queue.h is not available on all systems, but we need it for
+	# the hypervisor build.  Copy queue.h from the NetBSD sources
+	# into DESTDIR so that it's available for the hypervisor build
+	# on all hosts.
+	mkdir -p ${DESTDIR}/include/sys || die create ${DESTDIR}/include/sys
+	cp -p ${SRCDIR}/sys/sys/queue.h ${DESTDIR}/include/sys
 }
 
 # create the makefiles used for building
