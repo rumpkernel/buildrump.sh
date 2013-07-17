@@ -55,7 +55,7 @@ Building from Source Code
 =========================
 
 Building from source may be necessary of there are no binary packages
-for your systems, or if you wish to source level modifications to the
+for your systems, or if you wish to make source level modifications to the
 rump kernel components.
 
 Build dependencies
