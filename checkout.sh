@@ -51,14 +51,13 @@ NBSRC_EXTRA='20130601 2100UTC:
 	20130610 1500UTC:
     src/sys/rump/librump/rumpvfs/rumpfs.c
     src/sys/rump/net/lib/libshmif;
-	20130623 1930UTC:
-    src/sys/rump/net/lib/libsockin;
 	20130625 2110UTC:
     src/sys/rump/include/rump;
 	20130630 1715UTC:
     src/sys/rump/librump/rumpnet/net_stub.c
     src/sys/rump/net/lib/libnetinet/component.c;
 	20130717 2130UTC:
+    src/sys/rump/net/lib/libsockin
     src/sys/sys/vnode_if.h
     src/sys/kern/vnode_if.c
     src/sys/rump/include/rump/rumpvnode_if.h
