@@ -132,7 +132,7 @@ Tested hosts
 
 Continuous testing on Linux/amd64 + gcc/clang is done by
 [Travis CI](https://travis-ci.org/anttikantee/buildrump.sh)
-for every commit.
+for every commit.  [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
 
 Examples of hosts buildrump.sh has manually been tested on are
 as follows:
