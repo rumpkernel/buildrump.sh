@@ -218,9 +218,9 @@ maketools ()
 	# Check for ld because we need to make some adjustments based on it
 	probeld
 
-	# Check for GNU ar
-	if ! ${AR} --version 2>/dev/null | grep -q 'GNU ar' ; then
-		die Need GNU ar "(`type ${AR}`)"
+	# Check for GNU/BSD ar
+	if ! ${AR} --version 2>/dev/null | grep -q 'GNU ar\|BSD ar' ; then
+		die Need GNU or BSD ar "(`type ${AR}`)"
 	fi
 
 	cd ${OBJDIR}
@@ -769,7 +769,7 @@ evaltarget ()
 
 	TOOLABI=''
 	case ${MACH_ARCH} in
-	"x86_64")
+	"amd64"|"x86_64")
 		if ${THIRTYTWO} ; then
 			MACHINE="i386"
 			MACH_ARCH="i486"
@@ -779,6 +779,7 @@ evaltarget ()
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 		else
 			MACHINE="amd64"
+			MACH_ARCH="x86_64"
 		fi
 		;;
 	"i386"|"i486"|"i586"|"i686")
