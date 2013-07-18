@@ -299,6 +299,7 @@ maketools ()
 
 	cat > "${BRTOOLDIR}/mk.conf" << EOF
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
+CPPFLAGS+=-I${OBJDIR}/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
@@ -841,8 +842,9 @@ setupdest ()
 	# the hypervisor build.  Copy queue.h from the NetBSD sources
 	# into DESTDIR so that it's available for the hypervisor build
 	# on all hosts.
-	mkdir -p ${DESTDIR}/include/sys || die create ${DESTDIR}/include/sys
-	cp -p ${SRCDIR}/sys/sys/queue.h ${DESTDIR}/include/sys
+	mkdir -p ${OBJDIR}/compat/include/sys \
+	    || die create ${OBJDIR}/compat/include/sys
+	cp -p ${SRCDIR}/sys/sys/queue.h ${OBJDIR}/compat/include/sys
 }
 
 # create the makefiles used for building
