@@ -106,6 +106,7 @@ printenv ()
 	printoneconfig 'Env' 'BUILDRUMP_CPPFLAGS' "${BUILDRUMP_CPPFLAGS}"
 	printoneconfig 'Env' 'BUILDRUMP_CFLAGS' "${BUILDRUMP_CFLAGS}"
 	printoneconfig 'Env' 'BUILDRUMP_AFLAGS' "${BUILDRUMP_AFLAGS}"
+	printoneconfig 'Env' 'BUILDRUMP_LDFLAGS' "${BUILDRUMP_LDFLAGS}"
 }
 
 appendmkconf ()
@@ -342,6 +343,7 @@ EOF
 CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
+LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
