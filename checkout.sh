@@ -67,7 +67,9 @@ NBSRC_EXTRA='20130601 2100UTC:
     src/sys/rump/net/lib/libvirtif
     src/sys/rump/Makefile.rump
     src/sys/rump/kern/lib/libtty/Makefile
-    src/sys/rump/include/rump/rump.h'
+    src/sys/rump/include/rump/rump.h;
+	20130718 1230UTC:
+    src/lib/librumpuser'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
