@@ -220,7 +220,7 @@ maketools ()
 	probeld
 
 	# Check for GNU/BSD ar
-	if ! ${AR} --version 2>/dev/null | grep -q 'GNU ar\|BSD ar' ; then
+	if ! ${AR} --version 2>/dev/null | egrep -q '(GNU|BSD) ar' ; then
 		die Need GNU or BSD ar "(`type ${AR}`)"
 	fi
 
