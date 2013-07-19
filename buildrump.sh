@@ -482,7 +482,7 @@ evaltools ()
 	*-dragonflybsd)
 		TARGET=dragonfly
 		;;
-	*-freebsd)
+	*-freebsd*)
 		TARGET=freebsd
 		;;
 	*-netbsd*)
