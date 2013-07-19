@@ -30,6 +30,8 @@
 #	NOTE!
 #
 # DO NOT CHANGE THE VALUES WITHOUT UPDATING THE GIT REPO!
+# (also, do not update NBSRC_CVSDATE for just a small fix, it
+# causes changes to all CVS/Entries files)
 #
 # The procedure is:
 # 1) change the cvs tags, commit the change, DO NOT PUSH
