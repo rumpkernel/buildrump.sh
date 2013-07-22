@@ -30,6 +30,8 @@
 #	NOTE!
 #
 # DO NOT CHANGE THE VALUES WITHOUT UPDATING THE GIT REPO!
+# (also, do not update NBSRC_CVSDATE for just a small fix, it
+# causes changes to all CVS/Entries files)
 #
 # The procedure is:
 # 1) change the cvs tags, commit the change, DO NOT PUSH
@@ -37,39 +39,13 @@
 # 3) push rumpkernel-netbsd-src
 # 4) push buildrump.sh
 #
-NBSRC_CVSDATE="20130515 2200UTC"
+NBSRC_CVSDATE="20130719 1145UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='20130601 2100UTC:
-    src/sys/rump/librump/rumpkern/rump.c
-    src/sys/rump/net/lib/libnet
-    src/sys/rump/net/lib/libnetinet
-    src/sys/netinet/portalgo.c;
-	20130610 1500UTC:
-    src/sys/rump/librump/rumpvfs/rumpfs.c
-    src/sys/rump/net/lib/libshmif;
-	20130625 2110UTC:
-    src/sys/rump/include/rump;
-	20130630 1715UTC:
-    src/sys/rump/librump/rumpnet/net_stub.c
-    src/sys/rump/net/lib/libnetinet/component.c;
-	20130717 2130UTC:
-    src/sys/rump/net/lib/libsockin
-    src/sys/sys/vnode_if.h
-    src/sys/kern/vnode_if.c
-    src/sys/rump/include/rump/rumpvnode_if.h
-    src/sys/rump/librump/rumpvfs/rumpvnode_if.c
-    src/sys/rump/dev/lib/libugenhc
-    src/sys/sys/queue.h
-    src/sys/rump/net/lib/libvirtif
-    src/sys/rump/Makefile.rump
-    src/sys/rump/kern/lib/libtty/Makefile
-    src/sys/rump/include/rump/rump.h;
-	20130718 1230UTC:
-    src/lib/librumpuser'
+NBSRC_EXTRA=''
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
