@@ -263,7 +263,7 @@ maketools ()
 	rm -f test.c a.out
 
 	printf '#include <sys/ioctl.h>\n#include <unistd.h>\n
-int ioctl(int fd, int cmd, ...) {return 0;}\n' > test.c
+int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 	${CC} test.c >/dev/null 2>&1 && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 	rm -f test.c a.out
 
@@ -318,7 +318,7 @@ EOF
 
 	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${HAVE_IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
