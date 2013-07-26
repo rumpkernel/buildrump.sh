@@ -228,6 +228,7 @@ maketools ()
 	cctestW 'no-unused-but-set-variable'
 	cctestW 'no-unused-local-typedefs'
 	cctestW 'no-maybe-uninitialized'
+	cctestW 'no-cpp'
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
 	# uses the different flavor of size_t (int vs. long) than what
