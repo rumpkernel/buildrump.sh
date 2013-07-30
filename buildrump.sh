@@ -617,13 +617,13 @@ parseargs ()
 		done
 	fi
 
-	if ${docheckoutcvs} ; then
-		docheckout=true
-		checkoutstyle=cvs
-	fi
 	if ${docheckout} || ${docheckoutgit} ; then
 		docheckout=true
 		checkoutstyle=git
+	fi
+	if ${docheckoutcvs} ; then
+		docheckout=true
+		checkoutstyle=cvs
 	fi
 }
 
