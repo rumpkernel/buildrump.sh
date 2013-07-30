@@ -82,8 +82,8 @@ The long(er) version
 --------------------
 
 When run without parameters, `buildrump.sh` implicitly assumes that the
-given commands were `checkout fullbuild`.  You can override this default
-by giving explicit commands.
+given commands were `checkout fullbuild tests`.  You can override this
+default by giving explicit commands.
 
 The `checkout` command will fetch the necessary subset of the NetBSD
 source tree from github into `./src`.  You are free to use any method
@@ -96,10 +96,11 @@ of `make`, after which it will build the rump kernels.  By default,
 `cc` from path is used along with other host tools such as `nm`.
 Crosscompilation is documented further below.
 
-If the command `tests` or `fullbuild` is given, the script will run simple
-tests to check that e.g. file systems and the TCP/IP stack work correctly.
+If the command `tests` is given, the script will run simple tests
+to check that e.g. file systems and the TCP/IP stack work correctly.
 If everything was successfully completed, the final output from the
-script is "Success".
+script is "Success".  Note that `tests` cannot be run when `buildrump.sh`
+is used with a crosscompiler.
 
 To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.

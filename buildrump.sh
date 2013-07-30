@@ -75,7 +75,7 @@ helpme ()
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	echo
-	printf "supported commands (none supplied => checkout+fullbuild):\n"
+	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
 	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
 	printf "\tcheckout:\talias for checkoutgit\n"
@@ -83,7 +83,7 @@ helpme ()
 	printf "\tbuild:\t\tbuild rump kernel components\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
-	printf "\tfullbuild:\talias for \"tools build install tests\"\n"
+	printf "\tfullbuild:\talias for \"tools build install\"\n"
 	printf "\tsetupdest:\tcreate destdirs (implicit for \"install\")\n"
 	exit 1
 }
@@ -590,7 +590,7 @@ parseargs ()
 	#
 	allcmds='checkout checkoutcvs checkoutgit tools build install
 	    tests fullbuild setupdest'
-	fullbuildcmds="tools build install tests"
+	fullbuildcmds="tools build install"
 
 	for cmd in ${allcmds}; do
 		eval do${cmd}=false
@@ -610,6 +610,7 @@ parseargs ()
 	else
 		docheckoutgit=true
 		dofullbuild=true
+		dotests=true
 	fi
 	if ${dofullbuild} ; then
 		for cmd in ${fullbuildcmds}; do
