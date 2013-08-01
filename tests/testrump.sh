@@ -15,7 +15,7 @@ doremote ()
 	export RUMP_SERVER="unix://${sockname}"
 
 	set -x
-	cc -g -o ${TESTOBJ}/simpleserver ${TESTDIR}/simpleserver.c	\
+	${CC} -g -o ${TESTOBJ}/simpleserver ${TESTDIR}/simpleserver.c	\
 	    -I${DESTDIR}/include					\
 	    ${AS_NEEDED} -Wl,--whole-archive -lrump -lrumpuser		\
 	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread		\
@@ -24,7 +24,7 @@ doremote ()
 	# XXX: some systems don't have all of the librumpclient pthread
 	# dependencies in libc, so always link in libpthread, although
 	# it wouldn't be required on systems such as NetBSD
-	cc -g -o ${TESTOBJ}/simpleclient ${TESTDIR}/simpleclient.c	\
+	${CC} -g -o ${TESTOBJ}/simpleclient ${TESTDIR}/simpleclient.c	\
 	    -I${DESTDIR}/include					\
 	    -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_CFLAGS}		\
 	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
@@ -42,7 +42,7 @@ dokernfs ()
 	echo VFS test
 
 	set -x
-	cc -g -o ${TESTOBJ}/fstest ${TESTDIR}/fstest.c			\
+	${CC} -g -o ${TESTOBJ}/fstest ${TESTDIR}/fstest.c		\
 	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
@@ -60,7 +60,7 @@ dosysvbfs ()
 	echo VFS test with actual fs
 
 	set -x
-	cc -g -o ${TESTOBJ}/fstest2 ${TESTDIR}/fstest2.c		\
+	${CC} -g -o ${TESTOBJ}/fstest2 ${TESTDIR}/fstest2.c		\
 	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpfs_sysvbfs -lrumpdev_disk		\
 	    -lrumpdev -lrumpvfs -lrump -lrumpuser			\
@@ -79,7 +79,7 @@ donet ()
 	echo Networking test
 
 	set -x
-	cc -g -o ${TESTOBJ}/nettest_simple ${TESTDIR}/nettest_simple.c	\
+	${CC} -g -o ${TESTOBJ}/nettest_simple ${TESTDIR}/nettest_simple.c\
 	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
@@ -100,7 +100,7 @@ donetrouted ()
 	echo Routed networking test
 
 	set -x
-	cc -g -o ${TESTOBJ}/nettest_routed ${TESTDIR}/nettest_routed.c	\
+	${CC} -g -o ${TESTOBJ}/nettest_routed ${TESTDIR}/nettest_routed.c\
 	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
@@ -124,6 +124,13 @@ alltests ()
 {
 
 	echo Running simple tests
+
+	if ! ${NATIVEBUILD}; then
+		echo '>>
+		echo '>> WARNING!  Running tests on non-native build!'
+		echo '>> This may not work correctly!'
+		echo '>>'
+	fi
 
 	[ -z "${LD_FLAVOR}" ] && probeld
 	[ ${LD_FLAVOR} = 'sun' ] || AS_NEEDED='-Wl,--no-as-needed'

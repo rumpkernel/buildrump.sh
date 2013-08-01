@@ -447,9 +447,9 @@ evaltools ()
 
 	# check for crossbuild
 	: ${CC:=cc}
-	nativebuild=true
+	NATIVEBUILD=true
 	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] \
-	    && nativebuild=false
+	    && NATIVEBUILD=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
@@ -471,7 +471,7 @@ evaltools ()
 	fi
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 
-	if ${nativebuild}; then
+	if ${NATIVEBUILD}; then
 		: ${AR:=ar}
 		: ${NM:=nm}
 		: ${OBJCOPY:=objcopy}
