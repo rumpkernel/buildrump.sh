@@ -1,4 +1,4 @@
-Rump Kernels for POSIX Hosts
+Rump Kernels for POSIX Hosts [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
 ============================
 
 The buildrump.sh script builds unmodified NetBSD kernel drivers such
