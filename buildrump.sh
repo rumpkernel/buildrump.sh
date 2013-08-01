@@ -267,6 +267,22 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 	${CC} test.c >/dev/null 2>&1 && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 	rm -f test.c a.out
 
+	# the musl env usually does not contain linux kernel headers
+	# by default.  Since we need <linux/if_tun.h> for virtif, probe
+	# its presence and if its not available, just leave out if_virt
+	# instead of suffering a crushing build failure.
+	if [ "${TARGET}" = 'linux' ] && ! ${NATIVEBUILD} ; then
+		echo '#include <linux/if_tun.h>' > ${OBJDIR}/test.c
+		if ! ${CC} -c ${OBJDIR}/test.c -o ${OBJDIR}/test.o 2>/dev/null
+		then
+			RUMP_VIRTIF=no
+		fi
+		rm -f ${OBJDIR}/test.c ${OBJDIR}/test.o
+	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' \
+	    -a "${TARGET}" != 'linux' ]; then
+		RUMP_VIRTIF=no
+	fi
+
 	#
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
@@ -319,6 +335,7 @@ EOF
 	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
