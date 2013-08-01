@@ -126,7 +126,7 @@ alltests ()
 	echo Running simple tests
 
 	if ! ${NATIVEBUILD}; then
-		echo '>>
+		echo '>>'
 		echo '>> WARNING!  Running tests on non-native build!'
 		echo '>> This may not work correctly!'
 		echo '>>'
