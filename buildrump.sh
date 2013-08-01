@@ -380,7 +380,7 @@ EOF
 	    -V NOLINT=1 \
 	    -V USE_SSP=no \
 	    -V MKHTML=no -V MKCATPAGES=yes \
-	    -V SHLIBINSTALLDIR=/usr/lib \
+	    -V MKDYNAMICROOT=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
