@@ -839,6 +839,12 @@ evaltarget ()
 			EXTRA_AFLAGS='-m64'
 		fi
 		;;
+        "powerpc"|"ppc64")
+               MACHINE="macppc"
+               MACH_ARCH="powerpc"
+               EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+               EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+                ;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 }
