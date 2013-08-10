@@ -740,7 +740,7 @@ evaltarget ()
 		RUMPKERN_UNDEF='-U__FreeBSD__'
 		;;
 	"linux")
-		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__ -U_BIG_ENDIAN'
 		EXTRA_RUMPUSER='-ldl -lrt'
 		EXTRA_RUMPCLIENT='-lpthread -ldl'
 		;;
