@@ -839,11 +839,26 @@ evaltarget ()
 			EXTRA_AFLAGS='-m64'
 		fi
 		;;
-        "powerpc"|"ppc64")
-               MACHINE="evbppc"
-               MACH_ARCH="powerpc"
-               EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-               EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+	"ppc64")
+		if ${THIRTYTWO} ; then
+                	MACHINE="evbppc"
+                	MACH_ARCH="powerpc"
+                	EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+                	EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+		else
+                        MACHINE="evbppc64"
+                        MACH_ARCH="powerpc64"
+                        EXTRA_CFLAGS='-m64'
+			EXTRA_LDFLAGS='-m64'
+                        EXTRA_AFLAGS='-m64'
+		fi
+                ;;
+        "powerpc")
+		check64
+		MACHINE="evbppc"
+		MACH_ARCH="powerpc"
+		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
+		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
                 ;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
