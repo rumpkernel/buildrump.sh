@@ -840,7 +840,7 @@ evaltarget ()
 		fi
 		;;
         "powerpc"|"ppc64")
-               MACHINE="macppc"
+               MACHINE="evbppc"
                MACH_ARCH="powerpc"
                EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
                EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
