@@ -17,26 +17,29 @@ int
 main(int argc, char *argv[])
 {
 	struct rump_ufs_args args;
+	char imgpath[MAXPATHLEN+1];
 	union u u;
 	char buf[8192];
 	int fd;
 
 	/*
-	 * the file system image we use is little endian and the driver
-	 * we use doesn't support endian-swapping, so run the test only
-	 * on little endian for now
+	 * the driver doesn't support endian swapping, so pick image
+	 * with matching endianness.
 	 */
 	u.i = 0x12345678;
 	if (u.c == 0x12) {
-		printf("test works only on little endian.  skipping\n");
-		return 0;
+		snprintf(imgath, sizeof(imgpath),
+		    "%s/%s", argv[1], "sysvbfs_be.img");
+	} else {
+		snprintf(imgath, sizeof(imgpath),
+		    "%s/%s", argv[1], "sysvbfs_le.img");
 	}
 		
 
         rump_init();
 
 #define MYFSDEV "/de-vice"
-	rump_pub_etfs_register(MYFSDEV, argv[1], RUMP_ETFS_BLK);
+	rump_pub_etfs_register(MYFSDEV, imgpath, RUMP_ETFS_BLK);
 	args.fspec =  (void *)(uintptr_t)MYFSDEV;
 
 	if (rump_sys_mkdir("/mnt", 0755) == -1)

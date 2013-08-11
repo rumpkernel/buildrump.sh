@@ -68,7 +68,7 @@ dosysvbfs ()
 	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
-	./fstest2 ${TESTDIR}/sysvbfs_le.img || die fstest2 failed
+	./fstest2 ${TESTDIR} || die fstest2 failed
 
 	echo Done
 }
