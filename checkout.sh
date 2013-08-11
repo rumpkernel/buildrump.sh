@@ -39,19 +39,13 @@
 # 3) push rumpkernel-netbsd-src
 # 4) push buildrump.sh
 #
-NBSRC_CVSDATE="20130730 0930UTC"
+NBSRC_CVSDATE="20130811 1836UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='
-    20130801 1315UTC:
-	src/lib/librumpuser/rumpuser_dl.c
-	src/lib/librumphijack/hijack.c
-	src/sys/rump/net/Makefile.rumpnetcomp;
-    20130804 1111UTC:
-	src/sys/rump/librump/rumpvfs/rumpfs.c'
+NBSRC_EXTRA=''
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
