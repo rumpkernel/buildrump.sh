@@ -39,7 +39,7 @@
 # 3) push rumpkernel-netbsd-src
 # 4) push buildrump.sh
 #
-NBSRC_CVSDATE="20130811 1225UTC"
+NBSRC_CVSDATE="20130811 1836UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
 
