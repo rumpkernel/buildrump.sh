@@ -30,10 +30,10 @@ main(int argc, char *argv[])
 	 */
 	u.i = 0x12345678;
 	if (u.c == 0x12) {
-		snprintf(imgath, sizeof(imgpath),
+		snprintf(imgpath, sizeof(imgpath),
 		    "%s/%s", argv[1], "sysvbfs_be.img");
 	} else {
-		snprintf(imgath, sizeof(imgpath),
+		snprintf(imgpath, sizeof(imgpath),
 		    "%s/%s", argv[1], "sysvbfs_le.img");
 	}
 		
