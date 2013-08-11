@@ -1,5 +1,7 @@
 #include "common.c"
 
+#include <sys/param.h>
+
 #include <string.h>
 
 #include <rump/rump.h>
