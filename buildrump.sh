@@ -307,8 +307,8 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 		# Messy to plug it in here, but ...
 		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
 			printf 'for x in $*; do\n'
-        		printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
-	        	printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
+			printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
+			printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
 			printf '&& continue\n\tnewargs="${newargs} $x"\n'
 			printf 'done\nexec %s ${newargs}\n' ${tool}
 		else
@@ -724,8 +724,8 @@ probearm ()
 	# opcodes that are not permitted. If the environment defaults
 	# to thumb, force to full ARM instructions instead.
 	if cppdefines '__THUMBE[BL]__'; then
-                EXTRA_CFLAGS='-marm'
-                EXTRA_AFLAGS='-marm'
+		EXTRA_CFLAGS='-marm'
+		EXTRA_AFLAGS='-marm'
 	fi
 }
 
@@ -841,25 +841,25 @@ evaltarget ()
 		;;
 	"ppc64")
 		if ${THIRTYTWO} ; then
-                	MACHINE="evbppc"
-                	MACH_ARCH="powerpc"
-                	EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-                	EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+			MACHINE="evbppc"
+			MACH_ARCH="powerpc"
+			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 		else
-                        MACHINE="evbppc64"
-                        MACH_ARCH="powerpc64"
-                        EXTRA_CFLAGS='-m64'
+			MACHINE="evbppc64"
+			MACH_ARCH="powerpc64"
+			EXTRA_CFLAGS='-m64'
 			EXTRA_LDFLAGS='-m64'
-                        EXTRA_AFLAGS='-m64'
+			EXTRA_AFLAGS='-m64'
 		fi
-                ;;
-        "powerpc")
+		;;
+	"powerpc")
 		check64
 		MACHINE="evbppc"
 		MACH_ARCH="powerpc"
 		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
 		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
-                ;;
+		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 }
