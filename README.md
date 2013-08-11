@@ -145,6 +145,7 @@ as follows:
     - Linux vyrnwy 3.6.2-1.fc16.x86_64 #1 SMP Wed Oct 17 05:30:01 UTC 2012 x86_64 x86_64 __x86_64__ GNU/Linux (Fedora release 16 with read-only /usr/src via NFS)
     - Linux void-rpi 3.6.11_1 #1 PREEMPT Tue Feb 19 17:40:24 CET 2013 armv6l GNU/Linux (Void, __Raspberry Pi, evbarm__)
     - Linux braniac 3.9.9-1-ARCH #1 SMP PREEMPT Wed Jul 3 22:45:16 CEST 2013 x86_64 GNU/Linux (Arch Linux, __amd64__, gcc 4.8.1)
+    - Linux pike 3.6.7-4.fc17.ppc64 #1 SMP Thu Dec 6 06:41:58 MST 2012 ppc64 ppc64 ppc64 GNU/Linux (Fedora, __ppc64__)
 
 - DragonFly BSD
     - DragonFly  3.2-RELEASE DragonFly v3.2.1.9.g80b03f-RELEASE #2: Wed Oct 31 20:17:57 PDT 2012     root@pkgbox32.dragonflybsd.org:/usr/obj/build/home/justin/src/sys/GENERIC  __i386__
