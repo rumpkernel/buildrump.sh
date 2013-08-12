@@ -673,25 +673,6 @@ resolvepaths ()
 	RUMPMAKE="${BRTOOLDIR}/rumpmake"
 }
 
-checksrcversion ()
-{
-
-	[ ! -f "${SRCDIR}/build.sh" -o ! -f "${SRCDIR}/sys/rump/Makefile" ] && \
-	    die \"${SRCDIR}\" is not a NetBSD source tree.  try -h
-
-	# check if NetBSD src is new enough
-	oIFS="${IFS}"
-	IFS=':'
-	exec 3>&2 2>/dev/null
-	ver="`sed -n 's/^BUILDRUMP=//p' < ${SRCDIR}/sys/rump/VERSION`"
-	exec 2>&3 3>&-
-	set ${ver} 0
-	[ "1${1}" -lt "1${NBSRC_DATE}" -o \
-	    \( "1${1}" -eq "1${NBSRC_DATE}" -a "1${2}" -lt "1${NBSRC_SUB}" \) ]\
-	    && die "Update NetBSD src (${SRCDIR}) to ${NBSRC_DATE}:${NBSRC_SUB}"
-	IFS="${oIFS}"
-}
-
 check64 ()
 {
 
@@ -942,9 +923,6 @@ evaltarget
 resolvepaths
 
 if ${dobuild} || ${doinstall}; then
-	# install uses src tree Makefiles
-	checksrcversion
-
 	# build implies we need a dest
 	dosetupdest=true
 fi
