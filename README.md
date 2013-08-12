@@ -144,6 +144,9 @@ Continuous testing on Linux/amd64 + gcc/clang is done by
 [Travis CI](https://travis-ci.org/anttikantee/buildrump.sh)
 for every commit.  [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
 
+Tested machine architectures include _x86_ (32/64bit), _ARM_, _PowerPC_
+(32/64bit) and UltraSPARC (32/64bit).
+
 Examples of hosts buildrump.sh has manually been tested on are
 as follows:
 
