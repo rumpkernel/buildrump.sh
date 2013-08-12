@@ -8,11 +8,18 @@ of configurations to form *rump kernels*, which provide services to
 applications directly on the host.  The benefits of this approach include
 avoiding the overhead of OS virtualization.  Also, root privileges are
 not mandated.
+_buildrump.sh_ also provides basic support for hosting
+rump kernels beyond POSIX environments, such as
+[in the Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel).
 
-An example use case is [fs-utils](http://github.com/stacktic/fs-utils)
-which uses rump kernels to access file system images.  Another example
-is using the TCP/IP stack in conjunction with the Data Plane Development
-Kit, available [here](http://github.com/anttikantee/dpdk-rumptcpip).
+Examples of using rump kernels are as follows:
+[fs-utils](http://github.com/stacktic/fs-utils) uses file
+system drivers in unprivileged applications.  The TCP/IP
+stack can be used in conjunction with the Data
+Plane Development Kit for [fast userspace packet
+processing](http://github.com/anttikantee/dpdk-rumptcpip).
+An alternative Lua interface to rump kernels is available via
+the [ljsyscall project](https://github.com/justincormack/ljsyscall).
 
 For full details on rump kernels, read http://www.NetBSD.org/docs/rump/
 and follow the links.
