@@ -41,6 +41,8 @@ static struct socket *in4so;
 static struct socket *in6so;
 static struct socket *rtso;
 
+#define CHECKDOMAIN(dom) if (!(dom)) return EAFNOSUPPORT
+
 int
 rump_netconfig_ifcreate(const char *ifname)
 {
@@ -127,6 +129,8 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	in_addr_t m_addr;
 	int rv;
 
+	CHECKDOMAIN(in4so);
+
 	memset(&ia, 0, sizeof(ia));
 	strlcpy(ia.ifra_name, ifname, sizeof(ia.ifra_name));
 
@@ -159,6 +163,8 @@ int
 rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int mask)
 {
 
+	CHECKDOMAIN(in6so);
+
 	panic("IPv6 is TODO");
 }
 
@@ -169,6 +175,8 @@ rump_netconfig_ipv4_gw(const char *gwaddr)
 	struct sockaddr_in sin;
 	struct mbuf *m;
 	int off, rv;
+
+	CHECKDOMAIN(in4so);
 
 	memset(&rtm, 0, sizeof(rtm));
 	rtm.rtm_type = RTM_ADD;
@@ -214,10 +222,11 @@ RUMP_COMPONENT(RUMP_COMPONENT_NET_IFCFG)
 {
 	int rv;
 
-	if ((rv = socreate(PF_INET, &in4so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
-		panic("netconfig socreate in4: %d", rv);
-	if ((rv = socreate(PF_INET6, &in6so, SOCK_DGRAM, 0, curlwp, NULL)) != 0)
-		panic("netconfig socreate in6: %d", rv);
+	socreate(PF_INET, &in4so, SOCK_DGRAM, 0, curlwp, NULL);
+	socreate(PF_INET6, &in6so, SOCK_DGRAM, 0, curlwp, NULL);
+
+	if (!in4so && !in6so)
+		panic("netconfig: missing both inet and inet6");
 	if ((rv = socreate(PF_ROUTE, &rtso, SOCK_RAW, 0, curlwp, NULL)) != 0)
 		panic("netconfig socreate route: %d", rv);
 }
