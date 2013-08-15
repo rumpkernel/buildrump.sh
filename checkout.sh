@@ -47,7 +47,8 @@ NBSRC_CVSFLAGS="-z3 \
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA='
     20130815 2211UTC:
-	src/sys/rump/include/rump'
+	src/sys/rump/include/rump
+	src/sys/rump/librump/rumpvfs/compat.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
