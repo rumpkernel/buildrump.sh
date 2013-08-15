@@ -45,7 +45,9 @@ NBSRC_CVSFLAGS="-z3 \
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA=''
+NBSRC_EXTRA='
+    20130815 2200UTC:
+	src/sys/rump/include/rump'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
