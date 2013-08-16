@@ -8,9 +8,11 @@ of configurations to form *rump kernels*, which provide services to
 applications directly on the host.  The benefits of this approach include
 avoiding the overhead of OS virtualization.  Also, root privileges are
 not mandated.
-_buildrump.sh_ also provides basic support for hosting
-rump kernels beyond POSIX environments, such as
-[in the Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel).
+buildrump.sh also provides the tools necessary to build rump kernels
+for other platforms, such as
+[the Xen hypervisor](https://github.com/anttikantee/rumpuser-xen/)
+or
+[the Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel).
 
 Examples of using rump kernels are as follows:
 [fs-utils](http://github.com/stacktic/fs-utils) uses file
