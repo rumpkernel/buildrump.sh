@@ -77,7 +77,8 @@ router(const char *ctrlsock)
 
 	rump_daemonize_begin();
 	rump_init();
-	rump_init_server(ctrlsock);
+	if (rump_init_server(ctrlsock) != 0)
+		die("init server failed");
 	config_router();
 	rump_daemonize_done(0);
 	pause();
