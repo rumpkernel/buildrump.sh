@@ -747,6 +747,10 @@ evaltarget ()
 		;;
 	esac
 
+	if ! cppdefines __ELF__; then
+		${ANYTARGETISGOOD} || die ELF required as target object format
+	fi
+
 	if [ "${target_notsupp}" = 'yes' ]; then
 		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
 	fi
