@@ -397,7 +397,7 @@ EOF
 	    -V NOPROFILE=1 \
 	    -V NOLINT=1 \
 	    -V USE_SSP=no \
-	    -V MKHTML=no -V MKCATPAGES=yes \
+	    -V MKHTML=no -V MKCATPAGES=no \
 	    -V MKDYNAMICROOT=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
