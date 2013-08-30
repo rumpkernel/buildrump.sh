@@ -740,19 +740,19 @@ evaltarget ()
 		;;
 	"cygwin")
 		NOPIC=yes
-		target_notsupp='yes'
+		target_supported=false
 		;;
 	"unknown"|*)
-		target_notsupp='yes'
+		target_supported=false
 		;;
 	esac
 
-	if ! cppdefines __ELF__; then
-		${ANYTARGETISGOOD} || die ELF required as target object format
+	if ! ${target_supported:-true}; then
+		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
 	fi
 
-	if [ "${target_notsupp}" = 'yes' ]; then
-		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
+	if ! cppdefines __ELF__; then
+		${ANYTARGETISGOOD} || die ELF required as target object format
 	fi
 
 	# decide 32/64bit build.  step one: probe compiler default
