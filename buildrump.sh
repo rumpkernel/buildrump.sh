@@ -590,12 +590,12 @@ parseargs ()
 		k)
 			KERNONLY=true
 			;;
+		o)
+			OBJDIR=${OPTARG}
+			;;
 		q)
 			# build.sh handles value going negative
 			NOISE=$((NOISE-1))
-			;;
-		o)
-			OBJDIR=${OPTARG}
 			;;
 		r)
 			[ ${debugginess} -gt 0 ] \
