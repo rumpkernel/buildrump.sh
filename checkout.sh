@@ -48,7 +48,13 @@ NBSRC_CVSFLAGS="-z3 \
 NBSRC_EXTRA='
     20130815 2211UTC:
 	src/sys/rump/include/rump
-	src/sys/rump/librump/rumpvfs/compat.c'
+	src/sys/rump/librump/rumpvfs/compat.c;
+    20130830 1115UTC:
+	src/sys/rump/Makefile.rump
+	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/rump/librump/rumpkern/rump_syscalls.c
+	src/sys/sys/syscallargs.h
+	src/sys/kern/syscalls.master'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
