@@ -74,13 +74,14 @@ helpme ()
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
+	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
 	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
 	printf "\tcheckout:\talias for checkoutgit\n"
 	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
-	printf "\tbuild:\t\tbuild rump kernel components\n"
+	printf "\tbuild:\t\tbuild everything related to rump kernels\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
 	printf "\tfullbuild:\talias for \"tools build install\"\n"
@@ -426,8 +427,8 @@ makebuild ()
 
 	DIRS_first='lib/librumpuser'
 	DIRS_second='lib/librump'
-	DIRS_third="lib/librumpclient lib/librumpdev lib/librumpnet
-	    lib/librumpvfs sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
+	DIRS_third="lib/librumpdev lib/librumpnet lib/librumpvfs
+	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
 	if [ ${TARGET} = "linux" ]; then
@@ -439,23 +440,40 @@ makebuild ()
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_sunos"
 	fi
 
-	mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
-	mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
-	mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
-	mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
-	mkmakefile ${OBJDIR}/Makefile.all \
-	    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
+	if ${KERNONLY}; then
+		mkmakefile ${OBJDIR}/Makefile.incs \
+		    ${DIRS_first} ${DIRS_second} ${DIRS_third}
+		mkmakefile ${OBJDIR}/Makefile.all ${DIRS_second} ${DIRS_third}
+	else
+		DIRS_third="lib/librumpclient ${DIRS_third}"
+
+		mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
+		mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
+		mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
+		mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
+		mkmakefile ${OBJDIR}/Makefile.all \
+		    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
+	fi
 
 	# try to minimize the amount of domake invocations.  this makes a
 	# difference especially on systems with a large number of slow cores
 	for target in ${targets}; do
-		if [ ${target} = "dependall" ]; then
-			domake ${OBJDIR}/Makefile.first ${target}
-			domake ${OBJDIR}/Makefile.second ${target}
-			domake ${OBJDIR}/Makefile.third ${target}
-			domake ${OBJDIR}/Makefile.final ${target}
+		if ${KERNONLY}; then
+			if [ ${target} = "includes" ]; then
+				domake ${OBJDIR}/Makefile.incs ${target}
+			else
+				domake ${OBJDIR}/Makefile.all ${target} \
+				    NOPIC=1 RUMPKERN_ONLY=1
+			fi
 		else
-			domake ${OBJDIR}/Makefile.all ${target}
+			if [ ${target} = "dependall" ]; then
+				domake ${OBJDIR}/Makefile.first ${target}
+				domake ${OBJDIR}/Makefile.second ${target}
+				domake ${OBJDIR}/Makefile.third ${target}
+				domake ${OBJDIR}/Makefile.final ${target}
+			else
+				domake ${OBJDIR}/Makefile.all ${target}
+			fi
 		fi
 	done
 }
@@ -535,8 +553,9 @@ parseargs ()
 	BRDIR=$(dirname $0)
 	THIRTYTWO=false
 	SIXTYFOUR=false
+	KERNONLY=false
 
-	while getopts '3:6:d:DhHj:o:qrs:T:V:' opt; do
+	while getopts '3:6:d:DhHj:ko:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -567,6 +586,9 @@ parseargs ()
 			;;
 		H)
 			ANYTARGETISGOOD=true
+			;;
+		k)
+			KERNONLY=true
 			;;
 		q)
 			# build.sh handles value going negative
@@ -723,20 +745,20 @@ evaltarget ()
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__ -U_BIG_ENDIAN'
-		EXTRA_RUMPUSER='-ldl -lrt'
-		EXTRA_RUMPCLIENT='-lpthread -ldl'
+		${KERNONLY} || EXTRA_RUMPUSER='-ldl -lrt'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread -ldl'
 		;;
 	"netbsd")
 		# what do you expect? ;)
 		;;
 	"sunos")
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-		EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
-		EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
+		${KERNONLY} || EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
-		NOSTATICLIB=yes
+		${KERNONLY} || NOSTATICLIB=yes
 		;;
 	"cygwin")
 		NOPIC=yes
@@ -907,9 +929,12 @@ mkmakefile ()
 domake ()
 {
 
+	mkfile=${1}; shift
+	mktarget=${1}; shift
+
 	[ ! -x ${RUMPMAKE} ] && die "No rumpmake (${RUMPMAKE}). Forgot tools?"
-	${RUMPMAKE} -j ${JNUM} -f ${1} ${2}
-	[ $? -eq 0 ] || die "make $1 $2"
+	${RUMPMAKE} $* -j ${JNUM} -f ${mkfile} ${mktarget}
+	[ $? -eq 0 ] || die "make $mkfile $mktarget"
 }
 
 ###
