@@ -49,12 +49,19 @@ NBSRC_EXTRA='
     20130815 2211UTC:
 	src/sys/rump/include/rump
 	src/sys/rump/librump/rumpvfs/compat.c;
-    20130830 1115UTC:
+    20130903 2135UTC:
 	src/sys/rump/Makefile.rump
-	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/rump/librump/rumpkern/Makefile.rumpkern
+	src/sys/rump/librump/rumpkern/rump_private.h
+	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
+	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/sys/syscall.h
 	src/sys/sys/syscallargs.h
-	src/sys/kern/syscalls.master'
+	src/sys/kern/init_sysent.c
+	src/sys/kern/syscalls.c
+	src/sys/kern/syscalls.master
+	src/sys/kern/makesyscalls.sh'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
