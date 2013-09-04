@@ -412,6 +412,9 @@ EOF
 makebuild ()
 {
 
+	# ensure we're in SRCDIR, in case "tools" wasn't run
+	cd ${SRCDIR}
+
 	printenv
 
 	targets=$*
