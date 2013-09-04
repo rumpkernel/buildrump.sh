@@ -272,6 +272,7 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 {
 	struct interface *iface;
 	struct if_options *ifo;
+	struct lwp *origlwp;
 	int error, tries = 0;
 	bool rv;
 
@@ -279,6 +280,7 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 	 * first, create outselves a new process context, since we're
 	 * going to be opening file descriptors
 	 */
+	origlwp = curlwp;
 	rump_lwproc_rfork(RUMP_RFCFDG);
 
 	if ((error = init_sockets()) != 0) {
@@ -336,5 +338,6 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 	if (!error)
 		shutdownhook_establish(send_release, curlwp);
  out:
+	rump_lwproc_switch(origlwp);
 	return error;
 }
