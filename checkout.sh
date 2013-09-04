@@ -61,7 +61,9 @@ NBSRC_EXTRA='
 	src/sys/kern/init_sysent.c
 	src/sys/kern/syscalls.c
 	src/sys/kern/syscalls.master
-	src/sys/kern/makesyscalls.sh'
+	src/sys/kern/makesyscalls.sh;
+    20130904 1800UTC:
+	src/sys/rump/librump/rumpkern/rump.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
