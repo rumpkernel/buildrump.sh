@@ -280,7 +280,7 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 	 * first, create outselves a new process context, since we're
 	 * going to be opening file descriptors
 	 */
-	origlwp = curlwp;
+	origlwp = rump_lwproc_curlwp();
 	rump_lwproc_rfork(RUMP_RFCFDG);
 
 	if ((error = init_sockets()) != 0) {
