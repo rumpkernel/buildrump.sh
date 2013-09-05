@@ -62,7 +62,8 @@ NBSRC_EXTRA='
 	src/sys/kern/syscalls.c
 	src/sys/kern/syscalls.master
 	src/sys/kern/makesyscalls.sh;
-    20130904 1800UTC:
+    20130905 1225UTC:
+	src/sys/kern/kern_descrip.c
 	src/sys/rump/librump/rumpkern/rump.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
