@@ -51,9 +51,6 @@ NBSRC_EXTRA='
 	src/sys/rump/librump/rumpvfs/compat.c;
     20130903 2135UTC:
 	src/sys/rump/Makefile.rump
-	src/sys/rump/librump/rumpkern/Makefile.rumpkern
-	src/sys/rump/librump/rumpkern/rump_private.h
-	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
 	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/sys/syscall.h
@@ -62,8 +59,11 @@ NBSRC_EXTRA='
 	src/sys/kern/syscalls.c
 	src/sys/kern/syscalls.master
 	src/sys/kern/makesyscalls.sh;
-    20130905 1225UTC:
+    20130907 1800UTC:
 	src/sys/kern/kern_descrip.c
+	src/sys/rump/librump/rumpkern/Makefile.rumpkern
+	src/sys/rump/librump/rumpkern/rump_private.h
+	src/sys/rump/librump/rumpkern/cons.c
 	src/sys/rump/librump/rumpkern/rump.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
