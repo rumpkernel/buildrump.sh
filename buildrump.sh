@@ -432,11 +432,11 @@ makebuild ()
 	DIRS_second='lib/librump'
 	DIRS_third="lib/librumpdev lib/librumpnet lib/librumpvfs
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
-	    sys/rump/include ${BRDIR}/brlib"
+	    sys/rump/include ${BRDIR}/brlib
+	    sys/rump/kern/lib/libsys_linux"
 
 	if [ ${TARGET} = "linux" ]; then
 		DIRS_final="lib/librumphijack"
-		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
 	fi
 
 	if [ ${TARGET} = "sunos" ]; then
