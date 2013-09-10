@@ -343,12 +343,12 @@ EOF
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
 	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
 	unset _tmpvar
-	for x in ${EXTRA_RUMPUSER}; do
+	for x in ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
 	unset _tmpvar
-	for x in ${EXTRA_RUMPCLIENT}; do
+	for x in ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}; do
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
@@ -371,6 +371,24 @@ CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
+EOF
+
+	${KERNONLY} || cat >> "${BRTOOLDIR}/mk.conf" << EOF
+
+# Support for NetBSD Makefiles which use <bsd.prog.mk>
+# It's mostly a question of erasing dependencies that we don't
+# expect to see
+.ifdef PROG
+LIBCRT0=
+LIBCRTBEGIN=
+LIBCRTEND=
+LIBC=
+LIBUTIL=
+
+LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+CPPFLAGS+=-I${DESTDIR}/include
+LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
+.endif # PROG
 EOF
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
@@ -751,16 +769,17 @@ evaltarget ()
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__ -U_BIG_ENDIAN'
-		${KERNONLY} || EXTRA_RUMPUSER='-ldl -lrt'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread -ldl'
+		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
+		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	"netbsd")
 		# what do you expect? ;)
 		;;
 	"sunos")
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-		${KERNONLY} || EXTRA_RUMPUSER='-lsocket -lrt -ldl -lnsl'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lsocket -ldl -lnsl'
+		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
+		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
@@ -793,12 +812,12 @@ evaltarget ()
 	# step 2: if the user specified 32/64, try to establish if it will work
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
 		echo 'int main() {return 0;}' | ${CC} -m32 -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER} > /dev/null 2>&1
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
 		echo 'int main() {return 0;}' | ${CC} -m64 -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER} > /dev/null 2>&1
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
 	else
