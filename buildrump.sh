@@ -383,13 +383,14 @@ LIBCRT0=
 LIBCRTBEGIN=
 LIBCRTEND=
 LIBC=
-LIBUTIL=
 
 LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 CPPFLAGS+=-I${DESTDIR}/include
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
-.endif # PROG
 EOF
+	[ ${TARGET} != "netbsd" ] \
+	    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${BRTOOLDIR}/mk.conf"
+	echo '.endif # PROG' >> "${BRTOOLDIR}/mk.conf"
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
