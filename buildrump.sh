@@ -458,7 +458,7 @@ makebuild ()
 	fi
 
 	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
-		DIRS_final="lib/librumphijack"
+		DIRS_final="lib/librumphijack usr.bin/rump_server"
 	fi
 
 	if [ ${TARGET} = "sunos" ]; then
