@@ -1,3 +1,4 @@
-SUBDIR+=	libnetconfig libtest
+SUBDIR+=	libnetconfig
+#SUBDIR+=	libtest
 
 .include <bsd.subdir.mk>
