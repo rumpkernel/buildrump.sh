@@ -373,8 +373,9 @@ AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
-	${KERNONLY} || cat >> "${BRTOOLDIR}/mk.conf" << EOF
-
+	if ! ${KERNONLY}; then
+		echo >> "${BRTOOLDIR}/mk.conf"
+		cat >> "${BRTOOLDIR}/mk.conf" << EOF
 # Support for NetBSD Makefiles which use <bsd.prog.mk>
 # It's mostly a question of erasing dependencies that we don't
 # expect to see
@@ -388,9 +389,10 @@ LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 CPPFLAGS+=-I${DESTDIR}/include
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
-	[ ${TARGET} != "netbsd" ] \
-	    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${BRTOOLDIR}/mk.conf"
-	echo '.endif # PROG' >> "${BRTOOLDIR}/mk.conf"
+		[ ${TARGET} != "netbsd" ] \
+		    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${BRTOOLDIR}/mk.conf"
+		echo '.endif # PROG' >> "${BRTOOLDIR}/mk.conf"
+	fi
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
