@@ -438,7 +438,7 @@ makebuild ()
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
 	fi
 
-	if [ ${TARGET} = "linux" ]; then
+	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
 		DIRS_final="lib/librumphijack"
 	fi
 
