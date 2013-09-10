@@ -432,8 +432,11 @@ makebuild ()
 	DIRS_second='lib/librump'
 	DIRS_third="lib/librumpdev lib/librumpnet lib/librumpvfs
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
-	    sys/rump/include ${BRDIR}/brlib
-	    sys/rump/kern/lib/libsys_linux"
+	    sys/rump/include ${BRDIR}/brlib"
+
+	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" ]; then
+		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
+	fi
 
 	if [ ${TARGET} = "linux" ]; then
 		DIRS_final="lib/librumphijack"
