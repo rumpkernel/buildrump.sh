@@ -905,10 +905,13 @@ setupdest ()
 	# level of "usr"
 	mkdir -p ${DESTDIR}/include/rump || die create ${DESTDIR}/include/rump
 	mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
+	mkdir -p ${DESTDIR}/bin || die create ${DESTDIR}/bin
 	mkdir -p ${OBJDIR}/dest/usr/share/man \
 	    || die create ${OBJDIR}/dest/usr/share/man
 	ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/
 	ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/
+	ln -sf ${DESTDIR}/bin ${OBJDIR}/dest/usr/bin
+	ln -sf ${DESTDIR}/bin ${OBJDIR}/dest/usr/sbin
 	for man in cat man ; do 
 		for x in 1 2 3 4 5 6 7 8 9 ; do
 			mkdir -p ${DESTDIR}/share/man/${man}${x} \
