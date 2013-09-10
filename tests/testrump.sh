@@ -18,15 +18,16 @@ doremote ()
 	    -I${DESTDIR}/include					\
 	    ${AS_NEEDED} -Wl,--whole-archive -lrump -lrumpuser		\
 	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread		\
-	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} 			\
+	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 
 	# XXX: some systems don't have all of the librumpclient pthread
 	# dependencies in libc, so always link in libpthread, although
 	# it wouldn't be required on systems such as NetBSD
 	${CC} -g -o ${TESTOBJ}/simpleclient ${TESTDIR}/simpleclient.c	\
 	    -I${DESTDIR}/include					\
-	    -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_CFLAGS}		\
-	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}	\
+	    ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
 	./simpleserver "${RUMP_SERVER}" || die simpleserver failed
@@ -45,7 +46,8 @@ dokernfs ()
 	    -I${DESTDIR}/include ${AS_NEEDED} 				\
 	    -Wl,--whole-archive -lrumpfs_kernfs -lrumpvfs -lrump 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
-	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}			\
+	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
 	./fstest || die fstest failed
@@ -64,7 +66,8 @@ dosysvbfs ()
 	    -Wl,--whole-archive -lrumpfs_sysvbfs -lrumpdev_disk		\
 	    -lrumpdev -lrumpvfs -lrump -lrumpuser			\
 	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
-	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}			\
+	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
 	./fstest2 ${TESTDIR} || die fstest2 failed
@@ -83,7 +86,8 @@ donet ()
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
-	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}			\
+	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
 	rm -f busmem
@@ -104,7 +108,8 @@ donetrouted ()
 	    -Wl,--whole-archive -lrumpnet_shmif -lrumpnet_config	\
 	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump 	 	\
 	    -lrumpuser -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread	\
-	    ${EXTRA_RUMPUSER} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}			\
+	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
 	rm -f net1 net2
