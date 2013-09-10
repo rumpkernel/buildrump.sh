@@ -14,23 +14,13 @@ doremote ()
 	export RUMP_SERVER="unix://mysocket"
 
 	set -x
-	${CC} -g -o ${TESTOBJ}/simpleserver ${TESTDIR}/simpleserver.c	\
-	    -I${DESTDIR}/include					\
-	    ${AS_NEEDED} -Wl,--whole-archive -lrump -lrumpuser		\
-	    -Wl,--no-whole-archive ${EXTRA_CFLAGS} -lpthread		\
-	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} 			\
-	    -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
-
-	# XXX: some systems don't have all of the librumpclient pthread
-	# dependencies in libc, so always link in libpthread, although
-	# it wouldn't be required on systems such as NetBSD
 	${CC} -g -o ${TESTOBJ}/simpleclient ${TESTDIR}/simpleclient.c	\
 	    -I${DESTDIR}/include					\
 	    -lrumpclient ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}	\
 	    ${EXTRA_CFLAGS} -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 	set +x
 
-	./simpleserver "${RUMP_SERVER}" || die simpleserver failed
+	${DESTDIR}/bin/rump_server "${RUMP_SERVER}" || die rump_server failed
 	./simpleclient || die simpleclient failed
 
 	echo Done
