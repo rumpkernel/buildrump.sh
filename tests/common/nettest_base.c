@@ -20,7 +20,7 @@ static void
 server(void)
 {
 	struct sockaddr_in sin;
-	int slen = sizeof(sin);
+	unsigned int slen = sizeof(sin);
 	int s, s2;
 
 	rump_daemonize_begin();
