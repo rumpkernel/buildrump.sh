@@ -458,7 +458,7 @@ makebuild ()
 	fi
 
 	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
-		DIRS_final="lib/librumphijack usr.bin/rump_server"
+		DIRS_final="lib/librumphijack"
 	fi
 
 	if [ ${TARGET} = "sunos" ]; then
@@ -501,6 +501,13 @@ makebuild ()
 			fi
 		fi
 	done
+
+	if ! ${KERNONLY}; then
+		mkmakefile ${OBJDIR}/Makefile.utils usr.bin/rump_server
+		for target in ${targets}; do
+			domake ${OBJDIR}/Makefile.utils ${target}
+		done
+	fi
 }
 
 evaltools ()
