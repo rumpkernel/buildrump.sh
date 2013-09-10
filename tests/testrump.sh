@@ -12,7 +12,7 @@ dosimpleclient ()
 	echo Remote communication
 	export RUMP_SERVER="unix://mysocket"
 	${DESTDIR}/bin/rump_server "${RUMP_SERVER}" || die rump_server failed
-	${TO}/simpleclient || die simpleclient failed
+	./simpleclient || die simpleclient failed
 	unset RUMP_SERVER
 	echo Done
 }
@@ -29,7 +29,7 @@ dofstest_img ()
 {
 
 	echo VFS test with actual fs
-	${TO}/fstest2 ${TESTDIR}/fstest_img || die fstest2 failed
+	./fstest2 ${TESTDIR}/fstest_img || die fstest2 failed
 	echo Done
 }
 
@@ -38,8 +38,8 @@ donettest_simple ()
 
 	echo Networking test
 	rm -f busmem
-	${TO}/nettest_simple server || die nettest server failed
-	${TO}/nettest_simple client || die nettest client failed
+	./nettest_simple server || die nettest server failed
+	./nettest_simple client || die nettest client failed
 	echo Done
 }
 
@@ -49,9 +49,9 @@ donettest_routed ()
 	echo Routed networking test
 
 	rm -f net1 net2
-	${TO}/nettest_routed server || die nettest server failed
-	${TO}/nettest_routed router unix://routerctrl || die router fail
-	${TO}/nettest_routed client || die nettest client failed
+	./nettest_routed server || die nettest server failed
+	./nettest_routed router unix://routerctrl || die router fail
+	./nettest_routed client || die nettest client failed
 
 	# "code reuse ;)"
 	export RUMP_SERVER="unix://routerctrl"
@@ -76,13 +76,12 @@ alltests ()
 	for test in ${ALLTESTS}; do
 		TO=${TESTOBJ}/${test}
 		(
-			echo ${TESTDIR}
 			cd ${TESTDIR}/${test}
 			${RUMPMAKE} MAKEOBJDIR=${TO} obj
 			${RUMPMAKE} MAKEOBJDIR=${TO} dependall
 		)
 
-		do${test}
+		( cd ${TO} ; do${test} )
 	done
 
 	echo
