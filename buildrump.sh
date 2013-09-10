@@ -390,6 +390,9 @@ LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
 		[ ${TARGET} != "netbsd" ] \
 		    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${BRTOOLDIR}/mk.conf"
+		[ ${LD_FLAVOR} != 'sun' ] \
+		    && echo 'LDFLAGS+=-Wl,--no-as-needed' \
+		      >> "${BRTOOLDIR}/mk.conf"
 		echo '.endif # PROG' >> "${BRTOOLDIR}/mk.conf"
 	fi
 
