@@ -17,7 +17,7 @@ in various environments and using the drivers as services.  Some examples
 of how to use these services are as follows:
 
 * [fs-utils](https://github.com/stacktic/fs-utils) uses file
-  system drivers in unprivileged applications
+  system drivers to provide applications for accessing file system images
 * [dpdk-rumptcpip](https://github.com/anttikantee/dpdk-rumptcpip)
   attaches the TCP/IP to DPDK for fast userspace packet processing
 * [ljsyscall](https://github.com/justincormack/ljsyscall) provides
