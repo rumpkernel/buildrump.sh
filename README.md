@@ -3,8 +3,8 @@ Tools for building Rump Kernels [![Build Status](https://travis-ci.org/anttikant
 
 The `buildrump.sh` script builds unmodified NetBSD kernel drivers such
 as file systems and the TCP/IP stack as components which can be linked
-to form runnable *rump kernels*.  These lightweight rump kernels run on
-of top of a high-level hypercall interface which is straightforward to
+to form *rump kernels*.  These lightweight rump kernels run on
+top of a high-level hypercall interface which is straightforward to
 implement for most environments.  This repository includes the hypercall
 implementation for running in userspace on POSIX hosts, with alternative
 implementations such as for the
@@ -16,13 +16,15 @@ In other words, rump kernels enable embedding unmodified kernel drivers
 in various environments and using the drivers as services.  Some examples
 of how to use these services are as follows:
 
-* [fs-utils](http://github.com/stacktic/fs-utils) uses file
+* [fs-utils](https://github.com/stacktic/fs-utils) uses file
   system drivers in unprivileged applications
-* [dpdk-rumptcpip](http://github.com/anttikantee/dpdk-rumptcpip)
-  attaches the TCP/IP to DPDK for full-stack packet processing
+* [dpdk-rumptcpip](https://github.com/anttikantee/dpdk-rumptcpip)
+  attaches the TCP/IP to DPDK for fast userspace packet processing
 * [ljsyscall](https://github.com/justincormack/ljsyscall) provides
   a Lua interface to rump kernels, allowing easy access from applications
   written in Lua
+* [rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) enables
+  running applications as standalone Xen DomU's (includes libc support)
 
 For full details on rump kernels, read http://www.NetBSD.org/docs/rump/
 and follow the links.
