@@ -1,27 +1,28 @@
-Rump Kernels for POSIX Hosts [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
-============================
+Tools for building Rump Kernels [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
+===============================
 
-The buildrump.sh script builds unmodified NetBSD kernel drivers such
-as file systems and the TCP/IP stack as components for hosts such as
-Linux and BSDs.  These components can be linked in a variety
-of configurations to form *rump kernels*, which provide services to
-applications directly on the host.  The benefits of this approach include
-avoiding the overhead of OS virtualization.  Also, root privileges are
-not mandated.
-buildrump.sh also provides the tools necessary to build rump kernels
-for other platforms, such as
-[the Xen hypervisor](https://github.com/anttikantee/rumpuser-xen/)
-or
-[the Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel).
+The `buildrump.sh` script builds unmodified NetBSD kernel drivers such
+as file systems and the TCP/IP stack as components which can be linked
+to form runnable *rump kernels*.  These lightweight rump kernels run on
+of top of a high-level hypercall interface which is straightforward to
+implement for most environments.  This repository includes the hypercall
+implementation for running in userspace on POSIX hosts, with alternative
+implementations such as for the
+[Xen hypervisor](https://github.com/anttikantee/rumpuser-xen/)
+and the [Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel)
+being hosted elsewhere.
 
-Examples of using rump kernels are as follows:
-[fs-utils](http://github.com/stacktic/fs-utils) uses file
-system drivers in unprivileged applications.  The TCP/IP
-stack can be used in conjunction with the Data
-Plane Development Kit for [fast userspace packet
-processing](http://github.com/anttikantee/dpdk-rumptcpip).
-An alternative Lua interface to rump kernels is available via
-the [ljsyscall project](https://github.com/justincormack/ljsyscall).
+In other words, rump kernels enable embedding unmodified kernel drivers
+in various environments and using the drivers as services.  Some examples
+of how to use these services are as follows:
+
+* [fs-utils](http://github.com/stacktic/fs-utils) uses file
+  system drivers in unprivileged applications
+* [dpdk-rumptcpip](http://github.com/anttikantee/dpdk-rumptcpip)
+  attaches the TCP/IP to DPDK for full-stack packet processing
+* [ljsyscall](https://github.com/justincormack/ljsyscall) provides
+  a Lua interface to rump kernels, allowing easy access from applications
+  written in Lua
 
 For full details on rump kernels, read http://www.NetBSD.org/docs/rump/
 and follow the links.
@@ -32,7 +33,8 @@ Installation Instructions
 =========================
 
 The easiest way to install rump kernel components is to use a binary
-package for your OS/distribution/architecture.
+package for your OS/distribution/architecture.  These packages will also
+install the POSIX hypercall implementation.
 
 * Void Linux: `xbps-install -S netbsd-rumpkernel`
 * Arch Linux: [pacman](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=Arch_Core) (OBS), [AUR](https://aur.archlinux.org/packages/netbsd-rump-git/) 
@@ -137,6 +139,15 @@ can find the target platform headers and libraries which are required
 for building the hypercall library.  You can override the defaults
 by setting `$AR`, `$NM` and/or `$OBJCOPY` in the environment before
 running the script.
+
+Kernel-only mode
+----------------
+
+If the `-k` kernel-only parameter is specified, the script will
+omit building the POSIX hypercall implementation.  This is useful if
+you are developing your own hypercall layer implementation.  See the
+[rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) repository
+for the canonical example of using `-k`.
 
 
 Tested hosts
