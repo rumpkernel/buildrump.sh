@@ -780,7 +780,9 @@ evaltarget ()
 		RUMPKERN_UNDEF='-U__FreeBSD__'
 		;;
 	"linux")
-		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__ -U_BIG_ENDIAN'
+		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		cppdefines _BIG_ENDIAN \
+		    && RUMPKERN_UNDEF="${RUMPKERN_UNDEF} -U_BIG_ENDIAN"
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
