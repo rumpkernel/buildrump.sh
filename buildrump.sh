@@ -75,6 +75,7 @@ helpme ()
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
+	printf "\t-N: emulate NetBSD, set -D__NetBSD__ etc.  default: nope\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
@@ -334,7 +335,12 @@ EOF
 	appendmkconf 'Cmd' "${DBG}" "DBG"
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
-	appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
+	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
+		appendmkconf 'Cmd' '-D__NetBSD__' "CPPFLAGS"
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "CPPFLAGS"
+	else
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
+	fi
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
@@ -590,8 +596,9 @@ parseargs ()
 	THIRTYTWO=false
 	SIXTYFOUR=false
 	KERNONLY=false
+	NATIVENETBSD=false
 
-	while getopts '3:6:d:DhHj:ko:qrs:T:V:' opt; do
+	while getopts '3:6:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -625,6 +632,9 @@ parseargs ()
 			;;
 		k)
 			KERNONLY=true
+			;;
+		N)
+			NATIVENETBSD=true
 			;;
 		o)
 			OBJDIR=${OPTARG}
