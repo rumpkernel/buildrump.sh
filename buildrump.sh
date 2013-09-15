@@ -336,8 +336,8 @@ EOF
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
-		appendmkconf 'Cmd' '-D__NetBSD__' "CPPFLAGS" +
-		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "CPPFLAGS" +
+		printoneconfig 'Cmd' 'CPPFLAGS' '-D__NetBSD__'
+		printoneconfig 'Probe' 'CPPFLAGS' "${RUMPKERN_UNDEF}"
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	fi
@@ -436,6 +436,12 @@ EOF
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
 	unset ac_cv_header_zlib_h
+
+	# really append these only here, otherwise the tool build gets confused
+	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
+		echo "CPPFLAGS+=-D__NetBSD__ ${RUMPKERN_UNDEF}" \
+		    >> ${BRTOOLDIR}/mk.conf
+	fi
 }
 
 makebuild ()
