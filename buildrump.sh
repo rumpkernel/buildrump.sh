@@ -129,7 +129,7 @@ appendmkconf ()
 
 		val=${2# }
 		printoneconfig "${1}" "${name}" "${val}"
-		echo "${3}${4}=${val}" >> "${BRTOOLDIR}/mk.conf"
+		echo "${3}${4}=${val}" >> "${MKCONF}"
 	fi
 }
 
@@ -144,7 +144,7 @@ chkcrt ()
 	tst=`${CC} --print-file-name=crt${1}.o`
 	up=`echo ${1} | tr [a-z] [A-Z]`
 	[ -z "${tst%crt${1}.o}" ] \
-	    && echo "_GCC_CRT${up}=" >>"${BRTOOLDIR}/mk.conf"
+	    && echo "_GCC_CRT${up}=" >>"${MKCONF}"
 }
 
 #
@@ -323,7 +323,13 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 		chmod 755 ${tname}
 	done
 
-	cat > "${BRTOOLDIR}/mk.conf" << EOF
+	# Create mk.conf.  Create it under a temp name first so as to
+	# not affect the tool build with its contents
+	MKCONF="${BRTOOLDIR}/mk.conf.building"
+	mkconf_final="${BRTOOLDIR}/mk.conf"
+	> ${mkconf_final}
+
+	cat > "${MKCONF}" << EOF
 BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
 CPPFLAGS+=-I${OBJDIR}/compat/include
 LIBDO.pthread=_external
@@ -338,8 +344,8 @@ EOF
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
-		printoneconfig 'Cmd' 'CPPFLAGS' '-D__NetBSD__'
-		printoneconfig 'Probe' 'CPPFLAGS' "${RUMPKERN_UNDEF}"
+		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	fi
@@ -374,7 +380,7 @@ EOF
 	chkcrt n
 
 	# add vars from env last (so that they can be used for overriding)
-	cat >> "${BRTOOLDIR}/mk.conf" << EOF
+	cat >> "${MKCONF}" << EOF
 CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
@@ -382,8 +388,8 @@ LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
 	if ! ${KERNONLY}; then
-		echo >> "${BRTOOLDIR}/mk.conf"
-		cat >> "${BRTOOLDIR}/mk.conf" << EOF
+		echo >> "${MKCONF}"
+		cat >> "${MKCONF}" << EOF
 # Support for NetBSD Makefiles which use <bsd.prog.mk>
 # It's mostly a question of erasing dependencies that we don't
 # expect to see
@@ -397,11 +403,10 @@ LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
 		[ ${TARGET} != "netbsd" ] \
-		    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${BRTOOLDIR}/mk.conf"
+		    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${MKCONF}"
 		[ ${LD_FLAVOR} != 'sun' ] \
-		    && echo 'LDFLAGS+=-Wl,--no-as-needed' \
-		      >> "${BRTOOLDIR}/mk.conf"
-		echo '.endif # PROG' >> "${BRTOOLDIR}/mk.conf"
+		    && echo 'LDFLAGS+=-Wl,--no-as-needed' >> "${MKCONF}"
+		echo '.endif # PROG' >> "${MKCONF}"
 	fi
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
@@ -432,18 +437,18 @@ EOF
 	    -V MKHTML=no -V MKCATPAGES=yes \
 	    -V MKDYNAMICROOT=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
-	    -V MAKECONF="${BRTOOLDIR}/mk.conf" \
+	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
 	    ${BUILDSH_VARGS} \
 	  tools
 	[ $? -ne 0 ] && die build.sh tools failed
 	unset ac_cv_header_zlib_h
 
-	# really append these only here, otherwise the tool build gets confused
-	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
-		echo "CPPFLAGS+=-D__NetBSD__ ${RUMPKERN_UNDEF}" \
-		    >> ${BRTOOLDIR}/mk.conf
-	fi
+	# tool build done.  flip mk.conf name so that it gets picked up
+	omkconf="${MKCONF}"
+	MKCONF="${mkconf_final}"
+	mv "${omkconf}" "${MKCONF}"
+	unset omkconf mkconf_final
 }
 
 makebuild ()
