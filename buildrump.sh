@@ -175,8 +175,10 @@ probeld ()
 cppdefines ()
 {
 
-	${CC} -E -dM - < /dev/null | egrep -q "${1}"
-	return $?
+	var=${1}
+	${CC} -E -dM - < /dev/null | awk '$2 == "'$var'"{exit 37}'
+	[ $? -eq 37 ]
+	return
 }
 
 cctestW ()
