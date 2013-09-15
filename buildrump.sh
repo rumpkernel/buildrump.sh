@@ -336,8 +336,8 @@ EOF
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
-		appendmkconf 'Cmd' '-D__NetBSD__' "CPPFLAGS"
-		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "CPPFLAGS"
+		appendmkconf 'Cmd' '-D__NetBSD__' "CPPFLAGS" +
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "CPPFLAGS" +
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	fi
