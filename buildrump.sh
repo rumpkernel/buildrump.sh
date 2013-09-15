@@ -335,6 +335,11 @@ CPPFLAGS+=-I${OBJDIR}/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
+MKPROFILE=no
+MKARZERO=no
+USE_SSP=no
+MKHTML=no
+MKCATPAGES=yes
 EOF
 
 	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
@@ -430,11 +435,7 @@ EOF
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
-	    -V MKARZERO=no \
-	    -V NOPROFILE=1 \
-	    -V NOLINT=1 \
-	    -V USE_SSP=no \
-	    -V MKHTML=no -V MKCATPAGES=yes \
+	    -V MKLINT=no \
 	    -V MKDYNAMICROOT=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${mkconf_final}" \
