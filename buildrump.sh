@@ -255,7 +255,7 @@ maketools ()
 			if [ "${TARGET}" = netbsd ]; then
 				LDSCRIPT='-V RUMP_LDSCRIPT=no'
 			else
-				NOPIC=yes
+				MKPIC=no
 			fi
 		fi
 		rm -f test.c a.out ldscript.test
@@ -373,8 +373,8 @@ EOF
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
-	appendmkconf 'Probe' "${NOSTATICLIB}"  "NOSTATICLIB"
-	appendmkconf 'Probe' "${NOPIC}"  "NOPIC"
+	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
+	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
 	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
 
 	printenv
@@ -512,7 +512,7 @@ makebuild ()
 				domake ${OBJDIR}/Makefile.incs ${target}
 			else
 				domake ${OBJDIR}/Makefile.all ${target} \
-				    NOPIC=1 RUMPKERN_ONLY=1
+				    MKPIC=no RUMPKERN_ONLY=1
 			fi
 		else
 			if [ ${target} = "dependall" ]; then
@@ -821,10 +821,10 @@ evaltarget ()
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
-		${KERNONLY} || NOSTATICLIB=yes
+		${KERNONLY} || MKSTATICLIB=no
 		;;
 	"cygwin")
-		NOPIC=yes
+		MKPIC=no
 		target_supported=false
 		;;
 	"unknown"|*)
