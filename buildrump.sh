@@ -348,6 +348,11 @@ EOF
 	appendmkconf 'Cmd' "${DBG}" "DBG"
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
+	if ${KERNONLY}; then
+		appendmkconf Cmd no MKPIC
+		appendmkconf Cmd yes RUMPKERN_ONLY
+	fi
+
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
 		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
@@ -511,8 +516,7 @@ makebuild ()
 			if [ ${target} = "includes" ]; then
 				domake ${OBJDIR}/Makefile.incs ${target}
 			else
-				domake ${OBJDIR}/Makefile.all ${target} \
-				    MKPIC=no RUMPKERN_ONLY=1
+				domake ${OBJDIR}/Makefile.all ${target}
 			fi
 		else
 			if [ ${target} = "dependall" ]; then
