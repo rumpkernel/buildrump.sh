@@ -39,11 +39,6 @@ SRCDIR=./src
 JNUM=4
 
 #
-# NetBSD source timestamp minimum requirement
-NBSRC_DATE=20130515
-NBSRC_SUB=1
-
-#
 # support routines
 #
 
