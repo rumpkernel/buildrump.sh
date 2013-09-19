@@ -43,6 +43,10 @@ NBSRC_CVSDATE="20130910 1830UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
 
+# If set, timestamp for src/sys/rump/listsrcdir.  If unset,
+# NBSRC_CVSDATE is used.
+NBSRC_LISTDATE="20130919 1617UTC"
+
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA='
@@ -80,7 +84,7 @@ checkoutcvs ()
 
 	# we need listsrcdirs
 	echo ">> Fetching the list of files we need to checkout ..."
-	${CVS} ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_CVSDATE}" \
+	${CVS} ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_LISTDATE:-${NBSRC_CVSDATE}}"\
 	    src/sys/rump/listsrcdirs > listsrcdirs 2>/dev/null \
 	    || die listsrcdirs checkout failed
 
