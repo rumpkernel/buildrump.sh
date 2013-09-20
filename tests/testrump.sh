@@ -17,6 +17,14 @@ dosimpleclient ()
 	echo Done
 }
 
+doinit ()
+{
+
+	echo bootstrap test
+	${TO}/init || die init failed
+	echo Done
+}
+
 dofstest ()
 {
 
@@ -60,7 +68,7 @@ donettest_routed ()
 	echo Done
 }
 
-ALLTESTS="fstest fstest_img simpleclient nettest_simple nettest_routed"
+ALLTESTS="init fstest fstest_img simpleclient nettest_simple nettest_routed"
 alltests ()
 {
 
