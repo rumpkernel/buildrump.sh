@@ -9,7 +9,6 @@ main()
 	char buf[8192];
 	int fd;
 
-	setenv("RUMP_VERBOSE", "1", 1);
         rump_init();
 	if (rump_sys_mkdir("/kern", 0755) == -1)
 		die("mkdir /kern");
