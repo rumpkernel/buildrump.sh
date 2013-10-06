@@ -112,8 +112,9 @@ Crosscompilation is documented further below.
 If the command `tests` is given, the script will run simple tests
 to check that e.g. file systems and the TCP/IP stack work correctly.
 If everything was successfully completed, the final output from the
-script is "Success".  Note that `tests` cannot be run when `buildrump.sh`
-is used with a crosscompiler.
+script is "buildrump.sh ran successfully".  Note that `tests` cannot be
+run when `buildrump.sh` is used with a crosscompiler or in kernel-only
+mode (see below).
 
 To learn more about command line parameters, run the buildrump.sh
 script with the `-h` flag.
