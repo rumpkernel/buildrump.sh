@@ -1031,8 +1031,13 @@ ${doinstall} && targets="${targets} install"
 [ ! -z "${targets}" ] && makebuild ${targets}
 
 if ${dotests}; then
-	. ${BRDIR}/tests/testrump.sh
-	alltests
+	if ${KERNONLY}; then
+		echo '>> Kernel-only; skipping tests (no hypervisor)'
+	else
+		. ${BRDIR}/tests/testrump.sh
+		alltests
+	fi
 fi
 
+echo '>> buildrump.sh ran successfully'
 exit 0
