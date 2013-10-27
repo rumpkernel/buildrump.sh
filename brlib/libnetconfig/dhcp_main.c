@@ -43,6 +43,7 @@
 #include "dhcp_configure.h"
 #include "dhcp_dhcp.h"
 #include "dhcp_net.h"
+#include "rump_private.h"
 #include "rumpkern_if_priv.h"
 #include "netconfig_if_priv.h"
 
@@ -232,6 +233,9 @@ get_ack(struct interface *iface)
 	return true;
 }
 
+/* since we do essentially mi_switch() here, cannot use curlwp directly */
+#define mycurlwp curcpu()->ci_curlwp
+
 /*
  * release our called.  called at reboot-time.  we use the original
  * proc/lwp context here to avoid having to open new file descriptors.
@@ -244,9 +248,9 @@ send_release(void *arg)
 	uint8_t *udp;
 	ssize_t mlen, ulen;
 	struct in_addr ia;
-	struct lwp *l = curlwp;
+	struct lwp *origlwp = mycurlwp;
 
-	rump_lwproc_switch(NULL);
+	rump__lwproc_lwphold();
 	rump_lwproc_switch(arg);
 
 	memset(&ia, 0, sizeof(ia));
@@ -255,11 +259,14 @@ send_release(void *arg)
 	ulen = make_udp_packet(&udp, (void *)dhcp, mlen, ia, ia);
 	dhcp_send_raw_packet(iface, ETHERTYPE_IP, udp, ulen);
 
-	/* give it a chance to fly */
+	/* give it a chance to fly (rump kernel will exit) */
 	kpause("dhcprel", false, 1, NULL);
 
-	rump_lwproc_switch(NULL);
-	rump_lwproc_switch(l);
+	/* release the DHCP process */
+	rump_lwproc_releaselwp();
+
+	rump_lwproc_switch(origlwp);
+	rump__lwproc_lwprele();
 }
 
 /*
@@ -272,15 +279,15 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 {
 	struct interface *iface;
 	struct if_options *ifo;
-	struct lwp *origlwp;
+	struct lwp *origlwp = mycurlwp;
 	int error, tries = 0;
 	bool rv;
 
 	/*
-	 * first, create outselves a new process context, since we're
+	 * first, create ourselves a new process context, since we're
 	 * going to be opening file descriptors
 	 */
-	origlwp = rump_lwproc_curlwp();
+	rump__lwproc_lwphold();
 	rump_lwproc_rfork(RUMP_RFCFDG);
 
 	if ((error = init_sockets()) != 0) {
@@ -336,8 +343,9 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 
 	error = configure(iface);
 	if (!error)
-		shutdownhook_establish(send_release, curlwp);
+		shutdownhook_establish(send_release, mycurlwp);
  out:
 	rump_lwproc_switch(origlwp);
+	rump__lwproc_lwprele();
 	return error;
 }
