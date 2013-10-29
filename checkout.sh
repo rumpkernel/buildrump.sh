@@ -53,6 +53,7 @@ NBSRC_EXTRA='
     20130923 1800UTC:
 	src/sys/rump/include/sys/bus.h;
     20131027 2030UTC:
+	src/sys/rump/net/lib/libvirtif/rumpcomp_user.h
 	src/sys/rump/librump/rumpkern/lwproc.c
 	src/sys/rump/librump/rumpkern/rump_private.h'
 
