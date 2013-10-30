@@ -966,6 +966,8 @@ evaltarget ()
 		MACH_ARVH="mipseb"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		probemips
+		;;
 	"ppc64")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
