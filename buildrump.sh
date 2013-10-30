@@ -477,7 +477,9 @@ makebuild ()
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
-	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" ]; then
+	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" \
+	  -a ${MACHINE} != "mipsel" -a ${MACHINE} != "mipsel64" \
+	  -a ${MACHINE} != "mipseb" -a ${MACHINE} != "mipseb64" ]; then
 		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
 	fi
 
@@ -792,6 +794,15 @@ probearm ()
 	fi
 }
 
+# MIPS requires a few extra checks
+probemips ()
+{
+	# NetBSD/evbmips is softfloat by default but we can detect if this is correct
+	if cppdefines '__mips_hard_float'; then
+		MKSOFTFLOAT=no
+	fi
+}
+
 evaltarget ()
 {
 
@@ -848,12 +859,12 @@ evaltarget ()
 
 	# step 2: if the user specified 32/64, try to establish if it will work
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
-		echo 'int main() {return 0;}' | ${CC} -m32 -o /dev/null -x c - \
+		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
-		echo 'int main() {return 0;}' | ${CC} -m64 -o /dev/null -x c - \
+		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
 		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
@@ -909,6 +920,52 @@ evaltarget ()
 			EXTRA_AFLAGS='-m64'
 		fi
 		;;
+	"mips64el")
+		if ${THIRTYTWO} ; then
+			MACHINE="evbmips-el"
+			MACH_ARCH="mipsel"
+			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+			EXTRA_LDFLAGS='-D__mips_o32 -mabi=32'
+			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+		else
+			MACHINE="evbmips64-el"
+			MACH_ARCH="mips64el"
+			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
+			EXTRA_LDFLAGS='-D__mips_n64 -mabi=64'
+			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
+		fi
+		probemips
+		;;
+	"mips64eb")
+		if ${THIRTYTWO} ; then
+			MACHINE="evbmips-eb"
+			MACH_ARCH="mipseb"
+			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+			EXTRA_LDFLAGS='-D__mips_o32 -mabi=32'
+			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+		else
+			MACHINE="evbmips64-eb"
+			MACH_ARCH="mips64eb"
+			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
+			EXTRA_LDFLAGS='-D__mips_n64 -mabi=64'
+			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
+		fi
+		probemips
+		;;
+	"mipsel")
+		check64
+		MACHINE="evbmips"
+		MACH_ARCH="mipsel"
+		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		probemips
+		;;
+	"mipseb")
+		check64
+		MACHINE="evbmips"
+		MACH_ARVH="mipseb"
+		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
 	"ppc64")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
