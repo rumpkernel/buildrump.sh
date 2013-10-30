@@ -954,7 +954,7 @@ evaltarget ()
 		;;
 	"mipsel")
 		check64
-		MACHINE="evbmips"
+		MACHINE="evbmips-el"
 		MACH_ARCH="mipsel"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
@@ -962,7 +962,7 @@ evaltarget ()
 		;;
 	"mipseb")
 		check64
-		MACHINE="evbmips"
+		MACHINE="evbmips-eb"
 		MACH_ARVH="mipseb"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
