@@ -956,16 +956,16 @@ evaltarget ()
 		check64
 		MACHINE="evbmips-el"
 		MACH_ARCH="mipsel"
-		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
-		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
+		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
 	"mipseb")
 		check64
 		MACHINE="evbmips-eb"
 		MACH_ARVH="mipseb"
-		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
-		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64'
+		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
+		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
 	"ppc64")
