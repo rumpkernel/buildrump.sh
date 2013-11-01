@@ -174,6 +174,7 @@ as follows:
     - Linux void-rpi 3.6.11_1 #1 PREEMPT Tue Feb 19 17:40:24 CET 2013 armv6l GNU/Linux (Void, __Raspberry Pi, evbarm__)
     - Linux braniac 3.9.9-1-ARCH #1 SMP PREEMPT Wed Jul 3 22:45:16 CEST 2013 x86_64 GNU/Linux (Arch Linux, __amd64__, gcc 4.8.1)
     - Linux pike 3.6.7-4.fc17.ppc64 #1 SMP Thu Dec 6 06:41:58 MST 2012 ppc64 ppc64 ppc64 GNU/Linux (Fedora, __ppc64__)
+    - Linux 172-29-171-95.dal-ebis.ihost.com 2.6.32-358.el6.ppc64 #1 SMP Tue Jan 29 11:43:27 EST 2013 ppc64 ppc64 ppc64 GNU/Linux (RHEL6, __ppc64__, 64 and 32 bit builds, IBM Virtual Loaner Program)
     - Linux fuloong 3.11.6-gnu #8 PREEMPT Mon Oct 28 23:28:22 GMT 2013 mips64 ICT Loongson-2 V0.3 FPU V0.1 lemote-fuloong-2f-box GNU/Linux (Gentoo, __mips o32__)
 
 - DragonFly BSD
