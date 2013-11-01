@@ -56,8 +56,9 @@ NBSRC_EXTRA='
 	src/sys/rump/net/lib/libvirtif/rumpcomp_user.h
 	src/sys/rump/librump/rumpkern/lwproc.c
 	src/sys/rump/librump/rumpkern/rump_private.h;
-    20131030 1310UTC:
-	src/lib/librumpuser/rumpuser_dl.c'
+    20131101 2323UTC:
+	src/lib/librumpuser/rumpuser_dl.c
+	src/lib/librumpuser/rumpuser_sp.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
