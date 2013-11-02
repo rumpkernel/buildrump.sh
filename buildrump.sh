@@ -171,7 +171,7 @@ cppdefines ()
 {
 
 	var=${1}
-	${CC} -E -dM - < /dev/null | awk '$2 == "'$var'"{exit 37}'
+	${CC} ${BUILDRUMP_CFLAGS} -E -dM - < /dev/null | awk '$2 == "'$var'"{exit 37}'
 	[ $? -eq 37 ]
 	return
 }
