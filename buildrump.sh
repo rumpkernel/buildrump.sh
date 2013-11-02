@@ -785,12 +785,10 @@ probearm ()
 		MKSOFTFLOAT=no
 	fi
 
-	# A thumb build does not work due to assembler containing
-	# opcodes that are not permitted. If the environment defaults
-	# to thumb, force to full ARM instructions instead.
+	# A thumb build requires thumb interwork as parts will be built with arm
 	if cppdefines '__THUMBE[BL]__'; then
-		EXTRA_CFLAGS='-marm'
-		EXTRA_AFLAGS='-marm'
+		EXTRA_CFLAGS='-mthumb-interwork'
+		EXTRA_AFLAGS='-mthumb-interwork'
 	fi
 }
 
