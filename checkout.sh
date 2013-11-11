@@ -59,7 +59,8 @@ NBSRC_EXTRA='
     20131101 2323UTC:
 	src/lib/librumpuser/rumpuser_dl.c
 	src/lib/librumpuser/rumpuser_sp.c;
-    20131111 1555UTC:
+    20131111 2312UTC:
+	src/sys/rump/librump/rumpkern/intr.c
 	src/usr.bin/rump_server/Makefile'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
