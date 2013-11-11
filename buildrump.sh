@@ -995,6 +995,9 @@ evaltarget ()
 setupdest ()
 {
 
+	# nuke symlink farm first, avoids link resolution surprises in rebuilds
+	rm -rf ${OBJDIR}/dest
+
 	# set up $dest via symlinks.  this is easier than trying to teach
 	# the NetBSD build system that we're not interested in an extra
 	# level of "usr"
