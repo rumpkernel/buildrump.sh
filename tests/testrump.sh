@@ -81,6 +81,7 @@ alltests ()
 		echo '>>'
 	fi
 
+	failed=0
 	for test in ${ALLTESTS}; do
 		TO=${TESTOBJ}/${test}
 		(
@@ -90,7 +91,9 @@ alltests ()
 		)
 
 		( cd ${TO} ; do${test} )
+		failed=$(( ${failed} + $? ))
 	done
+	[ ${failed} -ne 0 ] && die "FAILED ${failed} tests!"
 
 	echo
 	echo Success
