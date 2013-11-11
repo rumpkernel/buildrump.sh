@@ -6,5 +6,5 @@ compiler:
 
 script:
   - ./buildrump.sh checkout
-  - ./buildrump.sh -o obj.static -d rump.static -qq -j16 -V MKPIC=no
-  - ./buildrump.sh -o obj -d rump -qq -j16 -V MKSTATICLIB=no
+  - ./buildrump.sh -o obj.a -d rump.a -qq -j16 -V MKPIC=no fullbuild tests
+  - ./buildrump.sh -o obj -d rump -qq -j16 -V MKSTATICLIB=no fullbuild tests
