@@ -62,6 +62,7 @@ NBSRC_EXTRA='
     20131111 2312UTC:
 	src/sys/rump/librump/rumpkern/intr.c;
     20131113 1748UTC:
+	src/sys/rump/include/rump/rumpdefs.h
 	src/usr.bin/rump_server
 	src/usr.bin/rump_allserver'
 
