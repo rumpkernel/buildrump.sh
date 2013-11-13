@@ -407,8 +407,6 @@ LIBC=
 LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
-		[ ${TARGET} != "netbsd" ] \
-		    && echo 'RUMP_SERVER_LIBUTIL=no' >> "${MKCONF}"
 		[ ${LD_FLAVOR} != 'sun' ] \
 		    && echo 'LDFLAGS+=-Wl,--no-as-needed' >> "${MKCONF}"
 		echo '.endif # PROG' >> "${MKCONF}"
