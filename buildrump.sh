@@ -525,7 +525,7 @@ makebuild ()
 		fi
 	done
 
-	if [ "${TARGET}" != "netbsd" ] && ! ${KERNONLY}; then
+	if ! ${KERNONLY}; then
 		mkmakefile ${OBJDIR}/Makefile.utils usr.bin/rump_server
 		for target in ${targets}; do
 			domake ${OBJDIR}/Makefile.utils ${target}
