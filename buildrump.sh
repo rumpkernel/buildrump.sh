@@ -636,7 +636,10 @@ parseargs ()
 			    && die Cannot specify releasy debug
 
 			debugginess=$((debugginess+1))
-			[ ${debugginess} -gt 0 ] && DBG='-O0 -g'
+			# use -O1 as the minimal supported compiler
+			# optimization level.  -O0 is just too broken
+			# for too many compilers and platforms
+			[ ${debugginess} -gt 0 ] && DBG='-O1 -g'
 			[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
 			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 			;;
