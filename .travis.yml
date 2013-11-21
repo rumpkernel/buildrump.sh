@@ -7,10 +7,11 @@ compiler:
 before_script: ./buildrump.sh checkout
 
 env:
-  - DIRSUF='a' LIBTYPE='MKPIC=no' DEBUG=''
-  - DIRSUF='so' LIBTYPE='MKSTATICLIB=no' DEBUG=''
-  - DIRSUF='so.dbg' LIBTYPE='MKSTATICLIB=no' DEBUG='-DDD'
+  - LIBTYPE='MKPIC=no' DEBUG=''
+  - LIBTYPE='MKSTATICLIB=no' DEBUG=''
+  - LIBTYPE='MKSTATICLIB=no' DEBUG='-DDD'
 
 script:
-    ./buildrump.sh -o obj.${DIRSUF} -d rump.${DIRSUF} -qq -j16 \
+    dirsuf=${LIBTYPE}.${DEBUG}
+    ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 \
         -V ${LIBTYPE} ${DEBUG} fullbuild tests
