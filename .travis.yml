@@ -4,7 +4,13 @@ compiler:
   - gcc
   - clang
 
+before_script: ./buildrump.sh checkout
+
+env:
+  - DIRSUF='a' LIBTYPE='MKPIC=no' DEBUG=''
+  - DIRSUF='so' LIBTYPE='MKSTATICLIB=no' DEBUG=''
+  - DIRSUF='so.dbg' LIBTYPE='MKSTATICLIB=no' DEBUG='-DDD'
+
 script:
-  - ./buildrump.sh checkout
-  - ./buildrump.sh -o obj.a -d rump.a -qq -j16 -V MKPIC=no fullbuild tests
-  - ./buildrump.sh -o obj -d rump -qq -j16 -V MKSTATICLIB=no fullbuild tests
+    ./buildrump.sh -o obj.${DIRSUF} -d rump.${DIRSUF} -qq -j16 \
+        -V ${LIBTYPE} ${DEBUG} fullbuild tests
