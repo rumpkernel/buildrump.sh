@@ -160,7 +160,7 @@ checkoutgit ()
 		cd ${SRCDIR}
 	fi
 
-	${GIT} checkout ${gitrev} || \
+	${GIT} checkout -q ${gitrev} || \
 	    die 'Could not checkout correct git revision. Wrong repo?'
 }
 
