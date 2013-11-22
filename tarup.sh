@@ -28,34 +28,42 @@
 # This script will generate a tar.bz2 archive of the current git checkout
 # The "version number" of the tarball is in unix time format 
 
+: ${GIT:=git}
 DEST=buildrump
 
 echo "Detecting buildrump.sh git revision"
 
-_revision=$(git rev-parse HEAD)
-_date=$(git show -s --format="%ci" ${_revision})
+_revision=$(${GIT} rev-parse HEAD)
+_date=$(${GIT} show -s --format="%ci" ${_revision})
+
 #incremental "version number" in unix time format
 _date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
 
+tarball=buildrump-${_date_filename}.tar.gz
+echo "Target name: ${tarball}"
+
+die ()
+{
+
+	echo '>> ERROR:' $*
+	exit 1
+}
+
+[ -e ${tarball} ] && die "${tarball} already exists"
+
 if [ -z "${_revision}" ]
 then
-  echo "Error: git revision could not be detected"
-  exit
+  die "git revision could not be detected"
 else
   echo "buildrump.sh git revision is ${_revision}"
 fi
 
-if ! mkdir "${DEST}"; then
-	echo "Error: failed to create directory \"${DEST}\""
-	exit 1
-fi
+mkdir -p "${DEST}" || die "failed to create directory \"${DEST}\""
 
 echo "Checking out cvs sources"
 
-if ! ./buildrump.sh -s ${DEST}/src checkoutgit ; then
-	echo "Checkout failed!"
-	exit 1
-fi
+./buildrump.sh -s ${DEST}/src checkoutgit || die "Checkout failed!"
+
 # don't need .git in the tarball
 rm -rf ${DEST}/src/.git
 
@@ -74,10 +82,9 @@ echo ${_date} > "${DEST}/revisiondate"
 
 echo "Compressing sources to a snapshot release"
 
-tar -cvzf buildrump-${_date_filename}.tar.gz "${DEST}"
+tar -czf ${tarball} "${DEST}"
 
 echo "Removing temporary directory"
 rm -rf "${DEST}"
 
-echo "Congratulations! Your archive should be
-      at buildrump-${_date_filename}.tar.gz"
+echo "Congratulations! Your archive is at ${tarball}"
