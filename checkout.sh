@@ -82,6 +82,31 @@ die ()
 checkoutcvs ()
 {
 
+	case $1 in
+	-r|-D)
+		NBSRC_CVSPARAM=$1
+		shift
+		NBSRC_CVSREV=$*
+		NBSRC_CVSLISTREV=$*
+		NBSRC_EXTRA=''
+		;;
+	HEAD)
+		NBSRC_CVSPARAM=''
+		NBSRC_CVSREV=''
+		NBSRC_CVSLISTREV=''
+		NBSRC_EXTRA=''
+		;;
+	'')
+		NBSRC_CVSPARAM=-D
+		NBSRC_CVSREV="${NBSRC_CVSDATE}"
+		NBSRC_CVSLISTREV="${NBSRC_LISTDATE:-${NBSRC_CVSDATE}}"
+		;;
+	default)
+		die 'Invalid parameters to checkoutcvs'
+		;;
+	esac
+		
+
 	echo ">> Fetching NetBSD sources to ${SRCDIR} using cvs"
 
 	: ${CVS:=cvs}
@@ -99,9 +124,10 @@ checkoutcvs ()
 
 	# we need listsrcdirs
 	echo ">> Fetching the list of files we need to checkout ..."
-	${CVS} ${NBSRC_CVSFLAGS} co -p -D "${NBSRC_LISTDATE:-${NBSRC_CVSDATE}}"\
+	${CVS} ${NBSRC_CVSFLAGS} co -p \
+	    ${NBSRC_CVSPARAM} ${NBSRC_CVSLISTREV:+"${NBSRC_CVSLISTREV}"} \
 	    src/sys/rump/listsrcdirs > listsrcdirs 2>/dev/null \
-	    || die listsrcdirs checkout failed
+	      || die listsrcdirs checkout failed
 
 	# trick cvs into "skipping" the module name so that we get
 	# all the sources directly into $SRCDIR
@@ -113,7 +139,8 @@ checkoutcvs ()
 	echo "   "`pwd -P`
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
 	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} co -P \
-	    -D "${NBSRC_CVSDATE}" || die checkout failed
+	    ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
+	      || die checkout failed
 
 	IFS=';'
 	for x in ${NBSRC_EXTRA}; do
@@ -210,13 +237,14 @@ setgit ()
 	fi
 }
 
-[ $# -ne 2 ] && die Invalid usage.  Run this script via buildrump.sh
+[ $# -lt 2 ] && die Invalid usage.  Run this script via buildrump.sh
 BRDIR=$(dirname $0)
 SRCDIR=${2}
 
 case "${1}" in
 cvs)
-	checkoutcvs
+	shift ; shift
+	checkoutcvs $*
 	echo '>> checkout done'
 	;;
 git)
