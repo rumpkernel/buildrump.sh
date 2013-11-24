@@ -30,6 +30,9 @@
 
 : ${GIT:=git}
 
+# files which are not relevant in the tarball
+STRIPFILES='README.md tarup.sh checkout.sh .travis.yml'
+
 echo "Detecting buildrump.sh git revision"
 
 _revision=$(${GIT} rev-parse HEAD)
@@ -72,11 +75,15 @@ echo "Checkout done"
 
 echo "Generating temporary directory to be compressed"
 
-#directories
-cp -r {brlib,examples,tests} "${DEST}/"
+# generate sed expression to filter out unwanted files
+unset filt
+for file in ${STRIPFILES}
+do
+  filt="/^${file}\$/d;${filt}"
+done
 
-#files
-cp -p {.srcgitrev,checkout.sh,AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
+# copy desired files into staging directory
+${GIT} ls-files | sed "${filt}" | xargs tar -cf - | (cd ${DEST} ; tar -xf -)
 
 echo ${_revision} > "${DEST}/tarup-gitrevision"
 echo ${_date} > "${DEST}/tarup-gitdate"
