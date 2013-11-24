@@ -92,7 +92,7 @@ helpme ()
 printoneconfig ()
 {
 
-	printf "%-5s %-18s: %s\n" "${1}" "${2}" "${3}"
+	[ -z "${2}" ] || printf "%-5s %-18s: %s\n" "${1}" "${2}" "${3}"
 }
 
 printenv ()
@@ -377,6 +377,8 @@ EOF
 	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
 	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
 
+	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
+
 	printenv
 
 	chkcrt begins
@@ -597,6 +599,13 @@ evaltools ()
 		TARGET=unknown
 		;;
 	esac
+
+	# check if we're running from a tarball, i.e. is checkout possible
+	BRDIR=$(dirname $0)
+	unset TARBALLMODE
+	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
+		TARBALLMODE='Run from tarball'
+	fi
 }
 
 parseargs ()
@@ -606,7 +615,6 @@ parseargs ()
 	ANYTARGETISGOOD=false
 	NOISE=2
 	debugginess=0
-	BRDIR=$(dirname $0)
 	THIRTYTWO=false
 	SIXTYFOUR=false
 	KERNONLY=false
@@ -711,7 +719,7 @@ parseargs ()
 			done
 		done
 	else
-		docheckoutgit=true
+		[ -z "${TARBALLMODE}" ] && docheckoutgit=true
 		dofullbuild=true
 		dotests=true
 	fi
@@ -728,6 +736,13 @@ parseargs ()
 	if ${docheckoutcvs} ; then
 		docheckout=true
 		checkoutstyle=cvs
+	fi
+
+	# sanity checks
+	if [ ! -z "${TARBALLMODE}" ]; then
+		${docheckout} && \
+		    die 'Checkout not possible in tarball mode, fetch repo'
+		[ -d "${SRCDIR}" ] || die 'Sources not found from tarball'
 	fi
 }
 
