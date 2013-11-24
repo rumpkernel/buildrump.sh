@@ -98,17 +98,19 @@ echo ${_date} > "${DEST}/tarup-gitdate"
 
 cat > "${DEST}/README" << EOF
 This archive is a self-contained tarball for building rump kernels,
-including the build scripts and NetBSD kernel driver sources.
+including the build scripts and NetBSD kernel driver sources.  The
+archive is meant for example for networkless environments where
+fetching the NetBSD kernel drivers at build-time is not possible.
 
 You can recreate this archive by cloning the buildrump.sh repository [1],
 checking out revision ${_revision}
 and running the "tarup.sh" script.
 
 To build rump kernels for the current platform, run "./buildrump.sh".
-For crosscompilation and other instructions, see the readme in [1].
+For crosscompilation and other instructions, see the git repository.
 
 Unless you have a need to use this self-contained archive, it is
-recommended that you migrate to using [1].
+recommended that you use the git repository.
 
 [1] https://github.com/anttikantee/buildrump.sh
 EOF
