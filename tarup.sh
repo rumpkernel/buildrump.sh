@@ -29,6 +29,7 @@
 # The "version number" of the tarball is in unix time format 
 
 : ${GIT:=git}
+IFS=' '
 
 # files which are not relevant in the tarball
 STRIPFILES='README.md tarup.sh checkout.sh .travis.yml'
@@ -56,7 +57,12 @@ die ()
 if [ "$1" != '-f' ]
 then
   [ -e ${tarball} ] && die "${tarball} already exists"
-  [ -z "$(${GIT} status --porcelain)" ] || die "working directory not clean"
+  gitstat="$(${GIT} status --porcelain)"
+  if [ ! -z "${gitstat}" ]
+  then
+    die "working directory not clean:
+${gitstat}"
+  fi
   [ "$(${GIT} status --porcelain -b )" != '## master' ] \
     || die "not on master branch"
 fi
