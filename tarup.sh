@@ -29,7 +29,6 @@
 # The "version number" of the tarball is in unix time format 
 
 : ${GIT:=git}
-DEST=buildrump
 
 echo "Detecting buildrump.sh git revision"
 
@@ -38,6 +37,8 @@ _date=$(${GIT} show -s --format="%ci" ${_revision})
 
 #incremental "version number" in unix time format
 _date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
+
+DEST=buildrump-${_date_filename}
 
 tarball=buildrump-${_date_filename}.tar.gz
 echo "Target name: ${tarball}"
