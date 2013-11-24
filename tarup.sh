@@ -53,11 +53,15 @@ die ()
 	exit 1
 }
 
-[ -e ${tarball} ] && die "${tarball} already exists"
-
-[ -z "$(${GIT} status --porcelain)" ] || die "working directory not clean"
-[ "$(${GIT} status --porcelain -b )" != '## master' ] \
+if [ "$1" != '-f' ]
+then
+  [ -e ${tarball} ] && die "${tarball} already exists"
+  [ -z "$(${GIT} status --porcelain)" ] || die "working directory not clean"
+  [ "$(${GIT} status --porcelain -b )" != '## master' ] \
     || die "not on master branch"
+fi
+
+rm -f ${tarball}
 
 if [ -z "${_revision}" ]
 then
