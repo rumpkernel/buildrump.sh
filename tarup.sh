@@ -60,7 +60,7 @@ fi
 
 mkdir -p "${DEST}" || die "failed to create directory \"${DEST}\""
 
-echo "Checking out cvs sources"
+echo "Fetching NetBSD sources"
 
 ./buildrump.sh -s ${DEST}/src checkoutgit || die "Checkout failed!"
 
@@ -77,8 +77,8 @@ cp -r {brlib,examples,tests} "${DEST}/"
 #files
 cp -p {.srcgitrev,checkout.sh,AUTHORS,buildrump.sh,LICENSE,tarup.sh} "${DEST}"/
 
-echo ${_revision} > "${DEST}/gitrevision"
-echo ${_date} > "${DEST}/revisiondate"
+echo ${_revision} > "${DEST}/tarup-gitrevision"
+echo ${_date} > "${DEST}/tarup-gitdate"
 
 echo "Compressing sources to a snapshot release"
 
