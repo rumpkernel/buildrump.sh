@@ -96,6 +96,23 @@ ${GIT} ls-files | sed "${filt}" | xargs tar -cf - | (cd ${DEST} ; tar -xf -)
 echo ${_revision} > "${DEST}/tarup-gitrevision"
 echo ${_date} > "${DEST}/tarup-gitdate"
 
+cat > "${DEST}/README" << EOF
+This archive is a self-contained tarball for building rump kernels,
+including the build scripts and NetBSD kernel driver sources.
+
+You can recreate this archive by cloning the buildrump.sh repository [1],
+checking out revision ${_revision}
+and running the "tarup.sh" script.
+
+To build rump kernels for the current platform, run "./buildrump.sh".
+For crosscompilation and other instructions, see the readme in [1].
+
+Unless you have a need to use this self-contained archive, it is
+recommended that you migrate to using [1].
+
+[1] https://github.com/anttikantee/buildrump.sh
+EOF
+
 echo "Compressing sources to a snapshot release"
 
 tar -czf ${tarball} "${DEST}"
