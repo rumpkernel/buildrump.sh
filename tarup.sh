@@ -29,7 +29,6 @@
 # The "version number" of the tarball is in unix time format 
 
 : ${GIT:=git}
-IFS=' '
 
 # files which are not relevant in the tarball
 STRIPFILES='README.md tarup.sh checkout.sh .travis.yml'
@@ -60,6 +59,7 @@ then
   gitstat="$(${GIT} status --porcelain)"
   if [ ! -z "${gitstat}" ]
   then
+    IFS=' '
     die "working directory not clean:
 ${gitstat}"
   fi
