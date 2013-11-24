@@ -55,6 +55,10 @@ die ()
 
 [ -e ${tarball} ] && die "${tarball} already exists"
 
+[ -z "$(${GIT} status --porcelain)" ] || die "working directory not clean"
+[ "$(${GIT} status --porcelain -b )" != '## master' ] \
+    || die "not on master branch"
+
 if [ -z "${_revision}" ]
 then
   die "git revision could not be detected"
