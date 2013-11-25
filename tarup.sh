@@ -36,6 +36,7 @@ STRIPFILES='README.md tarup.sh checkout.sh .travis.yml'
 echo "Detecting buildrump.sh git revision"
 
 _revision=$(${GIT} rev-parse HEAD)
+# ideally $_date would be in UTC
 _date=$(${GIT} show -s --format="%ci" ${_revision})
 
 #incremental "version number" in unix time format
