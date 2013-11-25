@@ -124,7 +124,8 @@ EOF
 
 echo "Compressing sources to a snapshot release"
 
-tar -czf ${tarball} "${DEST}"
+tar -czf "${tarball}.tmp" "${DEST}"
+mv "${tarball}.tmp" "${tarball}"
 
 echo "Removing temporary directory"
 rm -rf "${DEST}"
