@@ -43,7 +43,7 @@ package for your OS/distribution/architecture.  These packages will also
 install the POSIX hypercall implementation.
 
 * Void Linux: `xbps-install -S netbsd-rumpkernel`
-* Arch Linux: [pacman](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=Arch_Core) (OBS), [AUR](https://aur.archlinux.org/packages/netbsd-rump-git/) 
+* Arch Linux: [pacman](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=Arch_Extra) (OBS), [AUR](https://aur.archlinux.org/packages/netbsd-rump-git/) 
 * OpenSUSE Linux:
 12.3 [RPM](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=openSUSE_12.3) (OBS)
 || Tumbleweed [RPM](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=openSUSE_Factory) (OBS)
