@@ -32,8 +32,9 @@ and follow the links.
 For a video overview including various demos, watch the
 [FOSDEM 2013 presentation](http://video.fosdem.org/2013/maintracks/K.1.105/The_Anykernel_and_Rump_Kernels.webm).
 
-For support, use the github issue tracker or join __#rumpkernel__ on
-__irc.freenode.net__.
+Discuss buildrump.sh on rumpkernel-users@lists.sourceforge.net
+([subscribe](https://lists.sourceforge.net/lists/listinfo/rumpkernel-users)
+before posting), or join __#rumpkernel__ on __irc.freenode.net__.
 
 Installation Instructions
 =========================
