@@ -50,8 +50,8 @@ echo "Target name: ${tarball}"
 die ()
 {
 
-	echo '>> ERROR:' $*
-	exit 1
+  echo '>> ERROR:' $*
+  exit 1
 }
 
 if [ "$1" != '-f' ]
