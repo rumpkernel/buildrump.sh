@@ -54,6 +54,14 @@ die ()
   exit 1
 }
 
+nuketmp ()
+{
+
+  rm -rf "${DEST}"
+  rm -f "${tarball}.tmp" "${tarball}"
+  exit 1
+}
+
 if [ "$1" != '-f' ]
 then
   [ -e ${tarball} ] && die "${tarball} already exists"
@@ -77,6 +85,7 @@ else
   echo "buildrump.sh git revision is ${_revision}"
 fi
 
+trap "nuketmp" INT QUIT
 mkdir -p "${DEST}" || die "failed to create directory \"${DEST}\""
 
 echo "Fetching NetBSD sources"
