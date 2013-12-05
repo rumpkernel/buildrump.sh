@@ -200,11 +200,24 @@ out-of-the-box due to object format issues (ELF vs. PE-COFF).
 Mac OS X is likely to require support for its linker.
 
 
-Tip(s) for advanced users
+Tips for advanced users
 =========================
 
-Place your buildtools in a separate directory, e.g. `$HOME/rumptools`
-using `./buildrump.sh -T $HOME/rumptools tools`.  Put that directory in
-`$PATH`.  You can now do fast build interation for kernel components by
-going to the appropriate directory and running `rumpmake dependall &&
-rumpmake install`.
+- Place your buildtools in a separate directory, e.g. `$HOME/rumptools`
+  using `./buildrump.sh -T $HOME/rumptools tools`.  Put that directory in
+  `$PATH`.  You can now do fast build iteration for kernel components by
+  going to the appropriate directory and running `rumpmake dependall &&
+  rumpmake install`.
+
+- Assuming you have a commit bit to NetBSD, you can use HEAD from NetBSD
+  src and be able to commit your changes to NetBSD from src with the
+  following setup:
+
+  - `BUILDRUMP_CVSROOT=dev@cvs.netbsd.org:/cvsroot ./checkout.sh cvs nbcvs HEAD`
+  - `./buildrump.sh -s nbcvs fullbuild`
+
+  Of course, replace `dev` with your NetBSD account name.  Equally
+  "of course", this operating mode is not officially supported by
+  buildrump.sh.  However, if you run into problems that will affect
+  buildrump.sh after the checkout date is bumped, report the problems
+  using your discretion.
