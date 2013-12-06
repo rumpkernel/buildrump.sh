@@ -81,7 +81,6 @@ helpme ()
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
 	printf "\tfullbuild:\talias for \"tools build install\"\n"
-	printf "\tsetupdest:\tcreate destdirs (implicit for \"install\")\n"
 	exit 1
 }
 
@@ -318,6 +317,19 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 		chmod 755 ${tname}
 	done
 
+	# Create bounce directory used as the install target.  The
+	# purpose of this is to strip the "usr/" pathname component
+	# that is hardcoded by NetBSD Makefiles.
+	mkdir -p ${BRTOOLDIR}/dest || die "cannot create ${BRTOOLDIR}/dest"
+	rm -f ${BRTOOLDIR}/dest/usr
+	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
+
+	# queue.h is not available on all systems, but we need it for
+	# the hypervisor build.  So, we make it available in tooldir.
+	mkdir -p ${BRTOOLDIR}/compat/include/sys \
+	    || die create ${BRTOOLDIR}/compat/include/sys
+	cp -p ${SRCDIR}/sys/sys/queue.h ${BRTOOLDIR}/compat/include/sys
+
 	# Create mk.conf.  Create it under a temp name first so as to
 	# not affect the tool build with its contents
 	MKCONF="${BRTOOLDIR}/mk.conf.building"
@@ -325,8 +337,8 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 	> ${mkconf_final}
 
 	cat > "${MKCONF}" << EOF
-BUILDRUMP_CPPFLAGS=-I${DESTDIR}/include
-CPPFLAGS+=-I${OBJDIR}/compat/include
+BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
+CPPFLAGS+=-I${BRTOOLDIR}/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
@@ -407,7 +419,7 @@ LIBCRTEND=
 LIBCRTI=
 LIBC=
 
-LDFLAGS+= -L${DESTDIR}/lib -Wl,-R${DESTDIR}/lib
+LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R${DESTDIR}/lib
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
 		[ ${LD_FLAVOR} != 'sun' ] \
@@ -427,8 +439,31 @@ EOF
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
 	cd ${SRCDIR}
+
+	# create user-usable wrapper script
+	makemake ${BRTOOLDIR}/rumpmake ${BRTOOLDIR}/dest makewrapper
+
+	# create wrapper script to be used during buildrump.sh, plus tools
+	makemake ${RUMPMAKE} ${OBJDIR}/dest.stage tools
+
+	unset ac_cv_header_zlib_h
+
+	# tool build done.  flip mk.conf name so that it gets picked up
+	omkconf="${MKCONF}"
+	MKCONF="${mkconf_final}"
+	mv "${omkconf}" "${MKCONF}"
+	unset omkconf mkconf_final
+}
+
+makemake ()
+{
+
+	wrapper=$1
+	stage=$2
+	cmd=$3
+
 	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
-	    -D ${OBJDIR}/dest -w ${RUMPMAKE} \
+	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${BEQUIET} ${LDSCRIPT} \
 	    ${TRAVIS:+-E} \
@@ -441,16 +476,10 @@ EOF
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
+	    -V BUILDRUMP_STAGE=${stage} \
 	    ${BUILDSH_VARGS} \
-	  tools
-	[ $? -ne 0 ] && die build.sh tools failed
-	unset ac_cv_header_zlib_h
-
-	# tool build done.  flip mk.conf name so that it gets picked up
-	omkconf="${MKCONF}"
-	MKCONF="${mkconf_final}"
-	mv "${omkconf}" "${MKCONF}"
-	unset omkconf mkconf_final
+	${cmd}
+	[ $? -ne 0 ] && die build.sh ${cmd} failed
 }
 
 makebuild ()
@@ -461,7 +490,7 @@ makebuild ()
 
 	printenv
 
-	targets=$*
+	targets="obj includes dependall install"
 
 	#
 	# Building takes 4 passes, just like when
@@ -534,6 +563,12 @@ makebuild ()
 			domake ${OBJDIR}/Makefile.utils ${target}
 		done
 	fi
+}
+
+makeinstall ()
+{
+
+	(cd ${OBJDIR}/dest.stage/usr ; tar -c .) | (cd ${DESTDIR} ; tar -x)
 }
 
 evaltools ()
@@ -700,8 +735,12 @@ parseargs ()
 	# Determine what which parts we should execute.
 	#
 	allcmds='checkout checkoutcvs checkoutgit tools build install
-	    tests fullbuild setupdest'
+	    tests fullbuild'
 	fullbuildcmds="tools build install"
+
+	# for compat, so that previously valid invocations don't
+	# produce an error
+	allcmds="${allcmds} setupdest"
 
 	for cmd in ${allcmds}; do
 		eval do${cmd}=false
@@ -771,7 +810,19 @@ resolvepaths ()
 	abspath BRTOOLDIR
 	abspath SRCDIR
 
-	RUMPMAKE="${BRTOOLDIR}/rumpmake"
+	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
+
+	# mini-mtree
+	dstage=${OBJDIR}/dest.stage/usr
+	for dir in ${dstage}/bin ${dstage}/include/rump ${dstage}/lib; do
+		mkdir -p ${dir} || die "Cannot create ${dir}"
+	done
+	for man in cat man ; do
+		for x in 1 2 3 4 5 6 7 8 9 ; do
+			mkdir -p ${dstage}/share/man/${man}${x} \
+			    || die create ${dstage}/share/man/${man}${x}
+		done
+	done
 }
 
 check64 ()
@@ -1009,42 +1060,6 @@ evaltarget ()
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 }
 
-setupdest ()
-{
-
-	# nuke symlink farm first, avoids link resolution surprises in rebuilds
-	rm -rf ${OBJDIR}/dest
-
-	# set up $dest via symlinks.  this is easier than trying to teach
-	# the NetBSD build system that we're not interested in an extra
-	# level of "usr"
-	mkdir -p ${DESTDIR}/include/rump || die create ${DESTDIR}/include/rump
-	mkdir -p ${DESTDIR}/lib || die create ${DESTDIR}/lib
-	mkdir -p ${DESTDIR}/bin || die create ${DESTDIR}/bin
-	mkdir -p ${OBJDIR}/dest/usr/share/man \
-	    || die create ${OBJDIR}/dest/usr/share/man
-	ln -sf ${DESTDIR}/include ${OBJDIR}/dest/usr/
-	ln -sf ${DESTDIR}/lib ${OBJDIR}/dest/usr/
-	ln -sf ${DESTDIR}/bin ${OBJDIR}/dest/usr/bin
-	ln -sf ${DESTDIR}/bin ${OBJDIR}/dest/usr/sbin
-	for man in cat man ; do 
-		for x in 1 2 3 4 5 6 7 8 9 ; do
-			mkdir -p ${DESTDIR}/share/man/${man}${x} \
-			    || die create ${DESTDIR}/share/man/${man}${x}
-			ln -sf ${DESTDIR}/share/man/${man}${x} \
-			    ${OBJDIR}/dest/usr/share/man/
-		done
-	done
-
-	# queue.h is not available on all systems, but we need it for
-	# the hypervisor build.  Copy queue.h from the NetBSD sources
-	# into DESTDIR so that it's available for the hypervisor build
-	# on all hosts.
-	mkdir -p ${OBJDIR}/compat/include/sys \
-	    || die create ${OBJDIR}/compat/include/sys
-	cp -p ${SRCDIR}/sys/sys/queue.h ${OBJDIR}/compat/include/sys
-}
-
 # create the makefiles used for building
 mkmakefile ()
 {
@@ -1065,7 +1080,7 @@ mkmakefile ()
 		esac
 	done
 
-	printf '\n\n.include <bsd.subdir.mk>\n'
+	printf '\n.include <bsd.subdir.mk>\n'
 	exec 1>&3 3>&-
 }
 
@@ -1095,18 +1110,9 @@ evaltarget
 
 resolvepaths
 
-if ${dobuild} || ${doinstall}; then
-	# build implies we need a dest
-	dosetupdest=true
-fi
-${dosetupdest} && setupdest
-
 ${dotools} && maketools
-
-targets=''
-${dobuild} && targets="obj includes dependall"
-${doinstall} && targets="${targets} install"
-[ ! -z "${targets}" ] && makebuild ${targets}
+${dobuild} && makebuild
+${doinstall} && makeinstall
 
 if ${dotests}; then
 	if ${KERNONLY}; then
