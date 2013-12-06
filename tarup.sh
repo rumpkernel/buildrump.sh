@@ -42,10 +42,11 @@ _date=$(${GIT} show -s --format="%ci" ${_revision})
 #incremental "version number" in unix time format
 _date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
 
-DEST=buildrump-${_date_filename}
-
-tarball=buildrump-${_date_filename}.tar.gz
+tarballdir=tarup
+tarball=${tarballdir}/buildrump-${_date_filename}.tar
 echo "Target name: ${tarball}"
+
+DEST=/buildrump-${_date_filename}
 
 die ()
 {
@@ -57,8 +58,7 @@ die ()
 nuketmp ()
 {
 
-  rm -rf "${DEST}"
-  rm -f "${tarball}.tmp" "${tarball}"
+  rm -rf "${DEST}" "${tarball}"*
   exit 1
 }
 
@@ -87,6 +87,7 @@ fi
 
 trap "nuketmp" INT QUIT
 mkdir -p "${DEST}" || die "failed to create directory \"${DEST}\""
+mkdir -p "${tarballdir}" || die "failed to create directory \"${tarballdir}\""
 
 echo "Fetching NetBSD sources"
 
@@ -133,10 +134,15 @@ EOF
 
 echo "Compressing sources to a snapshot release"
 
-tar -czf "${tarball}.tmp" "${DEST}"
-mv "${tarball}.tmp" "${tarball}"
+tar -cf "${tarball}" "${DEST}"
+gzip - < "${tarball}" > "${tarball}.gz.tmp"
+bzip2 - < "${tarball}" > "${tarball}.bz2.tmp"
+xz - < "${tarball}" > "${tarball}.xz.tmp"
+for x in gz bz2 xz; do
+  mv "${tarball}.${x}.tmp" "${tarball}.${x}"
+done
 
-echo "Removing temporary directory"
-rm -rf "${DEST}"
+echo "Removing temporary files"
+rm -rf "${DEST}" "${tarball}"
 
-echo "Congratulations! Your archive is at ${tarball}"
+echo "Congratulations! Your archives are at ${tarball}.{gz,bz2,xz}"
