@@ -204,7 +204,7 @@ Tips for advanced users
 =========================
 
 - Place your buildtools in a separate directory, e.g. `$HOME/rumptools`
-  using `./buildrump.sh -T $HOME/rumptools tools`.  Put that directory in
+  using `./buildrump.sh -T $HOME/rumptools fullbuild`.  Put that directory in
   `$PATH`.  You can now do fast build iteration for kernel components by
   going to the appropriate directory and running `rumpmake dependall &&
   rumpmake install`.
