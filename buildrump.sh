@@ -568,7 +568,7 @@ makebuild ()
 makeinstall ()
 {
 
-	(cd ${OBJDIR}/dest.stage/usr ; tar -cf- .) | (cd ${DESTDIR} ; tar -xf-)
+	(cd ${OBJDIR}/dest.stage/usr; tar -cf - .) | (cd ${DESTDIR}; tar -xf -)
 }
 
 evaltools ()
