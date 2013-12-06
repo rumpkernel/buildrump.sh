@@ -46,7 +46,7 @@ tarballdir=tarup
 tarball=${tarballdir}/buildrump-${_date_filename}.tar
 echo "Target name: ${tarball}"
 
-DEST=/buildrump-${_date_filename}
+DEST=buildrump-${_date_filename}
 
 die ()
 {
