@@ -36,6 +36,11 @@ Discuss buildrump.sh on rumpkernel-users@lists.sourceforge.net
 ([subscribe](https://lists.sourceforge.net/lists/listinfo/rumpkernel-users)
 before posting), or join __#rumpkernel__ on __irc.freenode.net__.
 
+Running `buildrump.sh` requires a network connection for fetching NetBSD
+kernel driver source code.  Self-contained archives can be created using
+the `tarup.sh` script, and snapshots are available for download from
+[here](http://sourceforge.net/projects/rumpkernel/).
+
 Installation Instructions
 =========================
 
