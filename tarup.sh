@@ -138,15 +138,15 @@ EOF
 echo ">> Creating archive of sources"
 
 tar -cf "${tarball}" "${DEST}"
-
-echo ">> Compressing with gzip"
-gzip - < "${tarball}" > "${tarball}.gz.tmp"
-echo ">> Compressing with bzip2"
-bzip2 - < "${tarball}" > "${tarball}.bz2.tmp"
-echo ">> Compressing with xz"
-xz - < "${tarball}" > "${tarball}.xz.tmp"
-for x in gz bz2 xz; do
-  mv "${tarball}.${x}.tmp" "${tarball}.${x}"
+gzipsfx=gz
+bzip2sfx=bz2
+xzsfx=xz
+for compress in gzip bzip2 xz
+do
+  eval suf=\${${compress}sfx}
+  echo ">> Compressing with ${compress}"
+  ${compress} - < "${tarball}" > "${tarball}.${suf}.tmp"
+  mv "${tarball}.${suf}.tmp" "${tarball}.${suf}"
 done
 
 echo ">> Removing temporary files"
