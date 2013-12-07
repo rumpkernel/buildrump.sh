@@ -28,6 +28,9 @@
 # This script will generate a tar.bz2 archive of the current git checkout
 # The "version number" of the tarball is in unix time format 
 
+unset force
+[ "$1" = '-f' ] && force=-TARUP-f
+
 : ${GIT:=git}
 
 # files which are not relevant in the tarball
@@ -43,7 +46,7 @@ _date=$(${GIT} show -s --format="%ci" ${_revision})
 _date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
 
 tarballdir=tarup
-tarball=${tarballdir}/buildrump-${_date_filename}.tar
+tarball=${tarballdir}/buildrump-${_date_filename}${force}.tar
 echo "Target name: ${tarball}"
 
 DEST=buildrump-${_date_filename}
@@ -62,7 +65,7 @@ nuketmp ()
   exit 1
 }
 
-if [ "$1" != '-f' ]
+if [ -z "${force}" ]
 then
   [ -e ${tarball} ] && die "${tarball} already exists"
   gitstat="$(${GIT} status --porcelain)"
