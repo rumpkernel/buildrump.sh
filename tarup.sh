@@ -36,7 +36,7 @@ unset force
 # files which are not relevant in the tarball
 STRIPFILES='README.md tarup.sh checkout.sh .travis.yml'
 
-echo "Detecting buildrump.sh git revision"
+echo ">> Detecting buildrump.sh git revision"
 
 _revision=$(${GIT} rev-parse HEAD)
 # ideally $_date would be in UTC
@@ -47,7 +47,7 @@ _date_filename=$(echo ${_date} | sed 's/-//g;s/ .*//')
 
 tarballdir=tarup
 tarball=${tarballdir}/buildrump-${_date_filename}${force}.tar
-echo "Target name: ${tarball}"
+echo ">> Target basename: ${tarball}"
 
 DEST=buildrump-${_date_filename}
 
@@ -85,23 +85,23 @@ if [ -z "${_revision}" ]
 then
   die "git revision could not be detected"
 else
-  echo "buildrump.sh git revision is ${_revision}"
+  echo ">> buildrump.sh git revision is ${_revision}"
 fi
 
 trap "nuketmp" INT QUIT
 mkdir -p "${DEST}" || die "failed to create directory \"${DEST}\""
 mkdir -p "${tarballdir}" || die "failed to create directory \"${tarballdir}\""
 
-echo "Fetching NetBSD sources"
+echo ">> Fetching NetBSD sources"
 
 ./buildrump.sh -s ${DEST}/src checkoutgit || die "Checkout failed!"
 
 # don't need .git in the tarball
 rm -rf ${DEST}/src/.git
 
-echo "Checkout done"
+echo ">> Checkout done"
 
-echo "Generating temporary directory to be compressed"
+echo ">> Generating temporary directory to be compressed"
 
 # generate sed expression to filter out unwanted files
 unset filt
@@ -135,17 +135,22 @@ recommended that you use the git repository.
 [1] https://github.com/anttikantee/buildrump.sh
 EOF
 
-echo "Compressing sources to a snapshot release"
+echo ">> Creating archive of sources"
 
 tar -cf "${tarball}" "${DEST}"
+
+echo ">> Compressing with gzip"
 gzip - < "${tarball}" > "${tarball}.gz.tmp"
+echo ">> Compressing with bzip2"
 bzip2 - < "${tarball}" > "${tarball}.bz2.tmp"
+echo ">> Compressing with xz"
 xz - < "${tarball}" > "${tarball}.xz.tmp"
 for x in gz bz2 xz; do
   mv "${tarball}.${x}.tmp" "${tarball}.${x}"
 done
 
-echo "Removing temporary files"
+echo ">> Removing temporary files"
 rm -rf "${DEST}" "${tarball}"
 
-echo "Congratulations! Your archives are at ${tarball}.{gz,bz2,xz}"
+echo ">> Your archives are at ${tarball}.{gz,bz2,xz}"
+exit 0
