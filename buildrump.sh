@@ -568,7 +568,8 @@ makebuild ()
 makeinstall ()
 {
 
-	(cd ${OBJDIR}/dest.stage/usr; tar -cf - .) | (cd ${DESTDIR}; tar -xf -)
+	stage=$(${RUMPMAKE} -V '${BUILDRUMP_STAGE}')
+	(cd ${stage}/usr ; tar -cf - .) | (cd ${DESTDIR} ; tar -xf -)
 }
 
 evaltools ()
