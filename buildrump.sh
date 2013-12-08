@@ -201,6 +201,11 @@ maketools ()
 	# Perform various checks and set values
 	#
 
+	#
+	# does build.sh even exist, or is this just a kernel-only checkout?
+	#
+	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
+
 	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
