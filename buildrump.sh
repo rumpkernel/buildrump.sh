@@ -510,21 +510,22 @@ makebuild ()
 	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" \
 	  -a ${MACHINE} != "mipsel" -a ${MACHINE} != "mipsel64" \
 	  -a ${MACHINE} != "mipseb" -a ${MACHINE} != "mipseb64" ]; then
-		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_linux"
+		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
+
+	if [ ${TARGET} = "sunos" ]; then
+		DIRS_emul=sys/rump/kern/lib/libsys_sunos
+	fi
+
+	DIRS_third="${DIRS_third} ${DIRS_emul}"
 
 	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
 		DIRS_final="lib/librumphijack"
 	fi
 
-	if [ ${TARGET} = "sunos" ]; then
-		DIRS_third="${DIRS_third} sys/rump/kern/lib/libsys_sunos"
-	fi
-
 	if ${KERNONLY}; then
-		mkmakefile ${OBJDIR}/Makefile.incs \
-		    ${DIRS_first} ${DIRS_second} ${DIRS_third}
-		mkmakefile ${OBJDIR}/Makefile.all ${DIRS_second} ${DIRS_third}
+		mkmakefile ${OBJDIR}/Makefile.all \
+		    sys/rump ${DIRS_emul} ${BRDIR}/brlib
 	else
 		DIRS_third="lib/librumpclient ${DIRS_third}"
 
@@ -539,21 +540,13 @@ makebuild ()
 	# try to minimize the amount of domake invocations.  this makes a
 	# difference especially on systems with a large number of slow cores
 	for target in ${targets}; do
-		if ${KERNONLY}; then
-			if [ ${target} = "includes" ]; then
-				domake ${OBJDIR}/Makefile.incs ${target}
-			else
-				domake ${OBJDIR}/Makefile.all ${target}
-			fi
+		if [ ${target} = "dependall" ] && ! ${KERNONLY}; then
+			domake ${OBJDIR}/Makefile.first ${target}
+			domake ${OBJDIR}/Makefile.second ${target}
+			domake ${OBJDIR}/Makefile.third ${target}
+			domake ${OBJDIR}/Makefile.final ${target}
 		else
-			if [ ${target} = "dependall" ]; then
-				domake ${OBJDIR}/Makefile.first ${target}
-				domake ${OBJDIR}/Makefile.second ${target}
-				domake ${OBJDIR}/Makefile.third ${target}
-				domake ${OBJDIR}/Makefile.final ${target}
-			else
-				domake ${OBJDIR}/Makefile.all ${target}
-			fi
+			domake ${OBJDIR}/Makefile.all ${target}
 		fi
 	done
 
