@@ -39,6 +39,11 @@
 # 3) push rumpkernel-netbsd-src
 # 4) push buildrump.sh
 #
+# The rationale for the procedure is to prevent "race conditions"
+# where cvs/git can offer different checkouts and also to make sure
+# that once buildrump.sh is published, the NetBSD sources will be
+# available via git.
+#
 NBSRC_CVSDATE="20131209 2000UTC"
 NBSRC_CVSFLAGS="-z3 \
     -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
