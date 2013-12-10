@@ -44,9 +44,9 @@
 # that once buildrump.sh is published, the NetBSD sources will be
 # available via git.
 #
+: ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
 NBSRC_CVSDATE="20131209 2000UTC"
-NBSRC_CVSFLAGS="-z3 \
-    -d ${BUILDRUMP_CVSROOT:-:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}"
+NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
@@ -99,7 +99,8 @@ checkoutcvs ()
 	esac
 		
 
-	echo ">> Fetching NetBSD sources to ${SRCDIR} using cvs"
+	echo ">> Fetching NetBSD sources to ${SRCDIR} using CVS"
+	echo ">> BUILDRUMP_CVSROOT is \"${BUILDRUMP_CVSROOT}\""
 
 	: ${CVS:=cvs}
 	if ! type ${CVS} >/dev/null 2>&1 ;then
@@ -197,7 +198,6 @@ githubdate ()
 
 	${GIT} clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
 
-	echo '>> checking out source tree via anoncvs'
 	# checkoutcvs does cd to SRCDIR
 	curdir="$(pwd)"
 	checkoutcvs
