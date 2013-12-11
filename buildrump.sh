@@ -61,16 +61,18 @@ helpme ()
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
 	printf "\t-s: location of source tree.  default: PWD/src\n"
-	printf "\n"
+	echo
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
-	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
 	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
-	printf "\t-N: emulate NetBSD, set -D__NetBSD__ etc.  default: nope\n"
+	printf "\t-N: emulate NetBSD, set -D__NetBSD__ etc.  default: no\n"
+	echo
+	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
+	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
@@ -194,12 +196,25 @@ cctestW ()
 	rm -f broken.c broken.out
 }
 
+checkcheckout ()
+{
+
+	[ ! -z "${TARBALLMODE}" ] && return
+
+	if ! ${BRDIR}/checkout.sh checkcheckout ${SRCDIR} \
+	    && ! ${TITANMODE}; then
+		die 'revision mismatch, run checkout (or -H to override)'
+	fi
+}
+
 maketools ()
 {
 
 	#
 	# Perform various checks and set values
 	#
+
+	checkcheckout
 
 	#
 	# does build.sh even exist, or is this just a kernel-only checkout?
@@ -490,6 +505,8 @@ makemake ()
 makebuild ()
 {
 
+	checkcheckout
+
 	# ensure we're in SRCDIR, in case "tools" wasn't run
 	cd ${SRCDIR}
 
@@ -644,7 +661,7 @@ parseargs ()
 {
 
 	DBG='-O2 -g'
-	ANYTARGETISGOOD=false
+	TITANMODE=false
 	NOISE=2
 	debugginess=0
 	THIRTYTWO=false
@@ -685,7 +702,7 @@ parseargs ()
 			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 			;;
 		H)
-			ANYTARGETISGOOD=true
+			TITANMODE=true
 			;;
 		k)
 			KERNONLY=true
@@ -906,11 +923,11 @@ evaltarget ()
 	esac
 
 	if ! ${target_supported:-true}; then
-		${ANYTARGETISGOOD} || die unsupported target OS: ${TARGET}
+		${TITANMODE} || die unsupported target OS: ${TARGET}
 	fi
 
 	if ! cppdefines __ELF__; then
-		${ANYTARGETISGOOD} || die ELF required as target object format
+		${TITANMODE} || die ELF required as target object format
 	fi
 
 	# decide 32/64bit build.  step one: probe compiler default
@@ -924,12 +941,12 @@ evaltarget ()
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
 		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
-		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
+		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
 		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
-		[ $? -eq 0 ] || ${ANYTARGETISGOOD} || \
+		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
 	else
 		# not specified.  use compiler default

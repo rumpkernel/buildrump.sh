@@ -68,7 +68,9 @@ GITREVFILE='.srcgitrev'
 die ()
 {
 
+	echo '>>'
 	echo ">> $*"
+	echo '>>'
 	exit 1
 }
 
@@ -219,6 +221,43 @@ githubdate ()
 	set +e
 }
 
+checkcheckout ()
+{
+
+	# if it's not a git repo, don't bother
+	if [ ! -e "${SRCDIR}/.git" ]; then
+		echo '>>'
+		echo ">> NOTICE: Not a git repo in ${SRCDIR}"
+		echo '>> Cannot verify repository version.  Proceeding ...'
+		echo '>>'
+		return 0
+	fi
+
+	setgit
+
+	# if it's a git repo of the wrong version, issue an error
+	# (caller can choose to ignore it if they so desire)
+	gitrev_wanted=$(cat ${BRDIR}/${GITREVFILE})
+	gitrev_actual=$( (cd ${SRCDIR} && ${GIT} rev-parse HEAD))
+	if [ "${gitrev_wanted}" != "${gitrev_actual}" ]; then
+		echo '>>'
+		echo ">> ${SRCDIR} contains the wrong repo revision"
+		echo '>> Did you forget to run checkout?'
+		echo '>>'
+		return 1
+	fi
+
+	# if it's an unclean git repo, issue a warning
+	if [ ! -z "$( (cd ${SRCDIR} && ${GIT} status --porcelain))" ]; then
+		echo '>>'
+		echo ">> WARNING: repository in ${SRCDIR} is not clean"
+		echo '>>'
+		return 0
+	fi
+
+	return 0
+}
+
 setgit ()
 {
 
@@ -254,6 +293,10 @@ githubdate)
 	echo '>>'
 	echo ">> REMEMBER TO PUSH ${SRCDIR}"
 	echo '>>'
+	;;
+checkcheckout)
+	checkcheckout
+	exit $?
 	;;
 *)
 	die Invalid usage.  Run this script via buildrump.sh
