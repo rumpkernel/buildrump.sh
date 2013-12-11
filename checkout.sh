@@ -55,11 +55,11 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA='
-    20131211 0946UTC:
+    20131211 2315UTC:
 	src/sys/compat/linux/arch/powerpc
 	src/sys/kern/makesyscalls.sh
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
-	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/rump/include/rump
 	src/sys/sys/syscallargs.h
 	src/sys/rump/librump/rumpvfs/Makefile.rumpvfs'
 
