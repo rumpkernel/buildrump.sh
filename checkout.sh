@@ -60,6 +60,7 @@ NBSRC_EXTRA='
 	src/sys/kern/makesyscalls.sh
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
 	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/sys/syscallargs.h
 	src/sys/rump/librump/rumpvfs/Makefile.rumpvfs'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
