@@ -226,3 +226,8 @@ Tips for advanced users
   buildrump.sh.  However, if you run into problems that will affect
   buildrump.sh after the checkout date is bumped, report the problems
   using your discretion.
+
+- You can override the compiler optimization flags by setting
+  `BUILDRUMP_DBG` in the env before running the script.  For example,
+  `BUILDRUMP_DBG=-Os ./buildrump.sh` will build with `-Os` instead of
+  the default `-O2 -g`.
