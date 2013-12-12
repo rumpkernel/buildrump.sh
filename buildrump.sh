@@ -54,7 +54,6 @@ die ()
 helpme ()
 {
 
-	exec 1>&2
 	echo "Usage: $0 [-h] [options] [command] [command...]"
 	printf "supported options:\n"
 	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
