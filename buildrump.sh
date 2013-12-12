@@ -741,6 +741,8 @@ parseargs ()
 	done
 	shift $((${OPTIND} - 1))
 
+	DBG="${BUILDRUMP_DBG:-${DBG}}"
+
 	BEQUIET="-N${NOISE}"
 	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 
