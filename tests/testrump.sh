@@ -86,11 +86,9 @@ alltests ()
 		TO=${TESTOBJ}/${test}
 		(
 			cd ${TESTDIR}/${test}
-			${RUMPMAKE} MAKEOBJDIR=${TO} obj
-			${RUMPMAKE} MAKEOBJDIR=${TO} dependall
-		)
-
-		( cd ${TO} ; do${test} )
+			${RUMPMAKE} MAKEOBJDIR=${TO} obj || exit 1
+			${RUMPMAKE} MAKEOBJDIR=${TO} dependall || exit 1
+		) && ( cd ${TO} ; do${test} )
 		failed=$(( ${failed} + $? ))
 	done
 	[ ${failed} -ne 0 ] && die "FAILED ${failed} tests!"
