@@ -12,6 +12,6 @@ env:
   - LIBTYPE='MKSTATICLIB=no' DEBUG='-DDD'
 
 script:
-    dirsuf=${LIBTYPE}.${DEBUG}
-    ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 \
-        -V ${LIBTYPE} ${DEBUG} fullbuild tests
+  -  dirsuf=${LIBTYPE}.${DEBUG}
+  -  ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 \
+       -V ${LIBTYPE} ${DEBUG} fullbuild tests
