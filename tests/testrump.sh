@@ -81,6 +81,8 @@ alltests ()
 		echo '>>'
 	fi
 
+	mkdir -p ${TESTOBJ} || die cannot create object directory
+
 	failed=0
 	extradep=${TESTOBJ}/.testrumpdepend
 	touch ${extradep}
