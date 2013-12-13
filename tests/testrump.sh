@@ -82,12 +82,15 @@ alltests ()
 	fi
 
 	failed=0
+	extradep=${TESTOBJ}/.testrumpdepend
+	touch ${extradep}
 	for test in ${ALLTESTS}; do
 		TO=${TESTOBJ}/${test}
 		(
 			cd ${TESTDIR}/${test}
 			${RUMPMAKE} MAKEOBJDIR=${TO} obj || exit 1
-			${RUMPMAKE} MAKEOBJDIR=${TO} dependall || exit 1
+			${RUMPMAKE} MAKEOBJDIR=${TO} DPSRCS=${extradep} \
+			     dependall || exit 1
 		) && ( cd ${TO} ; do${test} )
 		failed=$(( ${failed} + $? ))
 	done
