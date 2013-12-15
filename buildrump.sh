@@ -285,6 +285,12 @@ int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
 	${CC} test.c >/dev/null 2>&1 && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 	rm -f test.c a.out
 
+	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
+	# to avoid line number conflicts
+	printf 'int a = __COUNTER__;\n' > test.c
+	${CC} -c test.c >/dev/null 2>&1 || CTASSERT="-D'CTASSERT(x)='"
+	rm -f test.c a.out
+
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
 	# its presence and if its not available, just leave out if_virt
@@ -387,6 +393,7 @@ EOF
 	fi
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
