@@ -528,12 +528,12 @@ makebuild ()
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
-	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64"; then
+	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
 
 	if [ ${TARGET} = "sunos" ]; then
-		DIRS_emul=sys/rump/kern/lib/libsys_sunos
+		DIRS_emul="${DIRS_emul} sys/rump/kern/lib/libsys_sunos"
 	fi
 
 	DIRS_third="${DIRS_third} ${DIRS_emul}"
