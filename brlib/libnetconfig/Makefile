@@ -2,6 +2,8 @@ LIB=	rumpnet_config
 
 SRCS=	netconfig.c netconfig_if_wrappers.c
 
+SRCS+=	inet_pton6.c
+
 # DHCP support
 SRCS+=	dhcp_bpf.c dhcp_common.c dhcp_configure.c dhcp_dhcp.c	\
 	dhcp_if-bsd.c dhcp_main.c dhcp_net.c
