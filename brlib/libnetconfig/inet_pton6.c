@@ -22,7 +22,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "netconfig.h"
+#include "netconfig_private.h"
 
 /*%
  * WARNING: Don't even consider trying to compile this on a system where
@@ -172,7 +172,7 @@ inet_pton4(const char *src, u_char *dst, int pton)
  *	Paul Vixie, 1996.
  */
 int
-inet_pton6(const char *src, void *dst_void)
+netconfig_inet_pton6(const char *src, void *dst_void)
 {
 	static const char xdigits_l[] = "0123456789abcdef",
 			  xdigits_u[] = "0123456789ABCDEF";

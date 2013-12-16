@@ -40,7 +40,7 @@
 #include "rump_private.h"
 
 #include "netconfig_if_priv.h"
-#include "netconfig.h"
+#include "netconfig_private.h"
 
 static struct socket *in4so;
 static struct socket *in6so;
@@ -187,7 +187,7 @@ rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int prefixlen)
 	sin6 = (struct sockaddr_in6 *)&ia.ifra_addr;
 	sin6->sin6_family = AF_INET6;
 	sin6->sin6_len = sizeof(*sin6);
-	inet_pton6(addr, &sin6->sin6_addr);
+	netconfig_inet_pton6(addr, &sin6->sin6_addr);
 
 	sin6 = (struct sockaddr_in6 *)&ia.ifra_prefixmask;
 	sin6->sin6_family = AF_INET6;
