@@ -33,9 +33,14 @@
 #include <netinet/in.h>
 
 #include <netinet6/in6.h>
+#include <netinet6/in6_var.h>
+#include <netinet6/nd6.h>
+#include <netinet6/scope6_var.h>
 
 #include "rump_private.h"
+
 #include "netconfig_if_priv.h"
+#include "netconfig.h"
 
 static struct socket *in4so;
 static struct socket *in6so;
@@ -155,17 +160,49 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	 * small pause so that we can assume interface is usable when
 	 * we return (ARPs have trickled through, etc.)
 	 */
-	kpause("ramasee", false, mstohz(50), NULL);
+	if (rv == 0)
+		kpause("ramasee", false, mstohz(50), NULL);
 	return rv;
 }
 
 int
-rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int mask)
+rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int prefixlen)
 {
+	struct sockaddr_in6 *sin6;
+	struct in6_aliasreq ia;
+	int rv;
 
 	CHECKDOMAIN(in6so);
 
-	panic("IPv6 is TODO");
+	/* pfft, you do the bitnibbling */
+	if (prefixlen % 8)
+		panic("lazy bum");
+
+	memset(&ia, 0, sizeof(ia));
+	strlcpy(ia.ifra_name, ifname, sizeof(ia.ifra_name));
+
+	ia.ifra_lifetime.ia6t_pltime = ND6_INFINITE_LIFETIME;
+	ia.ifra_lifetime.ia6t_vltime = ND6_INFINITE_LIFETIME;
+
+	sin6 = (struct sockaddr_in6 *)&ia.ifra_addr;
+	sin6->sin6_family = AF_INET6;
+	sin6->sin6_len = sizeof(*sin6);
+	inet_pton6(addr, &sin6->sin6_addr);
+
+	sin6 = (struct sockaddr_in6 *)&ia.ifra_prefixmask;
+	sin6->sin6_family = AF_INET6;
+	sin6->sin6_len = sizeof(*sin6);
+	memset(&sin6->sin6_addr, 0, sizeof(sin6->sin6_addr));
+	memset(&sin6->sin6_addr, 0xff, prefixlen / 8);
+
+	rv = ifioctl(in6so, SIOCAIFADDR_IN6, &ia, curlwp);
+	/*
+	 * small pause so that we can assume interface is usable when
+	 * we return (ARPs have trickled through, etc.)
+	 */
+	if (rv == 0)
+		kpause("ramasee", false, mstohz(50), NULL);
+	return rv;
 }
 
 int
