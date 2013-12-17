@@ -61,7 +61,15 @@ NBSRC_EXTRA='
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
 	src/sys/rump/include/rump
 	src/sys/sys/syscallargs.h
-	src/sys/rump/librump/rumpvfs/Makefile.rumpvfs'
+	src/sys/rump/librump/rumpvfs/Makefile.rumpvfs;
+    20131216 2330UTC:
+	src/usr.bin/rump_allserver/rump_allserver.c
+	src/sys/rump/kern/lib/libsys_linux/component.c
+	src/sys/rump/librump/rumpkern/emul.c
+	src/sys/rump/librump/rumpkern/lwproc.c
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/lib/libkern/libkern.h
+	src/sys/net/bpfjit.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
