@@ -176,7 +176,7 @@ rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int prefixlen)
 
 	/* pfft, you do the bitnibbling */
 	if (prefixlen % 8)
-		panic("lazy bum");
+		return EINVAL;
 
 	memset(&ia, 0, sizeof(ia));
 	strlcpy(ia.ifra_name, ifname, sizeof(ia.ifra_name));
