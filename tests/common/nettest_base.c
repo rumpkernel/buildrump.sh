@@ -14,6 +14,14 @@
 
 #define CONNPORT 135
 
+/*
+ * well, uh, solarisa wants to have some own junk at the end of its
+ * sockaddr_in6.  So pass just the standard bits into the rump kernel.
+ * (yea, this should be solved by syscall compat, but I don't want to
+ * think about linking compat into tests at the current time)
+ */
+#define RUMP_SIN6_SIZE 28
+
 #define NOFAIL(a) do {int rv=a; if(rv==-1) die("%s: %d\n",#a,errno);} while (0)
 
 static void
@@ -60,13 +68,16 @@ server_v6(void)
 	struct sockaddr_in6 sin6; /* XXX */
 	unsigned int slen = sizeof(sin6);
 
+	if (sizeof(sin6) < RUMP_SIN6_SIZE)
+		die("platform struct sockaddr_in6 too small\n");
+
 	memset(&sin6, 0, sizeof(sin6));
 	sin6.sin6_family = RUMP_AF_INET6;
 	sin6.sin6_port = htons(CONNPORT);
 	sin6.sin6_addr = in6addr_any;
 
 	server_common(config_server6,
-	    RUMP_PF_INET6, (struct sockaddr *)&sin6, sizeof(sin6));
+	    RUMP_PF_INET6, (struct sockaddr *)&sin6, RUMP_SIN6_SIZE);
 }
 
 static void
@@ -110,6 +121,9 @@ client_v6(void)
 {
 	struct sockaddr_in6 sin6;
 
+	if (sizeof(sin6) < RUMP_SIN6_SIZE)
+		die("platform struct sockaddr_in6 too small\n");
+
 	/* socket, connect.  standard sockets programming */
 	memset(&sin6, 0, sizeof(sin6));
 	sin6.sin6_family = RUMP_AF_INET6;
@@ -117,7 +131,7 @@ client_v6(void)
 	inet_pton(AF_INET6, "2013::1", &sin6.sin6_addr);
 
 	client_common(config_client6,
-	    RUMP_PF_INET6, (struct sockaddr *)&sin6, sizeof(sin6));
+	    RUMP_PF_INET6, (struct sockaddr *)&sin6, RUMP_SIN6_SIZE);
 }
 
 /* give the router a controlsocket so that it can easily be halted */
