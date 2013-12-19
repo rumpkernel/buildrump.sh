@@ -25,6 +25,13 @@ config_server(void)
 	NOFAIL_RV(rump_pub_netconfig_ipv4_gw("1.0.0.2"));
 }
 
+static void
+config_server6(void)
+{
+
+	printf("config_server6 not yet supported\n");
+	abort();
+}
 
 static void
 config_client(void)
@@ -38,6 +45,14 @@ config_client(void)
 	    "1.0.1.1", "255.255.255.0"));
 
 	NOFAIL_RV(rump_pub_netconfig_ipv4_gw("1.0.1.2"));
+}
+
+static void
+config_client6(void)
+{
+
+	printf("config_client6 not yet supported\n");
+	abort();
 }
 
 static void

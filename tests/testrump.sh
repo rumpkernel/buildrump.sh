@@ -48,6 +48,11 @@ donettest_simple ()
 	rm -f busmem
 	./nettest_simple server || die nettest server failed
 	./nettest_simple client || die nettest client failed
+
+	echo IPv6 networking test
+	rm -f busmem
+	./nettest_simple server6 || die nettest server6 failed
+	./nettest_simple client6 || die nettest client6 failed
 	echo Done
 }
 
