@@ -920,7 +920,7 @@ evaltarget ()
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
-		${KERNONLY} || MKSTATICLIB=no
+		MKSTATICLIB=no
 		;;
 	"cygwin")
 		MKPIC=no
