@@ -381,7 +381,6 @@ EOF
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	if ${KERNONLY}; then
-		appendmkconf Cmd no MKPIC
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
