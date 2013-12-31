@@ -70,8 +70,10 @@ NBSRC_EXTRA='
 	src/sys/rump/kern/lib/libsys_linux/component.c;
     20131218 2100UTC:
 	src/sys/compat/linux
-	src/sys/rump/include/rump
-	src/usr.bin/rump_allserver/rump_allserver.c'
+	src/sys/rump/include/rump;
+    20131231 0030UTC:
+	src/usr.bin/rump_allserver/rump_allserver.c
+	src/lib/librumpuser/sp_common.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
