@@ -22,7 +22,7 @@
  */
 #define RUMP_SIN6_SIZE 28
 
-#define NOFAIL(a) do {int rv=a; if(rv==-1) die("%s: %d\n",#a,errno);} while (0)
+#define NOFAIL(a) do {int rv=a; if(rv==-1) die("%s: %d",#a,errno);} while (0)
 
 static void
 server_common(void (*ifconf)(void),
@@ -69,7 +69,7 @@ server_v6(void)
 	unsigned int slen = sizeof(sin6);
 
 	if (sizeof(sin6) < RUMP_SIN6_SIZE)
-		die("platform struct sockaddr_in6 too small\n");
+		die("platform struct sockaddr_in6 too small");
 
 	memset(&sin6, 0, sizeof(sin6));
 	sin6.sin6_family = RUMP_AF_INET6;
@@ -122,7 +122,7 @@ client_v6(void)
 	struct sockaddr_in6 sin6;
 
 	if (sizeof(sin6) < RUMP_SIN6_SIZE)
-		die("platform struct sockaddr_in6 too small\n");
+		die("platform struct sockaddr_in6 too small");
 
 	/* socket, connect.  standard sockets programming */
 	memset(&sin6, 0, sizeof(sin6));
