@@ -1,0 +1,19 @@
+This file describes major user-visible changes between snapshot releases.
+Note that most improvements due to the bumping of the NetBSD timestamp
+are not described.  For a more complete list of NetBSD changes, see:
+http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
+
+
+	[changes not yet part of a snapshot]
+
++ allow user to specify any debug/optimization compiler flags by
+  setting BUILDRUMP_DBG in the env
++ Linux syscall compat improvements (mostly via NetBSD)
++ support IPv6 address configuration in the netconfig component
++ fix NetBSD 5.x host support
++ update NetBSD timestamp to 20131209 2000UTC
+
+	Snapshot 6.12.2013
+
+Older changes are documented only in buildrump.sh logs at:
+https://github.com/anttikantee/buildrump.sh/commits/master
