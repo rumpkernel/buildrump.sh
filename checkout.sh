@@ -272,6 +272,26 @@ checkcheckout ()
 	return 0
 }
 
+listdates ()
+{
+
+	echo '>> Base date for NetBSD sources:'
+	echo '>>' ${NBSRC_CVSDATE}
+	echo '>>'
+	echo '>> Overrides:'
+	IFS=';'
+	for x in ${NBSRC_EXTRA}; do
+		IFS=':'
+		set -- ${x}
+		unset IFS
+		date=${1}
+		dirs=${2}
+		echo '>>'
+		echo '>> Date: ' ${date}
+		echo '>> Files:' ${dirs}
+	done
+}
+
 setgit ()
 {
 
@@ -282,6 +302,8 @@ setgit ()
 		die \"${GIT}\" not found
 	fi
 }
+
+[ "$1" = "listdates" ] && { listdates ; exit 0; }
 
 [ $# -lt 2 ] && die Invalid usage.  Run this script via buildrump.sh
 BRDIR=$(dirname $0)
@@ -313,7 +335,7 @@ checkcheckout)
 	exit $?
 	;;
 *)
-	die Invalid usage.  Run this script via buildrump.sh
+	die Invalid command \"$1\".  Run this script via buildrump.sh
 	;;
 esac
 

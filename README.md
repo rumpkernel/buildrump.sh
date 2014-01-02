@@ -109,9 +109,12 @@ given commands were `checkout fullbuild tests`.  You can override this
 default by giving explicit commands.
 
 The `checkout` command will fetch the necessary subset of the NetBSD
-source tree from github into `./src`.  You are free to use any method
-for fetching NetBSD sources, though the only officially supported way
-is to let the script handle the checkout.
+source tree from github into `./src` (the location can be changed using
+the `-s` parameter).  You are free to use any method for fetching NetBSD
+sources, though the only officially supported way is to use the `checkout`
+command.  Note that the NetBSD sources and their timestamps may vary from
+one buildrump.sh revision to another.  By default, the script checks that
+you have the appropriate set of sources even if you do not run `checkout`.
 
 The `fullbuild` command will then instruct the script to to build the
 necessary set of tools for building rump kernels, e.g. the BSD version
@@ -213,6 +216,9 @@ Tips for advanced users
   `$PATH`.  You can now do fast build iteration for kernel components by
   going to the appropriate directory and running `rumpmake dependall &&
   rumpmake install`.
+
+- You can list the NetBSD source dates used by `./buildrump.sh checkout`
+  by running `./checkout.sh listdates`.
 
 - Assuming you have a commit bit to NetBSD, you can use HEAD from NetBSD
   src and be able to commit your changes to NetBSD from src with the
