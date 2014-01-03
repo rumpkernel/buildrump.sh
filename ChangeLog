@@ -9,12 +9,14 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ allow IPv4-only and IPv6-only rump kernels, i.e. libnet_netinet
+  provides only IPv4, and libnet_netinet6 provides only IPv6
++ update NetBSD timestamp to 20140103 1400UTC
 + allow user to specify any debug/optimization compiler flags by
   setting BUILDRUMP_DBG in the env
 + Linux syscall compat improvements (mostly via NetBSD)
 + support IPv6 address configuration in the netconfig component
 + fix NetBSD 5.x host support
-+ update NetBSD timestamp to 20131209 2000UTC
 
 	Snapshot 6.12.2013
 
