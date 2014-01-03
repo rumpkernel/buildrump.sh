@@ -9,6 +9,10 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
+[none]
+
+	Snapshot 3.1.2014
+
 + allow IPv4-only and IPv6-only rump kernels, i.e. libnet_netinet
   provides only IPv4, and libnet_netinet6 provides only IPv6
 + update NetBSD timestamp to 20140103 1400UTC
