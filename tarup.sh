@@ -133,7 +133,11 @@ Unless you have a need to use this self-contained archive, it is
 recommended that you use the git repository.
 
 [1] https://github.com/anttikantee/buildrump.sh
+
+
+The following NetBSD source timestamps were used in this snapshot:
 EOF
+./checkout.sh listdates >> "${DEST}/README"
 
 echo ">> Creating archive of sources"
 
