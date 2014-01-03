@@ -75,7 +75,7 @@ then
     die "working directory not clean:
 ${gitstat}"
   fi
-  [ "$(${GIT} status --porcelain -b )" = '## master' ] \
+  ${GIT} status --porcelain -b | grep -q '## master' \
     || die "not on master branch"
 fi
 
