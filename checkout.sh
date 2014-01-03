@@ -258,8 +258,7 @@ listdates ()
 
 	echo '>> Base date for NetBSD sources:'
 	echo '>>' ${NBSRC_CVSDATE}
-	echo '>>'
-	echo '>> Overrides:'
+	[ -z "${NBSRC_EXTRA}" ] || printf '>>\n>> Overrides:\n'
 	IFS=';'
 	for x in ${NBSRC_EXTRA}; do
 		IFS=':'
