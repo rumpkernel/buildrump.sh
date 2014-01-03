@@ -48,11 +48,15 @@ donettest_simple ()
 	rm -f busmem
 	./nettest_simple server || die nettest server failed
 	./nettest_simple client || die nettest client failed
+}
+
+donettest_simple6 ()
+{
 
 	echo IPv6 networking test
 	rm -f busmem
-	./nettest_simple server6 || die nettest server6 failed
-	./nettest_simple client6 || die nettest client6 failed
+	./nettest_simple6 server6 || die nettest server6 failed
+	./nettest_simple6 client6 || die nettest client6 failed
 	echo Done
 }
 
@@ -73,7 +77,9 @@ donettest_routed ()
 	echo Done
 }
 
-ALLTESTS="init fstest fstest_img simpleclient nettest_simple nettest_routed"
+ALLTESTS="init fstest fstest_img simpleclient
+	nettest_simple nettest_simple6 nettest_routed"
+
 alltests ()
 {
 
