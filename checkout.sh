@@ -45,7 +45,7 @@
 # available via git.
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
-NBSRC_CVSDATE="20131209 2000UTC"
+NBSRC_CVSDATE="20140103 1400UTC"
 NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
@@ -54,26 +54,7 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='
-    20131211 2315UTC:
-	src/sys/kern/makesyscalls.sh
-	src/sys/rump/librump/rumpkern/rump_syscalls.c
-	src/sys/sys/syscallargs.h
-	src/sys/rump/librump/rumpvfs/Makefile.rumpvfs;
-    20131216 2330UTC:
-	src/sys/rump/librump/rumpkern/emul.c
-	src/sys/rump/librump/rumpkern/lwproc.c
-	src/sys/rump/librump/rumpkern/rump.c
-	src/sys/lib/libkern/libkern.h
-	src/sys/net/bpfjit.c;
-    20131217 1435UTC:
-	src/sys/rump/kern/lib/libsys_linux/component.c;
-    20131218 2100UTC:
-	src/sys/compat/linux
-	src/sys/rump/include/rump;
-    20131231 0030UTC:
-	src/usr.bin/rump_allserver/rump_allserver.c
-	src/lib/librumpuser/sp_common.c'
+NBSRC_EXTRA=''
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
