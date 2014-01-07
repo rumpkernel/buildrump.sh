@@ -44,7 +44,7 @@ dofstest_img ()
 donettest_simple ()
 {
 
-	echo Networking test
+	echo IPv4 networking test
 	rm -f busmem
 	./nettest_simple server || die nettest server failed
 	./nettest_simple client || die nettest client failed
@@ -63,7 +63,7 @@ donettest_simple6 ()
 donettest_routed ()
 {
 
-	echo Routed networking test
+	echo Routed IPv4 networking test
 
 	rm -f net1 net2
 	./nettest_routed server || die nettest server failed
