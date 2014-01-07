@@ -638,6 +638,9 @@ evaltools ()
 	*-dragonflybsd)
 		TARGET=dragonfly
 		;;
+	*-openbsd)
+		TARGET=openbsd
+		;;
 	*-freebsd*)
 		TARGET=freebsd
 		;;
@@ -897,6 +900,9 @@ evaltarget ()
 	case ${TARGET} in
 	"dragonfly")
 		RUMPKERN_UNDEF='-U__DragonFly__'
+		;;
+	"openbsd")
+		RUMPKERN_UNDEF='-U__OpenBSD__'
 		;;
 	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
