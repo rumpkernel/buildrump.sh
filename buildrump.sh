@@ -638,7 +638,7 @@ evaltools ()
 	*-dragonflybsd)
 		TARGET=dragonfly
 		;;
-	*-openbsd)
+	*-openbsd*)
 		TARGET=openbsd
 		;;
 	*-freebsd*)
