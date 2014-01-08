@@ -903,6 +903,7 @@ evaltarget ()
 		;;
 	"openbsd")
 		RUMPKERN_UNDEF='-U__OpenBSD__'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
