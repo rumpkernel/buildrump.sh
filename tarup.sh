@@ -25,7 +25,7 @@
 # SUCH DAMAGE.
 #
 
-# This script will generate a tar.bz2 archive of the current git checkout
+# This script will generate a tar.{gz,xz} archive of the current git checkout
 # The "version number" of the tarball is in unix time format 
 
 unset force
@@ -143,9 +143,8 @@ echo ">> Creating archive of sources"
 
 tar -cf "${tarball}" "${DEST}"
 gzipsfx=gz
-bzip2sfx=bz2
 xzsfx=xz
-for compress in gzip bzip2 xz
+for compress in gzip xz
 do
   eval suf=\${${compress}sfx}
   echo ">> Compressing with ${compress}"
@@ -156,5 +155,5 @@ done
 echo ">> Removing temporary files"
 rm -rf "${DEST}" "${tarball}"
 
-echo ">> Your archives are at ${tarball}.{gz,bz2,xz}"
+echo ">> Your archives are at ${tarball}.{gz,xz}"
 exit 0
