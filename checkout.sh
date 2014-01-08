@@ -56,7 +56,9 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA='
     20140104 1420UTC:
-	src/sys/netinet/udp_usrreq.c'
+	src/sys/netinet/udp_usrreq.c;
+    20140108 0150UTC:
+	src/lib/librumpuser'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
