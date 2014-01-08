@@ -1067,7 +1067,7 @@ evaltarget ()
 	"mips")
 		check64
 		MACHINE="evbmips-eb"
-		MACH_ARVH="mipseb"
+		MACH_ARCH="mipseb"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
