@@ -199,6 +199,9 @@ as follows:
 - NetBSD
     - NetBSD pain-rustique.localhost 5.1_STABLE NetBSD 5.1_STABLE (PAIN-RUSTIQUE) #5: Wed Feb 16 13:34:14 CET 2011  pooka@pain-rustique.localhost:/objs/kobj.i386/PAIN-RUSTIQUE __i386__
 
+- OpenBSD
+    - OpenBSD openbsd.myriabit.eu 5.4 GENERIC#37 amd64
+
 - Solaris
     - SunOS hutcs 5.10 Generic_142900-15 sun4v sparc SUNW,T5240 Solaris (needs xpg4/bin/sh, __sparc64__ in 64bit mode, __sparc__ in 32bit mode)
     - SunOS pkgsrc-dev 5.11 joyent_20120126T071347Z i86pc i386 i86pc (with thanks to Jonathan for test host access, __amd64__ in 64bit mode, __i386__ in 32bit mode)
