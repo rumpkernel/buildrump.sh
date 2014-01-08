@@ -904,6 +904,7 @@ evaltarget ()
 	"openbsd")
 		RUMPKERN_UNDEF='-U__OpenBSD__'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -Wno-bounded"
 		;;
 	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
