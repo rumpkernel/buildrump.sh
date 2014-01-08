@@ -58,7 +58,9 @@ NBSRC_EXTRA='
     20140104 1420UTC:
 	src/sys/netinet/udp_usrreq.c;
     20140108 0150UTC:
-	src/lib/librumpuser'
+	src/lib/librumpuser;
+    20140108 1200UTC:
+	src/sys/rump/net/lib/libshmif/rumpcomp_user.c'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
