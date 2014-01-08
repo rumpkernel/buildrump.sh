@@ -1040,7 +1040,7 @@ evaltarget ()
 		fi
 		probemips
 		;;
-	"mips64eb")
+	"mips64")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
@@ -1064,7 +1064,7 @@ evaltarget ()
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
-	"mipseb")
+	"mips")
 		check64
 		MACHINE="evbmips-eb"
 		MACH_ARVH="mipseb"
