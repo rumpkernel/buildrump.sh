@@ -128,6 +128,14 @@ appendmkconf ()
 	fi
 }
 
+appendvar ()
+{
+
+	vname=${1}
+	shift
+	eval ${vname}="\"\${${vname}} \${*}\""
+}
+
 #
 # Not all platforms have  the same set of crt files.  for some
 # reason unbeknownst to me, if the file does not exist,
@@ -190,7 +198,7 @@ cctestW ()
 	echo 'no you_shall_not_compile' > broken.c
 	${CC} -W${1} broken.c > broken.out 2>&1
 	if ! grep -q "W${1}" broken.out ; then
-		EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -W${1}"
+		appendvar EXTRA_CWARNFLAGS -W${1}
 	fi
 	rm -f broken.c broken.out
 }
@@ -253,7 +261,7 @@ maketools ()
 	# since we need to testbuild kernel code, not host code,
 	# and we're only setting up the build now.  So we just
 	# disable format warnings on all 32bit targets.
-	${THIRTYTWO} && EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -Wno-format"
+	${THIRTYTWO} && appendvar EXTRA_CWARNFLAGS -Wno-format
 
 	#
 	# Check if the linker supports all the features of the rump kernel
@@ -739,7 +747,7 @@ parseargs ()
 			BRTOOLDIR=${OPTARG}
 			;;
 		V)
-			BUILDSH_VARGS="${BUILDSH_VARGS} -V ${OPTARG}"
+			appendvar BUILDSH_VARGS -V ${OPTARG}
 			;;
 		-)
 			break
@@ -904,7 +912,7 @@ evaltarget ()
 	"openbsd")
 		RUMPKERN_UNDEF='-U__OpenBSD__'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		EXTRA_CWARNFLAGS="${EXTRA_CWARNFLAGS} -Wno-bounded"
+		appendvar EXTRA_CWARNFLAGS -Wno-bounded
 		;;
 	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
@@ -912,8 +920,7 @@ evaltarget ()
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
-		cppdefines _BIG_ENDIAN \
-		    && RUMPKERN_UNDEF="${RUMPKERN_UNDEF} -U_BIG_ENDIAN"
+		cppdefines _BIG_ENDIAN && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
