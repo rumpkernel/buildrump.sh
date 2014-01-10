@@ -595,7 +595,9 @@ makebuild ()
 makeinstall ()
 {
 
-	stage=$(${RUMPMAKE} -V '${BUILDRUMP_STAGE}')
+	# ensure we run this in a directory that does not have a
+	# Makefile that could confuse rumpmake
+	stage=$(cd ${BRTOOLDIR} && ${RUMPMAKE} -V '${BUILDRUMP_STAGE}')
 	(cd ${stage}/usr ; tar -cf - .) | (cd ${DESTDIR} ; tar -xf -)
 }
 
