@@ -65,6 +65,7 @@ install the POSIX hypercall implementation.
 7 [DEB](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=Debian_7.0) (OBS)
 * Ubuntu Linux:
 13.04 [DEB](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=xUbuntu_13.04) (OBS)
+13.10 [DEB](https://build.opensuse.org/package/binaries/home:staal1978/rump?repository=xUbuntu_13.10) (OBS)
 * NetBSD: pkgsrc/misc/rump
 * DragonFly BSD: pkgsrc/misc/rump
 * Solaris: pkgsrc/misc/rump
