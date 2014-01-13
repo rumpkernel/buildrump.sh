@@ -9,7 +9,7 @@ TESTOBJ=${OBJDIR}/brtests
 dosimpleclient ()
 {
 
-	echo -n Remote communication ...
+	printf 'Remote communication ... '
 	export RUMP_SERVER="unix://mysocket"
 	${DESTDIR}/bin/rump_server "${RUMP_SERVER}" || die rump_server failed
 	./simpleclient || die simpleclient failed
@@ -36,7 +36,7 @@ dofstest ()
 dofstest_img ()
 {
 
-	echo -n VFS test with actual file system ...
+	printf 'VFS test with actual file system ... '
 	./fstest2 ${TESTDIR}/fstest_img || die fstest2 failed
 	echo done
 }
@@ -44,7 +44,7 @@ dofstest_img ()
 donettest_simple ()
 {
 
-	echo -n IPv4 networking test ...
+	printf 'IPv4 networking test ... '
 	rm -f busmem
 	./nettest_simple server || die nettest server failed
 	./nettest_simple client || die nettest client failed
@@ -54,7 +54,7 @@ donettest_simple ()
 donettest_simple6 ()
 {
 
-	echo -n IPv6 networking test ...
+	printf 'IPv6 networking test ... '
 	rm -f busmem
 	./nettest_simple6 server6 || die nettest server6 failed
 	./nettest_simple6 client6 || die nettest client6 failed
@@ -64,7 +64,7 @@ donettest_simple6 ()
 donettest_routed ()
 {
 
-	echo -n Routed IPv4 networking test ...
+	printf 'Routed IPv4 networking test ... '
 
 	rm -f net1 net2
 	./nettest_routed server || die nettest server failed
