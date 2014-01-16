@@ -27,8 +27,7 @@ of how to use these services are as follows:
 * [rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) enables
   running applications as standalone Xen DomU's (includes libc support)
 
-For full details on rump kernels, read http://www.NetBSD.org/docs/rump/
-and follow the links.
+For full details on rump kernels, go to http://www.rumpkernel.org/.
 For a video overview including various demos, watch the
 [FOSDEM 2013 presentation](http://video.fosdem.org/2013/maintracks/K.1.105/The_Anykernel_and_Rump_Kernels.webm).
 
