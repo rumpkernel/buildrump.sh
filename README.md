@@ -27,7 +27,7 @@ of how to use these services are as follows:
 * [rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) enables
   running applications as standalone Xen DomU's (includes libc support)
 
-Rump kernels address the part of the software typically handled
+Rump kernels address the part of the software stack typically handled
 by an OS kernel.  For running unmodified userspace applications
 against system call services provided by rump kernels, see
 [rumprun](https://github.com/justincormack/rumprun/).
