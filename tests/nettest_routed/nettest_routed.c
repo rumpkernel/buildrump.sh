@@ -18,7 +18,7 @@ config_server(void)
 
 	/* configure interface using the portable interfaces */
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
-	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "net1"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem1"));
 	NOFAIL_RV(rump_pub_netconfig_ipv4_ifaddr("shmif0",
 	    "1.0.0.1", "255.255.255.0"));
 
@@ -40,7 +40,7 @@ config_client(void)
 
 	/* configure networking using the portable interfaces */
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
-	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "net2"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem2"));
 	NOFAIL_RV(rump_pub_netconfig_ipv4_ifaddr("shmif0",
 	    "1.0.1.1", "255.255.255.0"));
 
@@ -62,12 +62,12 @@ config_router(void)
 
 	/* configure networking using the portable interfaces */
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
-	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "net1"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem1"));
 	NOFAIL_RV(rump_pub_netconfig_ipv4_ifaddr("shmif0",
 	    "1.0.0.2", "255.255.255.0"));
 
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif1"));
-	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif1", "net2"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif1", "busmem2"));
 	NOFAIL_RV(rump_pub_netconfig_ipv4_ifaddr("shmif1",
 	    "1.0.1.2", "255.255.255.0"));
 }
