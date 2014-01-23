@@ -128,7 +128,7 @@ client_v6(void)
 	memset(&sin6, 0, sizeof(sin6));
 	sin6.sin6_family = RUMP_AF_INET6;
 	sin6.sin6_port = htons(CONNPORT);
-	inet_pton(AF_INET6, "2013::1", &sin6.sin6_addr);
+	inet_pton(AF_INET6, "2001::1", &sin6.sin6_addr);
 
 	client_common(config_client6,
 	    RUMP_PF_INET6, (struct sockaddr *)&sin6, RUMP_SIN6_SIZE);
@@ -144,6 +144,20 @@ router(const char *ctrlsock)
 	if (rump_init_server(ctrlsock) != 0)
 		die("init server failed");
 	config_router();
+	rump_daemonize_done(0);
+	pause();
+}
+
+/* give the router a controlsocket so that it can easily be halted */
+static void
+router6(const char *ctrlsock)
+{
+
+	rump_daemonize_begin();
+	rump_init();
+	if (rump_init_server(ctrlsock) != 0)
+		die("init server failed");
+	config_router6();
 	rump_daemonize_done(0);
 	pause();
 }
@@ -165,6 +179,8 @@ main(int argc, char *argv[])
 		client_v6();
 	else if (strcmp(argv[1], "router") == 0)
 		router(argv[2]);
+	else if (strcmp(argv[1], "router6") == 0)
+		router6(argv[2]);
 	else
 		die("invalid role");
 	return 0;

@@ -28,9 +28,14 @@ config_server(void)
 static void
 config_server6(void)
 {
+	int rv;
 
-	printf("config_server6 not yet supported\n");
-	abort();
+	/* configure networking using the portable interfaces */
+	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem1"));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2001::1", 64));
+
+	NOFAIL_RV(rump_pub_netconfig_ipv6_gw("2001::2"));
 }
 
 static void
@@ -50,9 +55,14 @@ config_client(void)
 static void
 config_client6(void)
 {
+	int rv;
 
-	printf("config_client6 not yet supported\n");
-	abort();
+	/* configure networking using the portable interfaces */
+	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem2"));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2002::1", 64));
+
+	NOFAIL_RV(rump_pub_netconfig_ipv6_gw("2002::2"));
 }
 
 static void
@@ -70,6 +80,27 @@ config_router(void)
 	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif1", "busmem2"));
 	NOFAIL_RV(rump_pub_netconfig_ipv4_ifaddr("shmif1",
 	    "1.0.1.2", "255.255.255.0"));
+}
+
+static void
+config_router6(void)
+{
+	extern int rumpns_ip6_forwarding;
+	int rv;
+
+	/* configure networking using the portable interfaces */
+	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem1"));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2001::2", 64));
+	NOFAIL_RV(rump_pub_netconfig_ifup("shmif0"));
+
+	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif1"));
+	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif1", "busmem2"));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif1", "2002::2", 64));
+	NOFAIL_RV(rump_pub_netconfig_ifup("shmif1"));
+
+	/* turn ipv6 forwarding on the easy way */
+	rumpns_ip6_forwarding = 1;
 }
 
 #include "nettest_base.c"

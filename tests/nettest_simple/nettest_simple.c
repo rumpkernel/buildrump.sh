@@ -27,7 +27,7 @@ config_server6(void)
 	/* configure interface using the portable interfaces */
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
 	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem"));
-	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2013::1", 64));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2001::1", 64));
 }
 
 
@@ -49,11 +49,18 @@ config_client6(void)
 	/* configure networking using the portable interfaces */
 	NOFAIL_RV(rump_pub_netconfig_ifcreate("shmif0"));
 	NOFAIL_RV(rump_pub_netconfig_ifsetlinkstr("shmif0", "busmem"));
-	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2013::2", 64));
+	NOFAIL_RV(rump_pub_netconfig_ipv6_ifaddr("shmif0", "2001::2", 64));
 }
 
 static void
 config_router(void)
+{
+
+	/* nada */
+}
+
+static void
+config_router6(void)
 {
 
 	/* nada */
