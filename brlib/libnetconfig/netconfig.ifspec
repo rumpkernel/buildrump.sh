@@ -31,6 +31,7 @@ int	|netconfig_ipv6_ifaddr	|const char *, const char *, int
 
 ; default route configuration
 int	|netconfig_ipv4_gw	|const char *
+int	|netconfig_ipv6_gw	|const char *
 
 
 ; dhcp

@@ -255,6 +255,56 @@ rump_netconfig_ipv4_gw(const char *gwaddr)
 	return rv;
 }
 
+int
+rump_netconfig_ipv6_gw(const char *gwaddr)
+{
+	struct rt_msghdr rtm, *rtmp;
+	struct sockaddr_in6 sin6;
+	struct mbuf *m;
+	int off, rv;
+
+	CHECKDOMAIN(in6so);
+
+	memset(&rtm, 0, sizeof(rtm));
+	rtm.rtm_type = RTM_ADD;
+	rtm.rtm_flags = RTF_UP | RTF_STATIC | RTF_GATEWAY;
+	rtm.rtm_version = RTM_VERSION;
+	rtm.rtm_seq = 2;
+	rtm.rtm_addrs = RTA_DST | RTA_GATEWAY | RTA_NETMASK;
+
+	m = m_gethdr(M_WAIT, MT_DATA);
+	m->m_pkthdr.len = 0;
+	m_copyback(m, 0, sizeof(rtm), &rtm);
+	off = sizeof(rtm);
+
+	/* dest */
+	memset(&sin6, 0, sizeof(sin6));
+	sin6.sin6_family = AF_INET6;
+	sin6.sin6_len = sizeof(sin6);
+	m_copyback(m, off, sin6.sin6_len, &sin6);
+	RT_ADVANCE(off, (struct sockaddr *)&sin6);
+
+	/* gw */
+	netconfig_inet_pton6(gwaddr, &sin6.sin6_addr);
+	m_copyback(m, off, sin6.sin6_len, &sin6);
+	RT_ADVANCE(off, (struct sockaddr *)&sin6);
+
+	/* mask */
+	memset(&sin6.sin6_addr, 0, sizeof(sin6.sin6_addr));
+	m_copyback(m, off, sin6.sin6_len, &sin6);
+	off = m->m_pkthdr.len;
+
+	m = m_pullup(m, sizeof(*rtmp));
+	rtmp = mtod(m, struct rt_msghdr *);
+	rtmp->rtm_msglen = off;
+
+	solock(rtso);
+	rv = rtso->so_proto->pr_output(m, rtso);
+	sounlock(rtso);
+
+	return rv;
+}
+
 RUMP_COMPONENT(RUMP_COMPONENT_NET_IFCFG)
 {
 	int rv;

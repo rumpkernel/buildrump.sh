@@ -14,4 +14,5 @@ int rump_pub_netconfig_ifdestroy(const char *);
 int rump_pub_netconfig_ipv4_ifaddr(const char *, const char *, const char *);
 int rump_pub_netconfig_ipv6_ifaddr(const char *, const char *, int);
 int rump_pub_netconfig_ipv4_gw(const char *);
+int rump_pub_netconfig_ipv6_gw(const char *);
 int rump_pub_netconfig_dhcp_ipv4_oneshot(const char *);
