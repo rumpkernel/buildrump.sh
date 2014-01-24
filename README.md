@@ -1,4 +1,4 @@
-Tools for building Rump Kernels [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
+Tools for building Rump Kernels [![Build Status](https://travis-ci.org/rumpkernel/buildrump.sh.png?branch=master)](https://travis-ci.org/rumpkernel/buildrump.sh)
 ===============================
 
 The `buildrump.sh` script builds unmodified NetBSD kernel drivers such
@@ -8,8 +8,8 @@ top of a high-level hypercall interface which is straightforward to
 implement for most environments.  This repository includes the hypercall
 implementation for running in userspace on POSIX hosts, with alternative
 implementations such as for the
-[Xen hypervisor](https://github.com/anttikantee/rumpuser-xen/)
-and the [Linux kernel](https://github.com/anttikantee/rumpuser-linuxkernel)
+[Xen hypervisor](https://github.com/rumpkernel/rumpuser-xen/)
+and the [Linux kernel](https://github.com/rumpkernel/rumpuser-linuxkernel)
 being hosted elsewhere.
 
 In other words, rump kernels enable embedding unmodified kernel drivers
@@ -18,13 +18,13 @@ of how to use these services are as follows:
 
 * [fs-utils](https://github.com/stacktic/fs-utils) uses file
   system drivers to provide applications for accessing file system images
-* TCP/IP stack for the [DPDK](https://github.com/anttikantee/dpdk-rumptcpip)
-  and [netmap](https://github.com/anttikantee/netmap-rumptcpip)
+* TCP/IP stack for the [DPDK](https://github.com/rumpkernel/dpdk-rumptcpip)
+  and [netmap](https://github.com/rumpkernel/netmap-rumptcpip)
   userspace packet processing frameworks
 * [ljsyscall](https://github.com/justincormack/ljsyscall) provides
   a Lua interface to rump kernels, allowing easy access from applications
   written in Lua
-* [rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) enables
+* [rumpuser-xen](https://github.com/rumpkernel/rumpuser-xen) enables
   running applications as standalone Xen DomU's (includes libc support)
 
 Rump kernels address the part of the software stack typically handled
@@ -167,7 +167,7 @@ Kernel-only mode
 If the `-k` kernel-only parameter is specified, the script will
 omit building the POSIX hypercall implementation.  This is useful if
 you are developing your own hypercall layer implementation.  See the
-[rumpuser-xen](https://github.com/anttikantee/rumpuser-xen) repository
+[rumpuser-xen](https://github.com/rumpkernel/rumpuser-xen) repository
 for the canonical example of using `-k`.
 
 
@@ -175,8 +175,8 @@ Tested hosts
 ============
 
 Continuous testing on Linux/amd64 + gcc/clang is done by
-[Travis CI](https://travis-ci.org/anttikantee/buildrump.sh)
-for every commit.  [![Build Status](https://travis-ci.org/anttikantee/buildrump.sh.png?branch=master)](https://travis-ci.org/anttikantee/buildrump.sh)
+[Travis CI](https://travis-ci.org/rumpkernel/buildrump.sh)
+for every commit.  [![Build Status](https://travis-ci.org/rumpkernel/buildrump.sh.png?branch=master)](https://travis-ci.org/rumpkernel/buildrump.sh)
 
 There is a broader platform CI testing for Linux _x86_ (32/64bit), _ARM_, _PowerPC_ (32/64bit), _MIPS_ (o32 ABI) and NetBSD _x86_ (32/64bit) [using buildbot](http://build.myriabit.eu:8011/waterfall). 
 
