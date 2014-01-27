@@ -504,6 +504,7 @@ makemake ()
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
 	    -V MKLINT=no \
+	    -V MKZFS=no \
 	    -V MKDYNAMICROOT=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${mkconf_final}" \
