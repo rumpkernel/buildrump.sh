@@ -60,7 +60,10 @@ NBSRC_EXTRA='
     20140108 0150UTC:
 	src/lib/librumpuser;
     20140108 1200UTC:
-	src/sys/rump/net/lib/libshmif/rumpcomp_user.c'
+	src/sys/rump/net/lib/libshmif/rumpcomp_user.c;
+    20140128 1100UTC:
+	src/sys/compat/linux
+	src/sys/rump/kern/lib/libsys_linux'
 
 GITREPO='https://github.com/anttikantee/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:anttikantee/rumpkernel-netbsd-src'
