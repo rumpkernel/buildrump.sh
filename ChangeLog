@@ -9,8 +9,11 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
-+ OpenBSD support
++ add rump_wmd(1) (short for Where's My Dependency).  Given a
+  rump kernel component, rump_wmd lists all the components that
+  are needed for successful linking
 + even more Linux syscall compat fixes (via NetBSD)
++ OpenBSD support
 
 	Snapshot 3.1.2014
 

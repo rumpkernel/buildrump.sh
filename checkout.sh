@@ -62,6 +62,7 @@ NBSRC_EXTRA='
     20140108 1200UTC:
 	src/sys/rump/net/lib/libshmif/rumpcomp_user.c;
     20140128 1100UTC:
+	src/usr.bin/rump_wmd
 	src/sys/compat/linux
 	src/sys/rump/kern/lib/libsys_linux'
 

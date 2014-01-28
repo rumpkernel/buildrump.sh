@@ -585,7 +585,8 @@ makebuild ()
 
 	if ! ${KERNONLY}; then
 		mkmakefile ${OBJDIR}/Makefile.utils \
-		    usr.bin/rump_server usr.bin/rump_allserver
+		    usr.bin/rump_server usr.bin/rump_allserver \
+		    usr.bin/rump_wmd
 		for target in ${targets}; do
 			domake ${OBJDIR}/Makefile.utils ${target}
 		done
