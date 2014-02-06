@@ -399,6 +399,11 @@ MKHTML=no
 MKCATPAGES=yes
 EOF
 
+	printoneconfig 'Cmd' "SRCDIR" "${SRCDIR}"
+	printoneconfig 'Cmd' "DESTDIR" "${DESTDIR}"
+	printoneconfig 'Cmd' "OBJDIR" "${OBJDIR}"
+	printoneconfig 'Cmd' "BRTOOLDIR" "${BRTOOLDIR}"
+
 	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
 	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
