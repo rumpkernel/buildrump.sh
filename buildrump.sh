@@ -32,12 +32,6 @@
 # and tests directories.
 #
 
-# defaults
-OBJDIR=./obj
-DESTDIR=./rump
-SRCDIR=./src
-JNUM=4
-
 #
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
@@ -710,6 +704,10 @@ parseargs ()
 	SIXTYFOUR=false
 	KERNONLY=false
 	NATIVENETBSD=false
+	OBJDIR=./obj
+	DESTDIR=./rump
+	SRCDIR=./src
+	JNUM=4
 
 	while getopts '3:6:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
