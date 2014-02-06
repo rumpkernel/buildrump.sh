@@ -195,6 +195,17 @@ cppdefines ()
 	return
 }
 
+# check if C snippet given as first argument will build
+# arguments [2..n] are passed to the compiler
+doesitbuild ()
+{
+
+	theprog="${1}"
+	shift
+
+	echo ${theprog} | ${CC} -v ${EXTRA_CFLAGS} -x c - -o /dev/null $*
+}
+
 cctestandsetW ()
 {
 
@@ -280,8 +291,8 @@ maketools ()
 	# If not, build only static rump kernel components.
 	if [ ${LD_FLAVOR} = 'GNU' ]; then
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
-		echo 'int main(void) {return 0;}' > test.c
-		if ! $CC test.c -Wl,-T ldscript.test > /dev/null 2>&1 ; then
+		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
+		if [ $? -ne 0 ]; then
 			# We know that older versions of NetBSD
 			# work without an ldscript
 			if [ "${TARGET}" = netbsd ]; then
@@ -290,37 +301,31 @@ maketools ()
 				MKPIC=no
 			fi
 		fi
-		rm -f test.c a.out ldscript.test
+		rm -f ldscript.test
 	fi
 
 	#
 	# Check if the target supports posix_memalign()
-	printf '#include <stdlib.h>\nmain(){posix_memalign(NULL,0,0);}\n'>test.c
-	${CC} test.c >/dev/null 2>&1 && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
-	rm -f test.c a.out
+	doesitbuild \
+	    '#include <stdlib.h>\nint main(void){posix_memalign(NULL,0,0);}\n'
+	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
 
-	printf '#include <sys/ioctl.h>\n#include <unistd.h>\n
-int ioctl(int fd, int cmd, ...); int main() {return 0;}\n' > test.c
-	${CC} test.c >/dev/null 2>&1 && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
-	rm -f test.c a.out
+	doesitbuild \
+	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
+	    int ioctl(int fd, int cmd, ...); int main() {return 0;}\n'
+	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
 	# to avoid line number conflicts
-	printf 'int a = __COUNTER__;\n' > test.c
-	${CC} -c test.c >/dev/null 2>&1 || CTASSERT="-D'CTASSERT(x)='"
-	rm -f test.c a.out
+	doesitbuild 'int a = __COUNTER__;\n' -c
+	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
 	# its presence and if its not available, just leave out if_virt
 	# instead of suffering a crushing build failure.
 	if [ "${TARGET}" = 'linux' ] && ! ${NATIVEBUILD} ; then
-		echo '#include <linux/if_tun.h>' > ${OBJDIR}/test.c
-		if ! ${CC} -c ${OBJDIR}/test.c -o ${OBJDIR}/test.o 2>/dev/null
-		then
-			RUMP_VIRTIF=no
-		fi
-		rm -f ${OBJDIR}/test.c ${OBJDIR}/test.o
+		doesitbuild '#include <linux/if_tun.h>' -c || RUMP_VIRTIF=no
 	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' \
 	    -a "${TARGET}" != 'linux' ]; then
 		RUMP_VIRTIF=no
@@ -977,13 +982,13 @@ evaltarget ()
 
 	# step 2: if the user specified 32/64, try to establish if it will work
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
-		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
+		doesitbuild 'int main() {return 0;}' \
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
-		echo 'int main() {return 0;}' | ${CC} ${EXTRA_CFLAGS} -o /dev/null -x c - \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON} > /dev/null 2>&1
+		doesitbuild 'int main() {return 0;}' \
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
 	else
