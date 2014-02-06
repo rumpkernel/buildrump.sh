@@ -195,10 +195,10 @@ cppdefines ()
 	return
 }
 
-cctestW ()
+cctestandsetW ()
 {
 
-	[ "`pwd`" = "${OBJDIR}" ] || die call cctestW only when in OBJDIR
+	[ "`pwd`" = "${OBJDIR}" ] || die call cctestandsetW only when in OBJDIR
 
 	#
 	# Try to test if cc supports the given warning flag.
@@ -262,9 +262,9 @@ maketools ()
 	fi
 
 	cd ${OBJDIR}
-	cctestW 'no-unused-but-set-variable'
-	cctestW 'no-unused-local-typedefs'
-	cctestW 'no-maybe-uninitialized'
+	cctestandsetW 'no-unused-but-set-variable'
+	cctestandsetW 'no-unused-local-typedefs'
+	cctestandsetW 'no-maybe-uninitialized'
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
 	# uses the different flavor of size_t (int vs. long) than what
