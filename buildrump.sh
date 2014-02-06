@@ -39,6 +39,10 @@ SRCDIR=./src
 JNUM=4
 
 #
+# scrub necessary parts of the env
+unset BUILDRUMP_CPPCACHE
+
+#
 # support routines
 #
 
@@ -174,12 +178,19 @@ probeld ()
 	fi
 }
 
-# saves some typing.  not invoked often enough for caching output
+# check if cpp defines the given parameter (with any value)
 cppdefines ()
 {
 
+	[ -z "${BUILDRUMP_CPPCACHE}" ] \
+	   && BUILDRUMP_CPPCACHE=$(${CC} ${BUILDRUMP_CPPFLAGS} \
+		-E -dM - < /dev/null)
 	var=${1}
-	${CC} ${BUILDRUMP_CFLAGS} -E -dM - < /dev/null | awk '$2 == "'$var'"{exit 37}'
+	(
+	    IFS=' '
+	    echo ${BUILDRUMP_CPPCACHE} | awk '$2 == "'$var'"{exit 37}'
+	    exit $?
+	)
 	[ $? -eq 37 ]
 	return
 }
