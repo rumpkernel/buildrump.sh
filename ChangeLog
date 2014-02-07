@@ -29,4 +29,4 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 	Snapshot 6.12.2013
 
 Older changes are documented only in buildrump.sh logs at:
-https://github.com/anttikantee/buildrump.sh/commits/master
+https://github.com/rumpkernel/buildrump.sh/commits/master
