@@ -178,7 +178,7 @@ Continuous testing on Linux/amd64 + gcc/clang is done by
 [Travis CI](https://travis-ci.org/rumpkernel/buildrump.sh)
 for every commit.  [![Build Status](https://travis-ci.org/rumpkernel/buildrump.sh.png?branch=master)](https://travis-ci.org/rumpkernel/buildrump.sh)
 
-There is a broader platform CI testing for Linux _x86_ (32/64bit), _ARM_, _PowerPC_ (32/64bit), _MIPS_ (o32 ABI) and NetBSD _x86_ (32/64bit) [using buildbot](http://build.myriabit.eu:8011/waterfall). 
+There is a broader platform CI testing for Linux _x86_ (32/64bit), _ARM_, _PowerPC_ (32/64bit), _MIPS_ (o32 ABI) and NetBSD _x86_ (32/64bit), and FreeBSD and OpenBSD _x86_ (64 bit) [using buildbot](http://build.myriabit.eu:8011/waterfall). 
 
 Tested machine architectures include _x86_ (32/64bit), _ARM_, _PowerPC_
 (32/64bit), _MIPS_ (32bit) and _UltraSPARC_ (32/64bit).
