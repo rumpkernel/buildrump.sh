@@ -680,6 +680,9 @@ evaltools ()
 	*-pc-cygwin)
 		TARGET=cygwin
 		;;
+	*-apple-darwin*)
+		TARGET=osx
+		;;
 	*)
 		TARGET=unknown
 		;;
@@ -962,6 +965,9 @@ evaltarget ()
 		;;
 	"cygwin")
 		MKPIC=no
+		target_supported=false
+		;;
+	"osx")
 		target_supported=false
 		;;
 	"unknown"|*)
