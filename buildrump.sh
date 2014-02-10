@@ -35,6 +35,7 @@
 #
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
+unset BUILDRUMP_ALLVARS
 
 #
 # support routines
@@ -165,6 +166,10 @@ putconfig ()
 {
 
 	eval BRENV_${1}="${2}"
+	for var in ${BUILDRUMP_ALLVARS}; do
+		[ "${var}" = "${1}" ] && return
+	done
+	appendvar BUILDRUMP_ALLVARS ${1}
 }
 
 saveconfig ()
@@ -176,7 +181,9 @@ saveconfig ()
 showconfig ()
 {
 
-	echo not configured
+	for var in ${BUILDRUMP_ALLVARS}; do
+		printf "%s:\t%s\n" ${var} $(getconfig ${var})
+	done
 }
 
 #
@@ -1240,15 +1247,17 @@ domake ()
 evaltools
 parseargs $*
 
-${doshowconfig} && showconfig
 ${doconfig} && saveconfig
+${doshowconfig} && showconfig
 
 ${docheckout} && { $(getconfig BRDIR)/checkout.sh ${checkoutstyle} \
 			$(getconfig SRCDIR) || exit 1; }
 
 evaltarget
 
-resolvepaths
+if ${dotools} || ${dobuild} || ${doinstall}; then
+	resolvepaths
+fi
 
 ${dotools} && maketools
 ${dobuild} && makebuild
