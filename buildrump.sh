@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
 #
-# Copyright (c) 2013 Antti Kantee <pooka@iki.fi>
+# Copyright (c) 2013, 2014 Antti Kantee <pooka@iki.fi>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
