@@ -53,7 +53,22 @@ helpme ()
 {
 
 	echo "Usage: $0 [-h] [options] [command] [command...]"
-	printf "supported options:\n"
+	cat << EOF
+
+The simplest way to run buildrump.sh is without arguments.  Running the
+script so will build rump kernel components, a userspace hypercall
+implementation, and a handful of utilities.
+
+In case more control is desired, options and commands can be given.
+The given options are embedded in a config file when the "config" command
+is run.  These options can be used in later buildrump.sh invocations.
+Any options specified on the command line will override the ones in the
+config, but will not be stored permanently.
+EOF
+	printf "\nsupported options:\n"
+	printf "\t-c: name of configuration.  default: rumpmake\n"
+	printf "\t-T: location for tools+config.  default: PWD/tooldir\n"
+	echo
 	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
@@ -71,7 +86,8 @@ helpme ()
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	echo
-	printf "supported commands (default => checkout+fullbuild+tests):\n"
+	printf "supported commands (none => config+checkout+fullbuild+tests):\n"
+	printf "\tconfig:\t\tstore options in config (see -c)\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
 	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
 	printf "\tcheckout:\talias for checkoutgit\n"
@@ -80,7 +96,8 @@ helpme ()
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
 	printf "\tfullbuild:\talias for \"tools build install\"\n"
-	exit 1
+	printf "\tshowconfig:\tdisplay parameters associated with rumpmake\n"
+	exit 0
 }
 
 #
