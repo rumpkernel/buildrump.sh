@@ -392,8 +392,8 @@ maketools ()
 
 	# Create mk.conf.  Create it under a temp name first so as to
 	# not affect the tool build with its contents
-	MKCONF="${BRTOOLDIR}/mk.conf.building"
-	mkconf_final="${BRTOOLDIR}/mk.conf"
+	MKCONF="${BRTOOLDIR}/internal/mk.conf-${CONFIGNAME}.building"
+	mkconf_final="${BRTOOLDIR}/config/mk.conf-${CONFIGNAME}"
 	> ${mkconf_final}
 
 	cat > "${MKCONF}" << EOF
@@ -506,7 +506,7 @@ EOF
 	cd ${SRCDIR}
 
 	# create user-usable wrapper script
-	makemake ${BRTOOLDIR}/rumpmake ${BRTOOLDIR}/dest makewrapper
+	makemake ${BRTOOLDIR}/${CONFIGNAME} ${BRTOOLDIR}/dest makewrapper
 
 	# create wrapper script to be used during buildrump.sh, plus tools
 	makemake ${RUMPMAKE} ${OBJDIR}/dest.stage tools
@@ -728,6 +728,9 @@ parseargs ()
 	SRCDIR=./src
 	JNUM=4
 
+	# default, unchangeable for now
+	CONFIGNAME=rumpmake
+
 	while getopts '3:6:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
@@ -878,14 +881,16 @@ resolvepaths ()
 
 	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
 	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
-	mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tools)"
+	mkdir -p ${BRTOOLDIR}/config || die cannot create ${BRTOOLDIR}/config
+	mkdir -p ${BRTOOLDIR}/internal \
+	    || die cannot create ${BRTOOLDIR}/internal
 
 	abspath DESTDIR
 	abspath OBJDIR
 	abspath BRTOOLDIR
 	abspath SRCDIR
 
-	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
+	RUMPMAKE="${BRTOOLDIR}/internal/rumpmake-${CONFIGNAME}"
 
 	# mini-mtree
 	dstage=${OBJDIR}/dest.stage/usr
