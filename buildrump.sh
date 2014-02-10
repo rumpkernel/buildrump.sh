@@ -67,11 +67,10 @@ config, but will not be stored permanently.
 EOF
 	printf "\nsupported options:\n"
 	printf "\t-c: name of configuration.  default: rumpmake\n"
-	printf "\t-T: location for tools+config.  default: PWD/tooldir\n"
+	printf "\t-T: location for tools+config.  default: PWD/tools\n"
 	echo
 	printf "\t-d: location for headers/libs.  default: PWD/rump\n"
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
-	printf "\t-T: location for tools+rumpmake.  default: PWD/obj/tooldir\n"
 	printf "\t-s: location of source tree.  default: PWD/src\n"
 	echo
 	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
@@ -91,7 +90,7 @@ EOF
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
 	printf "\tcheckoutcvs:\tfetch NetBSD sources to srcdir from anoncvs\n"
 	printf "\tcheckout:\talias for checkoutgit\n"
-	printf "\ttools:\t\tbuild necessary tools to tooldir\n"
+	printf "\ttools:\t\tbuild necessary tools to tools\n"
 	printf "\tbuild:\t\tbuild everything related to rump kernels\n"
 	printf "\tinstall:\tinstall rump kernel components into destdir\n"
 	printf "\ttests:\t\trun tests to verify installation is functional\n"
@@ -386,7 +385,7 @@ maketools ()
 	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
 
 	# queue.h is not available on all systems, but we need it for
-	# the hypervisor build.  So, we make it available in tooldir.
+	# the hypervisor build.  So, we make it available in tools.
 	mkdir -p ${BRTOOLDIR}/compat/include/sys \
 	    || die create ${BRTOOLDIR}/compat/include/sys
 	cp -p ${SRCDIR}/sys/sys/queue.h ${BRTOOLDIR}/compat/include/sys
@@ -805,7 +804,7 @@ parseargs ()
 	DBG="${BUILDRUMP_DBG:-${DBG}}"
 
 	BEQUIET="-N${NOISE}"
-	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=./tools
 
 	#
 	# Determine what which parts we should execute.
@@ -879,7 +878,7 @@ resolvepaths ()
 
 	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
 	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
-	mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
+	mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tools)"
 
 	abspath DESTDIR
 	abspath OBJDIR
