@@ -159,7 +159,9 @@ appendvar ()
 getconfig ()
 {
 
-	eval echo \${BRENV_${1}}
+	rv=$(eval echo \${BRENV_${1}})
+	[ -z "${rv}" ] && die config variable \"$1\" not found
+	echo ${rv}
 }
 
 putconfig ()
