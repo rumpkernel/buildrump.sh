@@ -74,7 +74,7 @@ EOF
 	printf "\t-o: location for build-time files.  default: PWD/obj\n"
 	printf "\t-s: location of source tree.  default: PWD/src\n"
 	echo
-	printf "\t-j: value of -j specified to make.  default: ${JNUM}\n"
+	printf "\t-j: value of -j specified to make.  default: $(getcfg JNUM)\n"
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
@@ -154,38 +154,83 @@ appendvar ()
 #
 # config-related routines
 
-# Fetch a config variable.  If the variable is set from the command line,
-# use it.  If not, use one from the config file
-getconfig ()
+# cfg variable levels in order of priority
+BUILDRUMP_CFGLEVELS="param config default"
+
+# fetch a config variable.  the one with the highest priority will be
+# returned (see comment above setcfg)
+getcfg ()
 {
 
-	rv=$(eval echo \${BRENV_${1}})
+	for v in ${BUILDRUMP_CFGLEVELS}; do
+		rv=$(eval echo \${BR_${v}_${1}})
+		if [ ! -z "${rv}" ]; then
+			echo ${rv}
+			return
+		fi
+	done
 	[ -z "${rv}" ] && die config variable \"$1\" not found
-	echo ${rv}
 }
 
-putconfig ()
+# store a config variable:
+#  $1 = level (in order of preference for getcfg: param, config, default)
+#  $2 = name
+#  $3 = value
+putcfg ()
 {
 
-	eval BRENV_${1}="${2}"
-	for var in ${BUILDRUMP_ALLVARS}; do
-		[ "${var}" = "${1}" ] && return
+	level=$1
+	var=$2
+	value=${3}
+
+	while :; do
+		for v in ${BUILDRUMP_CFGLEVELS}; do
+			[ "${v}" = "${level}" ] && break 2
+		done
+		die Invalid cfg level \"${level}\"
 	done
-	appendvar BUILDRUMP_ALLVARS ${1}
+
+	eval BR_${level}_${var}="${value}"
+
+	for v in ${BUILDRUMP_ALLVARS}; do
+		[ "${v}" = "${var}" ] && return
+	done
+	appendvar BUILDRUMP_ALLVARS ${var}
 }
 
-saveconfig ()
+savecfg ()
 {
 
-	:
+	cfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
+
+	rm -f ${cfile}
+	for var in ${BUILDRUMP_ALLVARS}; do
+		printf "putcfg config %s %s\n" \
+		    ${var} $(getcfg ${var}) >> ${cfile}
+	done
 }
 
-showconfig ()
+showcfg ()
 {
 
 	for var in ${BUILDRUMP_ALLVARS}; do
-		printf "%s:\t%s\n" ${var} $(getconfig ${var})
+		printf '%25s: %s\n' ${var} $(getcfg ${var})
 	done
+}
+
+setdefaults ()
+{
+
+	putcfg default BRDIR $(dirname $0)
+
+	putcfg default SRCDIR ./src
+	putcfg default OBJDIR ./obj
+	putcfg default DESTDIR ./rump
+	putcfg default BRTOOLDIR ./tools
+
+	putcfg default CONFIGNAME rumpmake
+
+	putcfg default JNUM 4
 }
 
 #
@@ -258,7 +303,7 @@ doesitbuild ()
 cctestandsetW ()
 {
 
-	[ "`pwd`" = "$(getconfig OBJDIR)" ] \
+	[ "`pwd`" = "$(getcfg OBJDIR)" ] \
 	    || die call cctestandsetW only when in OBJDIR
 
 	#
@@ -280,7 +325,7 @@ checkcheckout ()
 
 	[ ! -z "${TARBALLMODE}" ] && return
 
-	if ! $(getconfig BRDIR)/checkout.sh checkcheckout $(getconfig SRCDIR) \
+	if ! $(getcfg BRDIR)/checkout.sh checkcheckout $(getcfg SRCDIR) \
 	    && ! ${TITANMODE}; then
 		die 'revision mismatch, run checkout (or -H to override)'
 	fi
@@ -298,8 +343,8 @@ maketools ()
 	#
 	# does build.sh even exist, or is this just a kernel-only checkout?
 	#
-	[ -x "$(getconfig SRCDIR)/build.sh" ] \
-	    || die "Cannot find $(getconfig SRCDIR)/build.sh!"
+	[ -x "$(getcfg SRCDIR)/build.sh" ] \
+	    || die "Cannot find $(getcfg SRCDIR)/build.sh!"
 
 	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
@@ -323,7 +368,7 @@ maketools ()
 		die Need GNU or BSD ar "(`type ${AR}`)"
 	fi
 
-	cd $(getconfig OBJDIR)
+	cd $(getcfg OBJDIR)
 	cctestandsetW 'no-unused-but-set-variable'
 	cctestandsetW 'no-unused-local-typedefs'
 	cctestandsetW 'no-maybe-uninitialized'
@@ -384,8 +429,8 @@ maketools ()
 
 	#
 	# Create external toolchain wrappers.
-	mkdir -p $(getconfig BRTOOLDIR)/bin \
-	    || die "cannot create $(getconfig BRTOOLDIR)/bin"
+	mkdir -p $(getcfg BRTOOLDIR)/bin \
+	    || die "cannot create $(getcfg BRTOOLDIR)/bin"
 	for x in CC AR NM OBJCOPY; do
 		# ok, it's not really --netbsd, but let's make-believe!
 		if [ ${x} = CC ]; then
@@ -393,7 +438,7 @@ maketools ()
 		else
 			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
 		fi
-		tname=$(getconfig BRTOOLDIR)/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
+		tname=$(getcfg BRTOOLDIR)/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
 
 		eval tool=\${${x}}
 		type ${tool} >/dev/null 2>&1 \
@@ -421,28 +466,28 @@ maketools ()
 	# Create bounce directory used as the install target.  The
 	# purpose of this is to strip the "usr/" pathname component
 	# that is hardcoded by NetBSD Makefiles.
-	mkdir -p $(getconfig BRTOOLDIR)/dest \
-	    || die "cannot create $(getconfig BRTOOLDIR)/dest"
-	rm -f $(getconfig BRTOOLDIR)/dest/usr
-	ln -s $(getconfig DESTDIR) $(getconfig BRTOOLDIR)/dest/usr
+	mkdir -p $(getcfg BRTOOLDIR)/dest \
+	    || die "cannot create $(getcfg BRTOOLDIR)/dest"
+	rm -f $(getcfg BRTOOLDIR)/dest/usr
+	ln -s $(getcfg DESTDIR) $(getcfg BRTOOLDIR)/dest/usr
 
 	# queue.h is not available on all systems, but we need it for
 	# the hypervisor build.  So, we make it available in tools.
-	mkdir -p $(getconfig BRTOOLDIR)/compat/include/sys \
-	    || die create $(getconfig BRTOOLDIR)/compat/include/sys
+	mkdir -p $(getcfg BRTOOLDIR)/compat/include/sys \
+	    || die create $(getcfg BRTOOLDIR)/compat/include/sys
 	cp -p \
-	    $(getconfig SRCDIR)/sys/sys/queue.h \
-	    $(getconfig BRTOOLDIR)/compat/include/sys
+	    $(getcfg SRCDIR)/sys/sys/queue.h \
+	    $(getcfg BRTOOLDIR)/compat/include/sys
 
 	# Create mk.conf.  Create it under a temp name first so as to
 	# not affect the tool build with its contents
-	MKCONF="$(getconfig BRTOOLDIR)/internal/mk.conf-${CONFIGNAME}.building"
-	mkconf_final="$(getconfig BRTOOLDIR)/config/mk.conf-${CONFIGNAME}"
+	MKCONF="$(getcfg BRTOOLDIR)/internal/mk.conf-$(getcfg CONFIGNAME).building"
+	mkconf_final="$(getcfg BRTOOLDIR)/config/mk.conf-$(getcfg CONFIGNAME)"
 	> ${mkconf_final}
 
 	cat > "${MKCONF}" << EOF
 BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
-CPPFLAGS+=-I$(getconfig BRTOOLDIR)/compat/include
+CPPFLAGS+=-I$(getcfg BRTOOLDIR)/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
@@ -453,16 +498,16 @@ MKHTML=no
 MKCATPAGES=yes
 EOF
 
-	printoneconfig 'Cmd' "SRCDIR" "$(getconfig SRCDIR)"
-	printoneconfig 'Cmd' "DESTDIR" "$(getconfig DESTDIR)"
-	printoneconfig 'Cmd' "OBJDIR" "$(getconfig OBJDIR)"
-	printoneconfig 'Cmd' "BRTOOLDIR" "$(getconfig BRTOOLDIR)"
+	printoneconfig 'Cmd' "SRCDIR" "$(getcfg SRCDIR)"
+	printoneconfig 'Cmd' "DESTDIR" "$(getcfg DESTDIR)"
+	printoneconfig 'Cmd' "OBJDIR" "$(getcfg OBJDIR)"
+	printoneconfig 'Cmd' "BRTOOLDIR" "$(getcfg BRTOOLDIR)"
 
 	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
 	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
 	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
 	appendmkconf 'Cmd' "${DBG}" "DBG"
-	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
+	printoneconfig 'Cmd' "make -j[num]" "-j $(getcfg JNUM)"
 
 	if ${KERNONLY}; then
 		appendmkconf Cmd yes RUMPKERN_ONLY
@@ -528,7 +573,7 @@ LIBCRTEND=
 LIBCRTI=
 LIBC=
 
-LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R$(getconfig DESTDIR)/lib
+LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R$(getcfg DESTDIR)/lib
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
 		[ ${LD_FLAVOR} != 'sun' ] \
@@ -547,16 +592,16 @@ EOF
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
-	dir=$(getconfig SRCDIR)
+	dir=$(getcfg SRCDIR)
 	echo $dir
-	cd $(getconfig SRCDIR)
+	cd $(getcfg SRCDIR)
 
 	# create user-usable wrapper script
-	makemake $(getconfig BRTOOLDIR)/${CONFIGNAME} \
-	    $(getconfig BRTOOLDIR)/dest makewrapper
+	makemake $(getcfg BRTOOLDIR)/$(getcfg CONFIGNAME) \
+	    $(getcfg BRTOOLDIR)/dest makewrapper
 
 	# create wrapper script to be used during buildrump.sh, plus tools
-	makemake ${RUMPMAKE} $(getconfig OBJDIR)/dest.stage tools
+	makemake ${RUMPMAKE} $(getcfg OBJDIR)/dest.stage tools
 
 	unset ac_cv_header_zlib_h
 
@@ -574,22 +619,22 @@ makemake ()
 	stage=$2
 	cmd=$3
 
-	env CFLAGS= HOST_LDFLAGS=-L$(getconfig OBJDIR) ./build.sh \
+	env CFLAGS= HOST_LDFLAGS=-L$(getcfg OBJDIR) ./build.sh \
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
-	    -T $(getconfig BRTOOLDIR) -j ${JNUM} \
+	    -T $(getcfg BRTOOLDIR) -j $(getcfg JNUM) \
 	    ${LLVM} ${BEQUIET} ${LDSCRIPT} \
 	    -E -Z S \
-	    -V EXTERNAL_TOOLCHAIN=$(getconfig BRTOOLDIR) \
+	    -V EXTERNAL_TOOLCHAIN=$(getcfg BRTOOLDIR) \
 	    -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
 	    -V MKLINT=no \
 	    -V MKZFS=no \
 	    -V MKDYNAMICROOT=no \
-	    -V TOPRUMP="$(getconfig SRCDIR)/sys/rump" \
+	    -V TOPRUMP="$(getcfg SRCDIR)/sys/rump" \
 	    -V MAKECONF="${mkconf_final}" \
-	    -V MAKEOBJDIR="\${.CURDIR:C,^($(getconfig SRCDIR)|$(getconfig BRDIR)),$(getconfig OBJDIR),}" \
+	    -V MAKEOBJDIR="\${.CURDIR:C,^($(getcfg SRCDIR)|$(getcfg BRDIR)),$(getcfg OBJDIR),}" \
 	    -V BUILDRUMP_STAGE=${stage} \
 	    ${BUILDSH_VARGS} \
 	${cmd}
@@ -602,7 +647,7 @@ makebuild ()
 	checkcheckout
 
 	# ensure we're in SRCDIR, in case "tools" wasn't run
-	cd $(getconfig SRCDIR)
+	cd $(getcfg SRCDIR)
 
 	printenv
 
@@ -621,7 +666,7 @@ makebuild ()
 	DIRS_second='lib/librump'
 	DIRS_third="lib/librumpdev lib/librumpnet lib/librumpvfs
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
-	    sys/rump/include $(getconfig BRDIR)/brlib"
+	    sys/rump/include $(getcfg BRDIR)/brlib"
 
 	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
@@ -638,16 +683,16 @@ makebuild ()
 	fi
 
 	if ${KERNONLY}; then
-		mkmakefile $(getconfig OBJDIR)/Makefile.all \
-		    sys/rump ${DIRS_emul} $(getconfig BRDIR)/brlib
+		mkmakefile $(getcfg OBJDIR)/Makefile.all \
+		    sys/rump ${DIRS_emul} $(getcfg BRDIR)/brlib
 	else
 		DIRS_third="lib/librumpclient ${DIRS_third}"
 
-		mkmakefile $(getconfig OBJDIR)/Makefile.first ${DIRS_first}
-		mkmakefile $(getconfig OBJDIR)/Makefile.second ${DIRS_second}
-		mkmakefile $(getconfig OBJDIR)/Makefile.third ${DIRS_third}
-		mkmakefile $(getconfig OBJDIR)/Makefile.final ${DIRS_final}
-		mkmakefile $(getconfig OBJDIR)/Makefile.all \
+		mkmakefile $(getcfg OBJDIR)/Makefile.first ${DIRS_first}
+		mkmakefile $(getcfg OBJDIR)/Makefile.second ${DIRS_second}
+		mkmakefile $(getcfg OBJDIR)/Makefile.third ${DIRS_third}
+		mkmakefile $(getcfg OBJDIR)/Makefile.final ${DIRS_final}
+		mkmakefile $(getcfg OBJDIR)/Makefile.all \
 		    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
 	fi
 
@@ -655,21 +700,21 @@ makebuild ()
 	# difference especially on systems with a large number of slow cores
 	for target in ${targets}; do
 		if [ ${target} = "dependall" ] && ! ${KERNONLY}; then
-			domake $(getconfig OBJDIR)/Makefile.first ${target}
-			domake $(getconfig OBJDIR)/Makefile.second ${target}
-			domake $(getconfig OBJDIR)/Makefile.third ${target}
-			domake $(getconfig OBJDIR)/Makefile.final ${target}
+			domake $(getcfg OBJDIR)/Makefile.first ${target}
+			domake $(getcfg OBJDIR)/Makefile.second ${target}
+			domake $(getcfg OBJDIR)/Makefile.third ${target}
+			domake $(getcfg OBJDIR)/Makefile.final ${target}
 		else
-			domake $(getconfig OBJDIR)/Makefile.all ${target}
+			domake $(getcfg OBJDIR)/Makefile.all ${target}
 		fi
 	done
 
 	if ! ${KERNONLY}; then
-		mkmakefile $(getconfig OBJDIR)/Makefile.utils \
+		mkmakefile $(getcfg OBJDIR)/Makefile.utils \
 		    usr.bin/rump_server usr.bin/rump_allserver \
 		    usr.bin/rump_wmd
 		for target in ${targets}; do
-			domake $(getconfig OBJDIR)/Makefile.utils ${target}
+			domake $(getcfg OBJDIR)/Makefile.utils ${target}
 		done
 	fi
 }
@@ -679,9 +724,9 @@ makeinstall ()
 
 	# ensure we run this in a directory that does not have a
 	# Makefile that could confuse rumpmake
-	stage=$(cd $(getconfig BRTOOLDIR) \
+	stage=$(cd $(getcfg BRTOOLDIR) \
 	    && ${RUMPMAKE} -V '${BUILDRUMP_STAGE}')
-	(cd ${stage}/usr ; tar -cf - .) | (cd $(getconfig DESTDIR) ; tar -xf -)
+	(cd ${stage}/usr ; tar -cf - .) | (cd $(getcfg DESTDIR) ; tar -xf -)
 }
 
 evaltools ()
@@ -757,10 +802,9 @@ evaltools ()
 	esac
 
 	# check if we're running from a tarball, i.e. is checkout possible
-	putconfig BRDIR $(dirname $0)
 	unset TARBALLMODE
-	if [ ! -f "$(getconfig BRDIR)/checkout.sh" -a -f \
-	    "$(getconfig BRDIR)/tarup-gitdate" ]; then
+	if [ ! -f "$(getcfg BRDIR)/checkout.sh" -a -f \
+	    "$(getcfg BRDIR)/tarup-gitdate" ]; then
 		TARBALLMODE='Run from tarball'
 	fi
 }
@@ -777,17 +821,7 @@ parseargs ()
 	KERNONLY=false
 	NATIVENETBSD=false
 
-	putconfig SRCDIR ./src
-	putconfig OBJDIR ./obj
-	putconfig DESTDIR ./rump
-	putconfig BRTOOLDIR ./tools
-
-	JNUM=4
-
-	# default, unchangeable for now
-	CONFIGNAME=rumpmake
-
-	while getopts '3:6:d:DhHj:kNo:qrs:T:V:' opt; do
+	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -801,11 +835,14 @@ parseargs ()
 			${THIRTYTWO} && die 32+64 given.  Want a 48bit build?
 			SIXTYFOUR=true
 			;;
+		c)
+			putcfg param CONFIGNAME ${OPTARG}
+			;;
 		j)
-			JNUM=${OPTARG}
+			putcfg param JNUM ${OPTARG}
 			;;
 		d)
-			putconfig DESTDIR ${OPTARG}
+			putcfg param DESTDIR ${OPTARG}
 			;;
 		D)
 			[ ! -z "${RUMP_DIAGNOSTIC}" ] \
@@ -829,7 +866,7 @@ parseargs ()
 			NATIVENETBSD=true
 			;;
 		o)
-			putconfig OBJDIR ${OPTARG}
+			putcfg param OBJDIR ${OPTARG}
 			;;
 		q)
 			# build.sh handles value going negative
@@ -842,10 +879,10 @@ parseargs ()
 			DBG=''
 			;;
 		s)
-			putconfig SRCDIR ${OPTARG}
+			putcfg param SRCDIR ${OPTARG}
 			;;
 		T)
-			putconfig BRTOOLDIR ${OPTARG}
+			putcfg param BRTOOLDIR ${OPTARG}
 			;;
 		V)
 			appendvar BUILDSH_VARGS -V ${OPTARG}
@@ -859,6 +896,9 @@ parseargs ()
 		esac
 	done
 	shift $((${OPTIND} - 1))
+
+	cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
+	[ -f ${cfgfile} ] && . ${cfgfile}
 
 	DBG="${BUILDRUMP_DBG:-${DBG}}"
 
@@ -914,7 +954,7 @@ parseargs ()
 	if [ ! -z "${TARBALLMODE}" ]; then
 		${docheckout} && \
 		    die 'Checkout not possible in tarball mode, fetch repo'
-		[ -d "$(getconfig ${SRCDIR})" ] \
+		[ -d "$(getcfg ${SRCDIR})" ] \
 		    || die 'Sources not found from tarball'
 	fi
 }
@@ -923,9 +963,9 @@ abspath ()
 {
 
 	curdir=`pwd -P`
-	cd $(getconfig ${1})
+	cd $(getcfg ${1})
 	[ $? -ne 0 ] && die Failed to resolve path "${1}"
-	putconfig ${1} `pwd -P`
+	putcfg foo ${1} `pwd -P`
 	cd ${curdir}
 }
 
@@ -935,22 +975,22 @@ resolvepaths ()
 	# resolve critical directories
 	abspath BRDIR
 
-	mkdir -p $(getconfig OBJDIR) || die cannot create $(getconfig OBJDIR)
-	mkdir -p $(getconfig DESTDIR) || die cannot create $(getconfig DESTDIR)
-	mkdir -p $(getconfig BRTOOLDIR)/config \
-	    || die cannot create $(getconfig BRTOOLDIR)/config
-	mkdir -p $(getconfig BRTOOLDIR)/internal \
-	    || die cannot create $(getconfig BRTOOLDIR)/internal
+	mkdir -p $(getcfg OBJDIR) || die cannot create $(getcfg OBJDIR)
+	mkdir -p $(getcfg DESTDIR) || die cannot create $(getcfg DESTDIR)
+	mkdir -p $(getcfg BRTOOLDIR)/config \
+	    || die cannot create $(getcfg BRTOOLDIR)/config
+	mkdir -p $(getcfg BRTOOLDIR)/internal \
+	    || die cannot create $(getcfg BRTOOLDIR)/internal
 
 	abspath DESTDIR
 	abspath OBJDIR
 	abspath BRTOOLDIR
 	abspath SRCDIR
 
-	RUMPMAKE="$(getconfig BRTOOLDIR)/internal/rumpmake-${CONFIGNAME}"
+	RUMPMAKE="$(getcfg BRTOOLDIR)/internal/rumpmake-$(getcfg CONFIGNAME)"
 
 	# mini-mtree
-	dstage=$(getconfig OBJDIR)/dest.stage/usr
+	dstage=$(getcfg OBJDIR)/dest.stage/usr
 	for dir in ${dstage}/bin ${dstage}/include/rump ${dstage}/lib; do
 		mkdir -p ${dir} || die "Cannot create ${dir}"
 	done
@@ -1220,7 +1260,7 @@ mkmakefile ()
 			printf ' %s' ${dir}
 			;;
 		*)
-			printf ' %s' $(getconfig SRCDIR)/${dir}
+			printf ' %s' $(getcfg SRCDIR)/${dir}
 			;;
 		esac
 	done
@@ -1236,7 +1276,7 @@ domake ()
 	mktarget=${1}; shift
 
 	[ ! -x ${RUMPMAKE} ] && die "No rumpmake (${RUMPMAKE}). Forgot tools?"
-	${RUMPMAKE} $* -j ${JNUM} -f ${mkfile} ${mktarget}
+	${RUMPMAKE} $* -j $(getcfg JNUM) -f ${mkfile} ${mktarget}
 	[ $? -eq 0 ] || die "make $mkfile $mktarget"
 }
 
@@ -1246,14 +1286,16 @@ domake ()
 ###
 ###
 
+setdefaults
+
 evaltools
 parseargs $*
 
-${doconfig} && saveconfig
-${doshowconfig} && showconfig
+${doconfig} && savecfg
+${doshowconfig} && showcfg
 
-${docheckout} && { $(getconfig BRDIR)/checkout.sh ${checkoutstyle} \
-			$(getconfig SRCDIR) || exit 1; }
+${docheckout} && { $(getcfg BRDIR)/checkout.sh ${checkoutstyle} \
+			$(getcfg SRCDIR) || exit 1; }
 
 evaltarget
 
@@ -1269,7 +1311,7 @@ if ${dotests}; then
 	if ${KERNONLY}; then
 		echo '>> Kernel-only; skipping tests (no hypervisor)'
 	else
-		. $(getconfig BRDIR)/tests/testrump.sh
+		. $(getcfg BRDIR)/tests/testrump.sh
 		alltests
 	fi
 fi
