@@ -214,7 +214,7 @@ showcfg ()
 {
 
 	for var in ${BUILDRUMP_ALLVARS}; do
-		printf '%25s: %s\n' ${var} $(getcfg ${var})
+		printf '%-20s: %s\n' ${var} $(getcfg ${var})
 	done
 }
 
@@ -223,14 +223,18 @@ setdefaults ()
 
 	putcfg default BRDIR $(dirname $0)
 
-	putcfg default SRCDIR ./src
-	putcfg default OBJDIR ./obj
-	putcfg default DESTDIR ./rump
-	putcfg default BRTOOLDIR ./tools
+	putcfg default SRCDIR src
+	putcfg default OBJDIR obj
+	putcfg default DESTDIR rump
+	putcfg default BRTOOLDIR tools
 
 	putcfg default CONFIGNAME rumpmake
 
 	putcfg default JNUM 4
+
+	putcfg default TITANMODE false
+	putcfg default KERNONLY false
+	putcfg default NATIVENETBSD false
 }
 
 #
@@ -326,7 +330,7 @@ checkcheckout ()
 	[ ! -z "${TARBALLMODE}" ] && return
 
 	if ! $(getcfg BRDIR)/checkout.sh checkcheckout $(getcfg SRCDIR) \
-	    && ! ${TITANMODE}; then
+	    && ! $(getcfg TITANMODE); then
 		die 'revision mismatch, run checkout (or -H to override)'
 	fi
 }
@@ -513,7 +517,7 @@ EOF
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
-	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
+	if $(getcfg NATIVENETBSD) && [ ${TARGET} != 'netbsd' ]; then
 		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
 	else
@@ -813,13 +817,10 @@ parseargs ()
 {
 
 	DBG='-O2 -g'
-	TITANMODE=false
-	NOISE=2
 	debugginess=0
+	NOISE=2
 	THIRTYTWO=false
 	SIXTYFOUR=false
-	KERNONLY=false
-	NATIVENETBSD=false
 
 	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
@@ -857,13 +858,13 @@ parseargs ()
 			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 			;;
 		H)
-			TITANMODE=true
+			putcfg param TITANMODE true
 			;;
 		k)
-			KERNONLY=true
+			putcfg param KERNONLY true
 			;;
 		N)
-			NATIVENETBSD=true
+			putcfg param NATIVENETBSD true
 			;;
 		o)
 			putcfg param OBJDIR ${OPTARG}
@@ -1055,27 +1056,27 @@ evaltarget ()
 		;;
 	"openbsd")
 		RUMPKERN_UNDEF='-U__OpenBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		$(getcfg KERNONLY) || EXTRA_RUMPCLIENT='-lpthread'
 		appendvar EXTRA_CWARNFLAGS -Wno-bounded -Wno-format
 		;;
 	"freebsd")
 		RUMPKERN_UNDEF='-U__FreeBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		$(getcfg KERNONLY) || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		cppdefines _BIG_ENDIAN && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
-		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
-		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		$(getcfg KERNONLY) || EXTRA_RUMPCOMMON='-ldl'
+		$(getcfg KERNONLY) || EXTRA_RUMPUSER='-lrt'
+		$(getcfg KERNONLY) || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	"netbsd")
 		# what do you expect? ;)
 		;;
 	"sunos")
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
-		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
+		$(getcfg KERNONLY) || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
+		$(getcfg KERNONLY) || EXTRA_RUMPUSER='-lrt'
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
@@ -1094,11 +1095,11 @@ evaltarget ()
 	esac
 
 	if ! ${target_supported:-true}; then
-		${TITANMODE} || die unsupported target OS: ${TARGET}
+		$(getcfg TITANMODE) || die unsupported target OS: ${TARGET}
 	fi
 
 	if ! cppdefines __ELF__; then
-		${TITANMODE} || die ELF required as target object format
+		$(getcfg TITANMODE) || die ELF required as target object format
 	fi
 
 	# decide 32/64bit build.  step one: probe compiler default
@@ -1112,12 +1113,12 @@ evaltarget ()
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
 		doesitbuild 'int main() {return 0;}' \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || ${TITANMODE} || \
+		[ $? -eq 0 ] || $(getcfg TITANMODE) || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
 		doesitbuild 'int main() {return 0;}' \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || ${TITANMODE} || \
+		[ $? -eq 0 ] || $(getcfg TITANMODE) || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
 	else
 		# not specified.  use compiler default
@@ -1308,7 +1309,7 @@ ${dobuild} && makebuild
 ${doinstall} && makeinstall
 
 if ${dotests}; then
-	if ${KERNONLY}; then
+	if $(getcfg KERNONLY); then
 		echo '>> Kernel-only; skipping tests (no hypervisor)'
 	else
 		. $(getcfg BRDIR)/tests/testrump.sh
