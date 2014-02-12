@@ -221,17 +221,15 @@ showcfg ()
 setdefaults ()
 {
 
-	putcfg default BRDIR $(dirname $0)
-
-	putcfg default SRCDIR src
-	putcfg default OBJDIR obj
-	putcfg default DESTDIR rump
-	putcfg default BRTOOLDIR tools
+	abspath default BRDIR $(dirname $0)
+	abspath default SRCDIR src
+	abspath default OBJDIR obj
+	abspath default DESTDIR rump
+	abspath default BRTOOLDIR tools
 
 	putcfg default CONFIGNAME rumpmake
 
 	putcfg default JNUM 4
-
 	putcfg default TITANMODE false
 	putcfg default KERNONLY false
 	putcfg default NATIVENETBSD false
@@ -307,21 +305,19 @@ doesitbuild ()
 cctestandsetW ()
 {
 
-	[ "`pwd`" = "$(getcfg OBJDIR)" ] \
-	    || die call cctestandsetW only when in OBJDIR
-
+	od=$(getcfg OBJDIR)
 	#
 	# Try to test if cc supports the given warning flag.
 	# This is a bit tricky since apparently some version of gcc
 	# don't complain about the flag unless there is some other
 	# error to complain about as well.
 	# So we try compiling a broken source file...
-	echo 'no you_shall_not_compile' > broken.c
-	${CC} -W${1} broken.c > broken.out 2>&1
-	if ! grep -q "W${1}" broken.out ; then
+	echo 'no you_shall_not_compile' > ${od}/broken.c
+	${CC} -W${1} ${od}/broken.c > ${od}/broken.out 2>&1
+	if ! grep -q "W${1}" ${od}/broken.out ; then
 		appendvar EXTRA_CWARNFLAGS -W${1}
 	fi
-	rm -f broken.c broken.out
+	rm -f ${od}/broken.c ${od}/broken.out
 }
 
 checkcheckout ()
@@ -513,7 +509,7 @@ EOF
 	appendmkconf 'Cmd' "${DBG}" "DBG"
 	printoneconfig 'Cmd' "make -j[num]" "-j $(getcfg JNUM)"
 
-	if ${KERNONLY}; then
+	if $(getcfg KERNONLY); then
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
@@ -564,7 +560,7 @@ AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
-	if ! ${KERNONLY}; then
+	if ! $(getcfg KERNONLY); then
 		echo >> "${MKCONF}"
 		cat >> "${MKCONF}" << EOF
 # Support for NetBSD Makefiles which use <bsd.prog.mk>
@@ -686,7 +682,7 @@ makebuild ()
 		DIRS_final="lib/librumphijack"
 	fi
 
-	if ${KERNONLY}; then
+	if $(getcfg KERNONLY); then
 		mkmakefile $(getcfg OBJDIR)/Makefile.all \
 		    sys/rump ${DIRS_emul} $(getcfg BRDIR)/brlib
 	else
@@ -703,7 +699,7 @@ makebuild ()
 	# try to minimize the amount of domake invocations.  this makes a
 	# difference especially on systems with a large number of slow cores
 	for target in ${targets}; do
-		if [ ${target} = "dependall" ] && ! ${KERNONLY}; then
+		if [ ${target} = "dependall" ] && ! $(getcfg KERNONLY); then
 			domake $(getcfg OBJDIR)/Makefile.first ${target}
 			domake $(getcfg OBJDIR)/Makefile.second ${target}
 			domake $(getcfg OBJDIR)/Makefile.third ${target}
@@ -713,7 +709,7 @@ makebuild ()
 		fi
 	done
 
-	if ! ${KERNONLY}; then
+	if ! $(getcfg KERNONLY); then
 		mkmakefile $(getcfg OBJDIR)/Makefile.utils \
 		    usr.bin/rump_server usr.bin/rump_allserver \
 		    usr.bin/rump_wmd
@@ -843,7 +839,7 @@ parseargs ()
 			putcfg param JNUM ${OPTARG}
 			;;
 		d)
-			putcfg param DESTDIR ${OPTARG}
+			abspath param DESTDIR ${OPTARG}
 			;;
 		D)
 			[ ! -z "${RUMP_DIAGNOSTIC}" ] \
@@ -867,7 +863,7 @@ parseargs ()
 			putcfg param NATIVENETBSD true
 			;;
 		o)
-			putcfg param OBJDIR ${OPTARG}
+			abspath param OBJDIR ${OPTARG}
 			;;
 		q)
 			# build.sh handles value going negative
@@ -880,10 +876,10 @@ parseargs ()
 			DBG=''
 			;;
 		s)
-			putcfg param SRCDIR ${OPTARG}
+			abspath param SRCDIR ${OPTARG}
 			;;
 		T)
-			putcfg param BRTOOLDIR ${OPTARG}
+			abspath param BRTOOLDIR ${OPTARG}
 			;;
 		V)
 			appendvar BUILDSH_VARGS -V ${OPTARG}
@@ -960,21 +956,32 @@ parseargs ()
 	fi
 }
 
+# turn path into absolute path
+#  $1 = config level
+#  $2 = config name to store resulting path under
+#  $3 = path (relative or absolute)
 abspath ()
 {
 
+	level=$1
+	name=$2
+	path=$3
+
 	curdir=`pwd -P`
-	cd $(getcfg ${1})
-	[ $? -ne 0 ] && die Failed to resolve path "${1}"
-	putcfg foo ${1} `pwd -P`
-	cd ${curdir}
+
+	case "${path}" in
+	/*)
+		;;
+	*)
+		path="${curdir}/${path}"
+	esac
+
+	echo ${leve} ${name} ${path}
+	putcfg ${level} ${name} ${path}
 }
 
 resolvepaths ()
 {
-
-	# resolve critical directories
-	abspath BRDIR
 
 	mkdir -p $(getcfg OBJDIR) || die cannot create $(getcfg OBJDIR)
 	mkdir -p $(getcfg DESTDIR) || die cannot create $(getcfg DESTDIR)
@@ -982,11 +989,6 @@ resolvepaths ()
 	    || die cannot create $(getcfg BRTOOLDIR)/config
 	mkdir -p $(getcfg BRTOOLDIR)/internal \
 	    || die cannot create $(getcfg BRTOOLDIR)/internal
-
-	abspath DESTDIR
-	abspath OBJDIR
-	abspath BRTOOLDIR
-	abspath SRCDIR
 
 	RUMPMAKE="$(getcfg BRTOOLDIR)/internal/rumpmake-$(getcfg CONFIGNAME)"
 
