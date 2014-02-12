@@ -3,15 +3,15 @@
 # Should make using these tests not depend on ------"-----
 #
 
-TESTDIR=$(getconfig BRDIR)/tests
-TESTOBJ=$(getconfig OBJDIR)/brtests
+TESTDIR=$(getcfg BRDIR)/tests
+TESTOBJ=$(getcfg OBJDIR)/brtests
 
 dosimpleclient ()
 {
 
 	printf 'Remote communication ... '
 	export RUMP_SERVER="unix://mysocket"
-	$(getconfig DESTDIR)/bin/rump_server "${RUMP_SERVER}" \
+	$(getcfg DESTDIR)/bin/rump_server "${RUMP_SERVER}" \
 	    || die rump_server failed
 	./simpleclient || die simpleclient failed
 	unset RUMP_SERVER
