@@ -323,6 +323,10 @@ cctestandsetW ()
 checkcheckout ()
 {
 
+	# does build.sh even exist?
+	[ -x "$(getcfg SRCDIR)/build.sh" ] \
+	    || die "Cannot find $(getcfg SRCDIR)/build.sh!"
+
 	[ ! -z "${TARBALLMODE}" ] && return
 
 	if ! $(getcfg BRDIR)/checkout.sh checkcheckout $(getcfg SRCDIR) \
@@ -331,20 +335,8 @@ checkcheckout ()
 	fi
 }
 
-maketools ()
+probetarget ()
 {
-
-	#
-	# Perform various checks and set values
-	#
-
-	checkcheckout
-
-	#
-	# does build.sh even exist, or is this just a kernel-only checkout?
-	#
-	[ -x "$(getcfg SRCDIR)/build.sh" ] \
-	    || die "Cannot find $(getcfg SRCDIR)/build.sh!"
 
 	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
@@ -368,7 +360,8 @@ maketools ()
 		die Need GNU or BSD ar "(`type ${AR}`)"
 	fi
 
-	cd $(getcfg OBJDIR)
+	# check & disable warning flags which usually cause troubles
+	# with varying compiler versions
 	cctestandsetW 'no-unused-but-set-variable'
 	cctestandsetW 'no-unused-local-typedefs'
 	cctestandsetW 'no-maybe-uninitialized'
@@ -426,6 +419,19 @@ maketools ()
 	    -a "${TARGET}" != 'linux' ]; then
 		RUMP_VIRTIF=no
 	fi
+
+}
+
+maketools ()
+{
+
+	#
+	# Perform various checks and set values
+	#
+
+	checkcheckout
+
+	probetarget
 
 	#
 	# Create external toolchain wrappers.
@@ -589,11 +595,6 @@ EOF
 	echo 'int gzdopen(int); int gzdopen(int v) { return 0; }' > fakezlib.c
 	${HOST_CC:-cc} -o libz.a -c fakezlib.c
 
-	# Run build.sh.  Use some defaults.
-	# The html pages would be nice, but result in too many broken
-	# links, since they assume the whole NetBSD man page set to be present.
-	dir=$(getcfg SRCDIR)
-	echo $dir
 	cd $(getcfg SRCDIR)
 
 	# create user-usable wrapper script
