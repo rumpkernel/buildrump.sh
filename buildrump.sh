@@ -75,7 +75,8 @@ EOF
 	printf "\t-s: location of source tree.  default: PWD/src\n"
 	echo
 	printf "\t-j: value of -j specified to make.  default: $(getcfg JNUM)\n"
-	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
+	printf "\t-q: quiet build, less output.  default level: 2\n"
+	printf "\t-Q: unquiet build, more output.  default level: 2\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
@@ -237,6 +238,8 @@ setdefaults ()
 	putcfg default CONFIGNAME rumpmake
 
 	putcfg default JNUM 4
+	putcfg default BUILDVERBOSE 2
+
 	putcfg default TITANMODE false
 	putcfg default KERNONLY false
 	putcfg default NATIVENETBSD false
@@ -633,7 +636,7 @@ makemake ()
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T $(getcfg BRTOOLDIR) -j $(getcfg JNUM) \
-	    ${LLVM} ${BEQUIET} ${LDSCRIPT} \
+	    ${LLVM} -N$(getcfg BUILDVERBOSE) ${LDSCRIPT} \
 	    -E -Z S \
 	    -V EXTERNAL_TOOLCHAIN=$(getcfg BRTOOLDIR) \
 	    -V TOOLCHAIN_MISSING=yes \
@@ -824,9 +827,9 @@ parseargs ()
 
 	DBG='-O2 -g'
 	debugginess=0
-	NOISE=2
+	noise=$(getcfg BUILDVERBOSE)
 
-	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
+	while getopts '3:6:c:d:DhHj:kNo:qQrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -876,8 +879,10 @@ parseargs ()
 			abspath param OBJDIR ${OPTARG}
 			;;
 		q)
-			# build.sh handles value going negative
-			NOISE=$((NOISE-1))
+			noise=$((noise-1))
+			;;
+		Q)
+			noise=$((noise+1))
 			;;
 		r)
 			[ ${debugginess} -gt 0 ] \
@@ -904,12 +909,15 @@ parseargs ()
 	done
 	shift $((${OPTIND} - 1))
 
+	[ ${noise} -le 0 ] && noise=0
+	[ ${noise} -gt 4 ] && noise=4
+	[ ${noise} -ne $(getcfg BUILDVERBOSE) ] \
+	    && putcfg param BUILDVERBOSE ${noise}
+
 	cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
 	[ -f ${cfgfile} ] && . ${cfgfile}
 
 	DBG="${BUILDRUMP_DBG:-${DBG}}"
-
-	BEQUIET="-N${NOISE}"
 
 	#
 	# Determine what which parts we should execute.
