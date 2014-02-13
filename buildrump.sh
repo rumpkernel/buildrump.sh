@@ -238,6 +238,7 @@ setdefaults ()
 
 	putcfg default JNUM 4
 	putcfg default BUILDVERBOSE 2
+	putcfg default BUILDDEBUG 0
 
 	putcfg default TITANMODE false
 	putcfg default KERNONLY false
@@ -430,7 +431,102 @@ probetarget ()
 	    -a "${TARGET}" != 'linux' ]; then
 		RUMP_VIRTIF=no
 	fi
+}
 
+makemkconf ()
+{
+
+	# Create mk.conf.  Create it under a temp name first so as to
+	# not affect the tool build with its contents
+	MKCONF="$(getcfg BRTOOLDIR)/internal/mk.conf-$(getcfg CONFIGNAME).building"
+	mkconf_final="$(getcfg BRTOOLDIR)/config/mk.conf-$(getcfg CONFIGNAME)"
+	> ${mkconf_final}
+
+	cat > "${MKCONF}" << EOF
+BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
+CPPFLAGS+=-I$(getcfg BRTOOLDIR)/compat/include
+LIBDO.pthread=_external
+INSTPRIV=-U
+AFLAGS+=-Wa,--noexecstack
+MKPROFILE=no
+MKARZERO=no
+USE_SSP=no
+MKHTML=no
+MKCATPAGES=yes
+EOF
+
+	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
+	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
+	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
+	appendmkconf 'Cmd' "${DBG}" "DBG"
+
+	if $(getcfg KERNONLY); then
+		appendmkconf Cmd yes RUMPKERN_ONLY
+	fi
+
+	if $(getcfg NATIVENETBSD) && [ ${TARGET} != 'netbsd' ]; then
+		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
+	else
+		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
+	fi
+	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
+	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
+	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
+	unset _tmpvar
+	for x in ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}; do
+		_tmpvar="${_tmpvar} ${x#-l}"
+	done
+	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
+	unset _tmpvar
+	for x in ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}; do
+		_tmpvar="${_tmpvar} ${x#-l}"
+	done
+	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
+	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
+	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
+	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
+	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
+	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
+
+	chkcrt begins
+	chkcrt ends
+	chkcrt i
+	chkcrt n
+
+	# add vars from env last (so that they can be used for overriding)
+	cat >> "${MKCONF}" << EOF
+CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
+CFLAGS+=\${BUILDRUMP_CFLAGS}
+AFLAGS+=\${BUILDRUMP_AFLAGS}
+LDFLAGS+=\${BUILDRUMP_LDFLAGS}
+EOF
+
+	if ! $(getcfg KERNONLY); then
+		echo >> "${MKCONF}"
+		cat >> "${MKCONF}" << EOF
+# Support for NetBSD Makefiles which use <bsd.prog.mk>
+# It's mostly a question of erasing dependencies that we don't
+# expect to see
+.ifdef PROG
+LIBCRT0=
+LIBCRTBEGIN=
+LIBCRTEND=
+LIBCRTI=
+LIBC=
+
+LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R$(getcfg DESTDIR)/lib
+LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
+EOF
+		[ ${LD_FLAVOR} != 'sun' ] \
+		    && echo 'LDFLAGS+=-Wl,--no-as-needed' >> "${MKCONF}"
+		echo '.endif # PROG' >> "${MKCONF}"
+	fi
 }
 
 maketools ()
@@ -496,107 +592,18 @@ maketools ()
 	    $(getcfg SRCDIR)/sys/sys/queue.h \
 	    $(getcfg BRTOOLDIR)/compat/include/sys
 
-	# Create mk.conf.  Create it under a temp name first so as to
-	# not affect the tool build with its contents
-	MKCONF="$(getcfg BRTOOLDIR)/internal/mk.conf-$(getcfg CONFIGNAME).building"
-	mkconf_final="$(getcfg BRTOOLDIR)/config/mk.conf-$(getcfg CONFIGNAME)"
-	> ${mkconf_final}
-
-	cat > "${MKCONF}" << EOF
-BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
-CPPFLAGS+=-I$(getcfg BRTOOLDIR)/compat/include
-LIBDO.pthread=_external
-INSTPRIV=-U
-AFLAGS+=-Wa,--noexecstack
-MKPROFILE=no
-MKARZERO=no
-USE_SSP=no
-MKHTML=no
-MKCATPAGES=yes
-EOF
-
 	printoneconfig 'Cmd' "SRCDIR" "$(getcfg SRCDIR)"
 	printoneconfig 'Cmd' "DESTDIR" "$(getcfg DESTDIR)"
 	printoneconfig 'Cmd' "OBJDIR" "$(getcfg OBJDIR)"
 	printoneconfig 'Cmd' "BRTOOLDIR" "$(getcfg BRTOOLDIR)"
 
-	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
-	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
-	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
-	appendmkconf 'Cmd' "${DBG}" "DBG"
 	printoneconfig 'Cmd' "make -j[num]" "-j $(getcfg JNUM)"
-
-	if $(getcfg KERNONLY); then
-		appendmkconf Cmd yes RUMPKERN_ONLY
-	fi
-
-	if $(getcfg NATIVENETBSD) && [ ${TARGET} != 'netbsd' ]; then
-		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
-		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
-	else
-		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
-	fi
-	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
-	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
-	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
-	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
-	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
-	unset _tmpvar
-	for x in ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}; do
-		_tmpvar="${_tmpvar} ${x#-l}"
-	done
-	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
-	unset _tmpvar
-	for x in ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}; do
-		_tmpvar="${_tmpvar} ${x#-l}"
-	done
-	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
-	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
-	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
-	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
 
 	printenv
 
-	chkcrt begins
-	chkcrt ends
-	chkcrt i
-	chkcrt n
-
-	# add vars from env last (so that they can be used for overriding)
-	cat >> "${MKCONF}" << EOF
-CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
-CFLAGS+=\${BUILDRUMP_CFLAGS}
-AFLAGS+=\${BUILDRUMP_AFLAGS}
-LDFLAGS+=\${BUILDRUMP_LDFLAGS}
-EOF
-
-	if ! $(getcfg KERNONLY); then
-		echo >> "${MKCONF}"
-		cat >> "${MKCONF}" << EOF
-# Support for NetBSD Makefiles which use <bsd.prog.mk>
-# It's mostly a question of erasing dependencies that we don't
-# expect to see
-.ifdef PROG
-LIBCRT0=
-LIBCRTBEGIN=
-LIBCRTEND=
-LIBCRTI=
-LIBC=
-
-LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R$(getcfg DESTDIR)/lib
-LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
-EOF
-		[ ${LD_FLAVOR} != 'sun' ] \
-		    && echo 'LDFLAGS+=-Wl,--no-as-needed' >> "${MKCONF}"
-		echo '.endif # PROG' >> "${MKCONF}"
-	fi
+	makemkconf
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
@@ -934,9 +941,6 @@ parseargs ()
 		putcfg param BUILDDEBUG ${debugginess}
 	fi
 
-	cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
-	[ -f ${cfgfile} ] && . ${cfgfile}
-
 	DBG="${BUILDRUMP_DBG:-${DBG}}"
 
 	#
@@ -1014,7 +1018,6 @@ abspath ()
 		path="${curdir}/${path}"
 	esac
 
-	echo ${leve} ${name} ${path}
 	putcfg ${level} ${name} ${path}
 }
 
@@ -1322,8 +1325,10 @@ setdefaults
 
 evaltools
 parseargs $*
-
 ${doconfig} && savecfg
+
+cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
+[ -f ${cfgfile} ] && . ${cfgfile}
 ${doshowconfig} && showcfg
 
 ${docheckout} && { $(getcfg BRDIR)/checkout.sh ${checkoutstyle} \
