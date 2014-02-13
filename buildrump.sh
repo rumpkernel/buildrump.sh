@@ -155,7 +155,10 @@ appendvar ()
 # config-related routines
 
 # cfg variable levels in order of priority
-BUILDRUMP_CFGLEVELS="param config default"
+BUILDRUMP_CFGLEVELS="probe param config default"
+for lvl in ${BUILDRUMP_CFGLEVELS}; do
+	eval BR_${lvl}=false
+done
 
 # fetch a config variable.  the one with the highest priority will be
 # returned (see comment above setcfg)
@@ -173,7 +176,7 @@ getcfg ()
 }
 
 # store a config variable:
-#  $1 = level (in order of preference for getcfg: param, config, default)
+#  $1 = level (in order of preference for getcfg: probe, param, config, default)
 #  $2 = name
 #  $3 = value
 putcfg ()
@@ -190,6 +193,7 @@ putcfg ()
 		die Invalid cfg level \"${level}\"
 	done
 
+	eval BR_${level}=true
 	eval BR_${level}_${var}="${value}"
 
 	for v in ${BUILDRUMP_ALLVARS}; do
@@ -198,8 +202,11 @@ putcfg ()
 	appendvar BUILDRUMP_ALLVARS ${var}
 }
 
+# save configuration.  must be called before any probes are done
 savecfg ()
 {
+
+	${BR_probe} && die internal error: savecfg called after probes
 
 	cfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
 
@@ -233,6 +240,8 @@ setdefaults ()
 	putcfg default TITANMODE false
 	putcfg default KERNONLY false
 	putcfg default NATIVENETBSD false
+
+	putcfg default WORDSIZE native
 }
 
 #
@@ -372,7 +381,7 @@ probetarget ()
 	# since we need to testbuild kernel code, not host code,
 	# and we're only setting up the build now.  So we just
 	# disable format warnings on all 32bit targets.
-	${THIRTYTWO} && appendvar EXTRA_CWARNFLAGS -Wno-format
+	[ $(getcfg WORDSIZE) = '32' ] && appendvar EXTRA_CWARNFLAGS -Wno-format
 
 	#
 	# Check if the linker supports all the features of the rump kernel
@@ -816,22 +825,22 @@ parseargs ()
 	DBG='-O2 -g'
 	debugginess=0
 	NOISE=2
-	THIRTYTWO=false
-	SIXTYFOUR=false
 
 	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
 			    && die 'invalid option. did you mean -32?'
-			${SIXTYFOUR} && die 32+64 given.  Want a 48bit build?
-			THIRTYTWO=true
+			[ $(getcfg WORDSIZE) != 'native' ] \
+			    && die Can specify word size only once
+			putcfg param WORDSIZE 32
 			;;
 		6)
 			[ ${OPTARG} != '4' ] \
 			    && die 'invalid option. did you mean -64?'
-			${THIRTYTWO} && die 32+64 given.  Want a 48bit build?
-			SIXTYFOUR=true
+			[ $(getcfg WORDSIZE) != 'native' ] \
+			    && die Can specify word size only once
+			putcfg param WORDSIZE 64
 			;;
 		c)
 			putcfg param CONFIGNAME ${OPTARG}
@@ -1009,7 +1018,7 @@ resolvepaths ()
 check64 ()
 {
 
-	${SIXTYFOUR} \
+	[ $(getcfg WORDSIZE) = '64' ] \
 	    && die Do not know how to do a 64bit build for \"${MACH_ARCH}\"
 }
 
@@ -1105,37 +1114,28 @@ evaltarget ()
 		$(getcfg TITANMODE) || die ELF required as target object format
 	fi
 
-	# decide 32/64bit build.  step one: probe compiler default
+	# decide 32/64bit build.  step one: probe compiler default word size
 	if cppdefines __LP64__; then
-		ccdefault=64
+		ccdefaultword=64
 	else
-		ccdefault=32
+		ccdefaultword=32
 	fi
 
 	# step 2: if the user specified 32/64, try to establish if it will work
-	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
+	if [ $(getcfg WORDSIZE) != 'native' ] ; then
 		doesitbuild 'int main() {return 0;}' \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
+		    -m$(getcfg WORDSIZE) ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 		[ $? -eq 0 ] || $(getcfg TITANMODE) || \
-		    die 'Gave -32, but probe shows it will not work.  Try -H?'
-	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
-		doesitbuild 'int main() {return 0;}' \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || $(getcfg TITANMODE) || \
-		    die 'Gave -64, but probe shows it will not work.  Try -H?'
+		    die Gave -$(getcfg WORDSIZE), but probe shows \
+		      it will not work.  Try '-H?'
 	else
-		# not specified.  use compiler default
-		if [ "${ccdefault}" -eq 64 ]; then
-			SIXTYFOUR=true
-		else
-			THIRTYTWO=true
-		fi
+		putcfg probe WORDSIZE ${ccdefaultword}
 	fi
 
 	TOOLABI=''
 	case ${MACH_ARCH} in
 	"amd64"|"x86_64")
-		if ${THIRTYTWO} ; then
+		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="i386"
 			MACH_ARCH="i486"
 			TOOLABI="elf"
@@ -1161,7 +1161,7 @@ evaltarget ()
 		probearm
 		;;
 	"sparc")
-		if ${THIRTYTWO} ; then
+		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
 			TOOLABI="elf"
@@ -1176,7 +1176,7 @@ evaltarget ()
 		fi
 		;;
 	"mips64el")
-		if ${THIRTYTWO} ; then
+		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
 			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
@@ -1192,7 +1192,7 @@ evaltarget ()
 		probemips
 		;;
 	"mips64")
-		if ${THIRTYTWO} ; then
+		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
 			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
@@ -1224,7 +1224,7 @@ evaltarget ()
 		probemips
 		;;
 	"ppc64")
-		if ${THIRTYTWO} ; then
+		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
