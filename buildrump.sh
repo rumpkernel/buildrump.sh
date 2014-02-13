@@ -577,7 +577,7 @@ maketools ()
 	querymake=$(getcfg BRTOOLDIR)/internal/querymake
 	makemake ${querymake} $(getcfg BRTOOLDIR)/dest makewrapper silent
 
-	arch=$(${querymake} -V '${MACHINE_GNU_PLATFORM}')
+	toolabi=$(${querymake} -V '${MACHINE_GNU_PLATFORM}')
 	cd $(getcfg OBJDIR)
 
 	#
@@ -591,7 +591,7 @@ maketools ()
 		else
 			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
 		fi
-		tname=$(getcfg BRTOOLDIR)/bin/${arch}-${lcx}
+		tname=$(getcfg BRTOOLDIR)/bin/${toolabi}-${lcx}
 
 		eval tool=\${${x}}
 		type ${tool} >/dev/null 2>&1 \
