@@ -631,6 +631,14 @@ makemake ()
 	stage=$2
 	cmd=$3
 
+	debugginess=$(getcfg BUILDDEBUG)
+	# use -O1 as the minimal supported compiler
+	# optimization level.  -O0 is just too broken
+	# for too many compilers and platforms
+	[ ${debugginess} -gt 0 ] && DBG='-O1 -g'
+	[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
+	[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
+
 	env CFLAGS= HOST_LDFLAGS=-L$(getcfg OBJDIR) ./build.sh \
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
@@ -825,12 +833,11 @@ parseargs ()
 {
 
 	DBG='-O2 -g'
-	debugginess=0
 
 	unset buildverbose
+	unset debugginess
 
 	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
-		echo $OPTIND
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -859,13 +866,15 @@ parseargs ()
 			[ ! -z "${RUMP_DIAGNOSTIC}" ] \
 			    && die Cannot specify releasy debug
 
-			debugginess=$((debugginess+1))
-			# use -O1 as the minimal supported compiler
-			# optimization level.  -O0 is just too broken
-			# for too many compilers and platforms
-			[ ${debugginess} -gt 0 ] && DBG='-O1 -g'
-			[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
-			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
+			eval maybe=\${$OPTIND}
+			if [ ! -z "${maybe}" -a -z "${maybe%[0123]}" ]; then
+				OPTIND=$((${OPTIND}+1))
+				debugginess=${maybe}
+			else
+				[ -z "${debugginess}" ] && debugginess=0
+				debugginess=$((debugginess+1))
+			fi
+
 			;;
 		H)
 			putcfg param TITANMODE true
@@ -888,6 +897,7 @@ parseargs ()
 				[ -z "${buildverbose}" ] && buildverbose=2
 				buildverbose=$((buildverbose-1))
 			fi
+
 			;;
 		r)
 			[ ${debugginess} -gt 0 ] \
@@ -917,6 +927,11 @@ parseargs ()
 	if [ ! -z "${buildverbose}" ]; then
 		[ ${buildverbose} -le 0 ] && buildverbose=0
 		putcfg param BUILDVERBOSE ${buildverbose}
+	fi
+
+	if [ ! -z "${debugginess}" ]; then
+		[ ${debugginess} -gt 3 ] && debugginess=3
+		putcfg param BUILDDEBUG ${debugginess}
 	fi
 
 	cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
