@@ -1331,7 +1331,7 @@ ${docheckout} && { $(getcfg BRDIR)/checkout.sh ${checkoutstyle} \
 
 evaltarget
 
-if ${dotools} || ${dobuild} || ${doinstall}; then
+if ${dotools} || ${dobuild} || ${doinstall} || ${dotests}; then
 	resolvepaths
 fi
 
