@@ -208,7 +208,9 @@ savecfg ()
 
 	${BR_probe} && die internal error: savecfg called after probes
 
-	cfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
+	td=$(getcfg BRTOOLDIR)
+	mkdir -p ${td}/config || die cannot create directory \"${td}\"
+	cfile=${td}/config/cfg-$(getcfg CONFIGNAME)
 
 	rm -f ${cfile}
 	for var in ${BUILDRUMP_ALLVARS}; do
@@ -540,42 +542,6 @@ maketools ()
 
 	probetarget
 
-	#
-	# Create external toolchain wrappers.
-	mkdir -p $(getcfg BRTOOLDIR)/bin \
-	    || die "cannot create $(getcfg BRTOOLDIR)/bin"
-	for x in CC AR NM OBJCOPY; do
-		# ok, it's not really --netbsd, but let's make-believe!
-		if [ ${x} = CC ]; then
-			lcx=${CC_FLAVOR}
-		else
-			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
-		fi
-		tname=$(getcfg BRTOOLDIR)/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
-
-		eval tool=\${${x}}
-		type ${tool} >/dev/null 2>&1 \
-		    || die Cannot find \$${x} at \"${tool}\".
-		printoneconfig 'Tool' "${x}" "${tool}"
-
-		exec 3>&1 1>${tname}
-		printf '#!/bin/sh\n\n'
-
-		# Make the compiler wrapper mangle arguments suitable for ld.
-		# Messy to plug it in here, but ...
-		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
-			printf 'for x in $*; do\n'
-			printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
-			printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
-			printf '&& continue\n\tnewargs="${newargs} $x"\n'
-			printf 'done\nexec %s ${newargs}\n' ${tool}
-		else
-			printf 'exec %s $*\n' ${tool}
-		fi
-		exec 1>&3 3>&-
-		chmod 755 ${tname}
-	done
-
 	# Create bounce directory used as the install target.  The
 	# purpose of this is to strip the "usr/" pathname component
 	# that is hardcoded by NetBSD Makefiles.
@@ -604,6 +570,51 @@ maketools ()
 	printenv
 
 	makemkconf
+
+	# create temp. wrapper.  this is only so that we can query
+	# MACHINE_GNU_PLATFORM (required by the next step)
+	cd $(getcfg SRCDIR)
+	querymake=$(getcfg BRTOOLDIR)/internal/querymake
+	makemake ${querymake} $(getcfg BRTOOLDIR)/dest makewrapper silent
+
+	arch=$(${querymake} -V '${MACHINE_GNU_PLATFORM}')
+	cd $(getcfg OBJDIR)
+
+	#
+	# Create external toolchain wrappers.
+	mkdir -p $(getcfg BRTOOLDIR)/bin \
+	    || die "cannot create $(getcfg BRTOOLDIR)/bin"
+	for x in CC AR NM OBJCOPY; do
+		# ok, it's not really --netbsd, but let's make-believe!
+		if [ ${x} = CC ]; then
+			lcx=${CC_FLAVOR}
+		else
+			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
+		fi
+		tname=$(getcfg BRTOOLDIR)/bin/${arch}-${lcx}
+
+		eval tool=\${${x}}
+		type ${tool} >/dev/null 2>&1 \
+		    || die Cannot find \$${x} at \"${tool}\".
+		printoneconfig 'Tool' "${x}" "${tool}"
+
+		exec 3>&1 1>${tname}
+		printf '#!/bin/sh\n\n'
+
+		# Make the compiler wrapper mangle arguments suitable for ld.
+		# Messy to plug it in here, but ...
+		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
+			printf 'for x in $*; do\n'
+			printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
+			printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
+			printf '&& continue\n\tnewargs="${newargs} $x"\n'
+			printf 'done\nexec %s ${newargs}\n' ${tool}
+		else
+			printf 'exec %s $*\n' ${tool}
+		fi
+		exec 1>&3 3>&-
+		chmod 755 ${tname}
+	done
 
 	# skip the zlib tests run by "make tools", since we don't need zlib
 	# and it's only required by one tools autoconf script.  Of course,
@@ -637,6 +648,8 @@ makemake ()
 	wrapper=$1
 	stage=$2
 	cmd=$3
+	silencio=false
+	[ "$4" = "silent" ] && silencio=true
 
 	debugginess=$(getcfg BUILDDEBUG)
 	# use -O1 as the minimal supported compiler
@@ -646,6 +659,7 @@ makemake ()
 	[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
 	[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
 
+	${silencio} && exec 3>&1 4>&2 1>/dev/null 2>&1
 	env CFLAGS= HOST_LDFLAGS=-L$(getcfg OBJDIR) ./build.sh \
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
@@ -665,7 +679,9 @@ makemake ()
 	    -V BUILDRUMP_STAGE=${stage} \
 	    ${BUILDSH_VARGS} \
 	${cmd}
-	[ $? -ne 0 ] && die build.sh ${cmd} failed
+	rv=$?
+	${silencio} && exec 1>&3 3>&- 2>&4 4>&-
+	[ $rv -ne 0 ] && die build.sh ${cmd} failed
 }
 
 makebuild ()
@@ -1145,14 +1161,7 @@ evaltarget ()
 		$(getcfg TITANMODE) || die ELF required as target object format
 	fi
 
-	# decide 32/64bit build.  step one: probe compiler default word size
-	if cppdefines __LP64__; then
-		ccdefaultword=64
-	else
-		ccdefaultword=32
-	fi
-
-	# step 2: if the user specified 32/64, try to establish if it will work
+	# decide 32/64bit build.  did user specify it, or wanted native?
 	if [ $(getcfg WORDSIZE) != 'native' ] ; then
 		doesitbuild 'int main() {return 0;}' \
 		    -m$(getcfg WORDSIZE) ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
@@ -1160,47 +1169,42 @@ evaltarget ()
 		    die Gave -$(getcfg WORDSIZE), but probe shows \
 		      it will not work.  Try '-H?'
 	else
+		# native means we probe compiler default word size
+		if cppdefines __LP64__; then
+			ccdefaultword=64
+		else
+			ccdefaultword=32
+		fi
 		putcfg probe WORDSIZE ${ccdefaultword}
 	fi
 
-	TOOLABI=''
 	case ${MACH_ARCH} in
 	"amd64"|"x86_64")
 		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="i386"
-			MACH_ARCH="i486"
-			TOOLABI="elf"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 			EXTRA_LDFLAGS='-m32'
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 		else
 			MACHINE="amd64"
-			MACH_ARCH="x86_64"
 		fi
 		;;
 	"i386"|"i486"|"i586"|"i686")
 		check64
 		MACHINE="i386"
-		MACH_ARCH="i486"
-		TOOLABI="elf"
 		;;
 	"arm"|"armv6l")
 		check64
 		MACHINE="evbarm"
-		MACH_ARCH="arm"
-		TOOLABI="elf"
 		probearm
 		;;
 	"sparc")
 		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="sparc"
-			MACH_ARCH="sparc"
-			TOOLABI="elf"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
 		else
 			MACHINE="sparc64"
-			MACH_ARCH="sparc64"
 			EXTRA_CFLAGS='-m64'
 			EXTRA_LDFLAGS='-m64'
 			EXTRA_AFLAGS='-m64'
@@ -1209,13 +1213,11 @@ evaltarget ()
 	"mips64el")
 		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbmips-el"
-			MACH_ARCH="mipsel"
 			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 			EXTRA_LDFLAGS='-D__mips_o32 -mabi=32'
 			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 		else
 			MACHINE="evbmips64-el"
-			MACH_ARCH="mips64el"
 			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
 			EXTRA_LDFLAGS='-D__mips_n64 -mabi=64'
 			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
@@ -1225,13 +1227,11 @@ evaltarget ()
 	"mips64")
 		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbmips-eb"
-			MACH_ARCH="mipseb"
 			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 			EXTRA_LDFLAGS='-D__mips_o32 -mabi=32'
 			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 		else
 			MACHINE="evbmips64-eb"
-			MACH_ARCH="mips64eb"
 			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
 			EXTRA_LDFLAGS='-D__mips_n64 -mabi=64'
 			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
@@ -1241,7 +1241,6 @@ evaltarget ()
 	"mipsel")
 		check64
 		MACHINE="evbmips-el"
-		MACH_ARCH="mipsel"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
@@ -1249,7 +1248,6 @@ evaltarget ()
 	"mips")
 		check64
 		MACHINE="evbmips-eb"
-		MACH_ARCH="mipseb"
 		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
@@ -1257,13 +1255,11 @@ evaltarget ()
 	"ppc64")
 		if [ $(getcfg WORDSIZE) = '32' ]; then
 			MACHINE="evbppc"
-			MACH_ARCH="powerpc"
 			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 			EXTRA_LDFLAGS='-m32'
 			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
 		else
 			MACHINE="evbppc64"
-			MACH_ARCH="powerpc64"
 			EXTRA_CFLAGS='-m64'
 			EXTRA_LDFLAGS='-m64'
 			EXTRA_AFLAGS='-m64'
@@ -1272,7 +1268,6 @@ evaltarget ()
 	"powerpc")
 		check64
 		MACHINE="evbppc"
-		MACH_ARCH="powerpc"
 		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
 		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
 		;;
