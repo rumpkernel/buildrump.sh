@@ -628,7 +628,7 @@ maketools ()
 
 	# create user-usable wrapper script
 	makemake $(getcfg BRTOOLDIR)/$(getcfg CONFIGNAME) \
-	    $(getcfg BRTOOLDIR)/dest makewrapper
+	    $(getcfg BRTOOLDIR)/dest makewrapper silent
 
 	# create wrapper script to be used during buildrump.sh, plus tools
 	makemake ${RUMPMAKE} $(getcfg OBJDIR)/dest.stage tools
