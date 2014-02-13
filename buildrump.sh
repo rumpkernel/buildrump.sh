@@ -76,7 +76,6 @@ EOF
 	echo
 	printf "\t-j: value of -j specified to make.  default: $(getcfg JNUM)\n"
 	printf "\t-q: quiet build, less output.  default level: 2\n"
-	printf "\t-Q: unquiet build, more output.  default level: 2\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
@@ -827,9 +826,11 @@ parseargs ()
 
 	DBG='-O2 -g'
 	debugginess=0
-	noise=$(getcfg BUILDVERBOSE)
 
-	while getopts '3:6:c:d:DhHj:kNo:qQrs:T:V:' opt; do
+	unset buildverbose
+
+	while getopts '3:6:c:d:DhHj:kNo:qrs:T:V:' opt; do
+		echo $OPTIND
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -879,10 +880,14 @@ parseargs ()
 			abspath param OBJDIR ${OPTARG}
 			;;
 		q)
-			noise=$((noise-1))
-			;;
-		Q)
-			noise=$((noise+1))
+			eval maybe=\${$OPTIND}
+			if [ ! -z "${maybe}" -a -z "${maybe%[012]}" ]; then
+				OPTIND=$((${OPTIND}+1))
+				buildverbose=$((2-${maybe}))
+			else
+				[ -z "${buildverbose}" ] && buildverbose=2
+				buildverbose=$((buildverbose-1))
+			fi
 			;;
 		r)
 			[ ${debugginess} -gt 0 ] \
@@ -909,10 +914,10 @@ parseargs ()
 	done
 	shift $((${OPTIND} - 1))
 
-	[ ${noise} -le 0 ] && noise=0
-	[ ${noise} -gt 4 ] && noise=4
-	[ ${noise} -ne $(getcfg BUILDVERBOSE) ] \
-	    && putcfg param BUILDVERBOSE ${noise}
+	if [ ! -z "${buildverbose}" ]; then
+		[ ${buildverbose} -le 0 ] && buildverbose=0
+		putcfg param BUILDVERBOSE ${buildverbose}
+	fi
 
 	cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
 	[ -f ${cfgfile} ] && . ${cfgfile}
