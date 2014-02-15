@@ -132,7 +132,7 @@ For crosscompilation and other instructions, see the git repository.
 Unless you have a need to use this self-contained archive, it is
 recommended that you use the git repository.
 
-[1] https://github.com/anttikantee/buildrump.sh
+[1] https://github.com/rumpkernel/buildrump.sh
 
 
 The following NetBSD source timestamps were used in this snapshot:
