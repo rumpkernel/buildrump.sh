@@ -1047,8 +1047,6 @@ resolvepaths ()
 	mkdir -p $(getcfg BRTOOLDIR)/internal \
 	    || die cannot create $(getcfg BRTOOLDIR)/internal
 
-	RUMPMAKE="$(getcfg BRTOOLDIR)/internal/rumpmake-$(getcfg CONFIGNAME)"
-
 	# mini-mtree
 	dstage=$(getcfg OBJDIR)/dest.stage/usr
 	for dir in ${dstage}/bin ${dstage}/include/rump ${dstage}/lib; do
@@ -1320,6 +1318,7 @@ setdefaults
 
 evaltools
 parseargs $*
+
 ${doconfig} && savecfg
 
 cfgfile=$(getcfg BRTOOLDIR)/config/cfg-$(getcfg CONFIGNAME)
@@ -1331,11 +1330,13 @@ ${docheckout} && { $(getcfg BRDIR)/checkout.sh ${checkoutstyle} \
 
 evaltarget
 
-if ${dotools} || ${dobuild} || ${doinstall} || ${dotests}; then
+if ${dotools} || ${dobuild} || ${doinstall}; then
 	resolvepaths
 fi
 
 ${dotools} && maketools
+RUMPMAKE="$(getcfg BRTOOLDIR)/internal/rumpmake-$(getcfg CONFIGNAME)"
+
 ${dobuild} && makebuild
 ${doinstall} && makeinstall
 
