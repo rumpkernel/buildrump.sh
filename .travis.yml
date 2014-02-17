@@ -17,4 +17,4 @@ script:
        -V ${LIBTYPE} ${DEBUG} fullbuild tests
 
 notifications:
-  irc: "chat.freenode.net#rumpkernel"
+  irc: "chat.freenode.net#rumpkernel-builds"
