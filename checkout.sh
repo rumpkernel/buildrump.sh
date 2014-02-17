@@ -66,7 +66,9 @@ NBSRC_EXTRA='
 	src/sys/compat/linux
 	src/sys/rump/kern/lib/libsys_linux;
     20140207 1725UTC:
-	src/usr.bin/make/main.c'
+	src/usr.bin/make/main.c;
+    20140217 2000UTC:
+	src/sys/rump/librump/rumpkern/vm.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
