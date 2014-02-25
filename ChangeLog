@@ -9,6 +9,9 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ update NetBSD timestamp to 20140225 2300UTC
++ many sysctl nodes required by rumprun utilities now available by
+  default, including kern.urandom, kern.rawpartition, etc.
 + add rump_wmd(1) (short for Where's My Dependency).  Given a
   rump kernel component, rump_wmd lists all the components that
   are needed for successful linking
