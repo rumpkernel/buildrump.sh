@@ -197,7 +197,7 @@ doesitbuild ()
 	theprog="${1}"
 	shift
 
-	echo ${theprog} | ${CC} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
+	printf "${theprog}" | ${CC} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
 	    > /dev/null 2>&1
 }
 
