@@ -313,7 +313,7 @@ maketools ()
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
 	# to avoid line number conflicts
 	doesitbuild 'int a = __COUNTER__;\n' -c
-	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
+	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)=' -D'__CTASSERT(x)='"
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
