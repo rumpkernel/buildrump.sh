@@ -5,7 +5,8 @@ PROG=	webbrowser webbrowser.sockin
 
 LDADD.webbrowser+= -Wl,--whole-archive					\
 	    -lrumpnet_virtif -lrumpnet_config -lrumpdev_bpf		\
-	    -lrumpnet_netinet -lrumpnet_net -lrumpnet -lrump -lrumpuser	\
+	    -lrumpnet_netinet6 -lrumpnet_netinet -lrumpnet_net -lrumpnet\
+	    -lrump -lrumpuser	\
 	-Wl,--no-whole-archive
 
 LDADD.webbrowser.sockin+= -Wl,--whole-archive				\
