@@ -56,7 +56,14 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA='
      20140225 2320UTC:
-	src/sys/kern/kern_rndq.c'
+	src/sys/kern/kern_rndq.c;
+     20140303 1404UTC:
+	src/lib/librumpclient/rumpclient.c
+	src/lib/librumpuser/rumpuser_sp.c
+	src/sys/kern/kern_rndsink.c
+	src/sys/rump/net/lib/libnpf
+	src/sys/rump/net/lib/libvirtif'
+
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
