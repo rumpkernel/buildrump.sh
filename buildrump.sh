@@ -391,6 +391,7 @@ MKARZERO=no
 USE_SSP=no
 MKHTML=no
 MKCATPAGES=yes
+RUMP_NPF_TESTING?=no
 EOF
 
 	printoneconfig 'Cmd' "SRCDIR" "${SRCDIR}"
