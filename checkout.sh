@@ -61,9 +61,9 @@ NBSRC_EXTRA='
 	src/lib/librumpclient/rumpclient.c
 	src/lib/librumpuser/rumpuser_sp.c
 	src/sys/kern/kern_rndsink.c
-	src/sys/rump/net/lib/libnpf
 	src/sys/rump/net/lib/libvirtif;
-     20140303 1700UTC:
+     20140303 1910UTC:
+	src/sys/rump/net/lib/libnpf
 	src/sys/rump/librump/rumpkern/vm.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
