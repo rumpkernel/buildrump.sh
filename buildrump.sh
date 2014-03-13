@@ -1102,7 +1102,7 @@ evaltarget ()
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
-	"ppc64")
+	"powerpc"|"ppc64")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
@@ -1116,13 +1116,6 @@ evaltarget ()
 			EXTRA_LDFLAGS='-m64'
 			EXTRA_AFLAGS='-m64'
 		fi
-		;;
-	"powerpc")
-		check64
-		MACHINE="evbppc"
-		MACH_ARCH="powerpc"
-		EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
-		EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
 		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
