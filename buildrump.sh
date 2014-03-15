@@ -1039,6 +1039,13 @@ evaltarget ()
 		TOOLABI="elf"
 		probearm
 		;;
+	"armeb")
+		check64
+		MACHINE="evbarm-eb"
+		MACH_ARCH="armeb"
+		TOOLABI="elf"
+		probearm
+		;;
 	"sparc")
 		if ${THIRTYTWO} ; then
 			MACHINE="sparc"
