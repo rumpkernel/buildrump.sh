@@ -101,7 +101,7 @@ checkoutcvs ()
 		NBSRC_CVSREV="${NBSRC_CVSDATE}"
 		NBSRC_CVSLISTREV="${NBSRC_LISTDATE:-${NBSRC_CVSDATE}}"
 		;;
-	default)
+	*)
 		die 'Invalid parameters to checkoutcvs'
 		;;
 	esac
