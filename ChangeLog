@@ -25,6 +25,7 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
   are needed for successful linking
 + even more Linux syscall compat fixes (via NetBSD)
 + OpenBSD support
++ armeb support
 
 	Snapshot 3.1.2014
 
