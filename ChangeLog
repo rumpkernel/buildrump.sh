@@ -9,7 +9,15 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
-+ update NetBSD timestamp to 20140225 2300UTC
++ update NetBSD timestamp to 20140317 2200UTC
++ compile options affecting rump kernels are now documented in
+  src/sys/rump/README.compileopts. to access, run
+  "./buildrump.sh checkout" first
++ a high-performance version of "curlwp" will be automatically
+  used if supported by the target
++ rump kernels were fixed to work in static binaries with
+  e.g. glibc and musl
++ support for NPF firewall driver has been added
 + many sysctl nodes required by rumprun utilities now available by
   default, including kern.urandom, kern.rawpartition, etc.
 + add rump_wmd(1) (short for Where's My Dependency).  Given a
