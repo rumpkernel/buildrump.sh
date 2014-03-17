@@ -407,6 +407,8 @@ EOF
 
 	if ${KERNONLY}; then
 		appendmkconf Cmd yes RUMPKERN_ONLY
+	else
+		echo 'RUMP_CURLWP?= __thread' >> ${MKCONF}
 	fi
 
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
