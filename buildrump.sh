@@ -462,6 +462,11 @@ AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
+	# temporary fix for CTFMERGE issues on eg FreeBSD
+	cat >> "${MKCONF}" << EOF
+CTFMERGE=:
+EOF
+
 	if ! ${KERNONLY}; then
 		echo >> "${MKCONF}"
 		cat >> "${MKCONF}" << EOF
