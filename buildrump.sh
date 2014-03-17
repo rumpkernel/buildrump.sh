@@ -310,6 +310,10 @@ maketools ()
 	    int ioctl(int fd, int cmd, ...); int main() {return 0;}\n'
 	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
+	# does target support __thread.  if yes, optimize curlwp
+	doesitbuild '__thread int lanka;\n' -c
+	[ $? -eq 0 ] && RUMP_CURLWP=__thread
+
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
 	# to avoid line number conflicts
 	doesitbuild 'int a = __COUNTER__;\n' -c
@@ -407,8 +411,6 @@ EOF
 
 	if ${KERNONLY}; then
 		appendmkconf Cmd yes RUMPKERN_ONLY
-	else
-		echo 'RUMP_CURLWP?= __thread' >> ${MKCONF}
 	fi
 
 	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
@@ -419,6 +421,7 @@ EOF
 	fi
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP'
 	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
