@@ -421,7 +421,7 @@ EOF
 	fi
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP'
+	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP' ?
 	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
