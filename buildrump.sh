@@ -438,7 +438,6 @@ EOF
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'yes' 'HAVE_SUN_LD'
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'sun' 'RUMP_LDSCRIPT'
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
 	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
