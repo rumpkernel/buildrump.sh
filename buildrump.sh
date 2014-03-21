@@ -304,12 +304,13 @@ maketools ()
 	#
 	# Check if the target supports posix_memalign()
 	doesitbuild \
-	    '#include <stdlib.h>\nint main(void){posix_memalign(NULL,0,0);}\n'
+	    '#include <stdlib.h>
+		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
 	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
 
 	doesitbuild \
 	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
-	    int ioctl(int fd, int cmd, ...); int main() {return 0;}\n'
+	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
 	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
 	# does target support __thread.  if yes, optimize curlwp
@@ -1016,12 +1017,12 @@ evaltarget ()
 
 	# step 2: if the user specified 32/64, try to establish if it will work
 	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
-		doesitbuild 'int main() {return 0;}' \
+		doesitbuild 'int main(void) {return 0;}' \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -32, but probe shows it will not work.  Try -H?'
 	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
-		doesitbuild 'int main() {return 0;}' \
+		doesitbuild 'int main(void) {return 0;}' \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 		[ $? -eq 0 ] || ${TITANMODE} || \
 		    die 'Gave -64, but probe shows it will not work.  Try -H?'
