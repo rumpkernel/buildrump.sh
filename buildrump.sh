@@ -197,8 +197,10 @@ doesitbuild ()
 	theprog="${1}"
 	shift
 
-	printf "${theprog}" | ${CC} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
-	    > /dev/null 2>&1
+	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Werror"
+	printf "${theprog}" \
+	    | ${CC} ${warnflags} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
+	      > /dev/null 2>&1
 }
 
 cctestandsetW ()
@@ -321,10 +323,12 @@ maketools ()
 
 	# two or three-arg pthread_setname_np().  or none?
 	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {pthread_setname_np(NULL, NULL, 0);}' -c
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
 	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {pthread_setname_np(NULL, NULL);}' -c
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 
 	# the musl env usually does not contain linux kernel headers
