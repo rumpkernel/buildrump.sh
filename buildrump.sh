@@ -319,6 +319,14 @@ maketools ()
 	doesitbuild 'int a = __COUNTER__;\n' -c
 	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
 
+	# two or three-arg pthread_setname_np().  or none?
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {pthread_setname_np(NULL, NULL, 0);}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {pthread_setname_np(NULL, NULL);}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
+
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
 	# its presence and if its not available, just leave out if_virt
@@ -421,6 +429,7 @@ EOF
 	fi
 	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${PTHREAD_SETNAME_NP}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP' ?
 	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
