@@ -197,7 +197,7 @@ doesitbuild ()
 	theprog="${1}"
 	shift
 
-	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Werror"
+	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
 	    | ${CC} ${warnflags} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
 	      > /dev/null 2>&1
