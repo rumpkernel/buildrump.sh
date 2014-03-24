@@ -299,6 +299,7 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 		printf("cannot init %s (%d)\n", ifname, error);
 		goto out;
 	}
+	rump_netconfig_ifup(ifname);
 	ifaces = iface;
 	if ((error = dhcp_open_socket(iface, ETHERTYPE_IP)) != 0)
 		panic("failed to open socket: %d", error);
