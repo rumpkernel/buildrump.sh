@@ -44,7 +44,7 @@ die(int e, const char *msg)
 }
 
 int
-main()
+main(int argc, char *argv[])
 {
 	struct sockaddr_in sin;
 	char buf[65535];
@@ -52,6 +52,14 @@ main()
 	ssize_t nn;
 	ssize_t off;
 	int s, e;
+#ifndef USE_SOCKIN
+	const char *ifname;
+
+	if (argc > 1)
+		ifname = argv[1];
+	else
+		ifname = "virt0";
+#endif
 
 	hp = gethostbyname(DESTHOST);
 	if (!hp || hp->h_addrtype != AF_INET)
@@ -60,9 +68,9 @@ main()
 	rump_init();
 
 #ifndef USE_SOCKIN
-	if ((e = rump_pub_netconfig_ifcreate("virt0")) != 0)
+	if ((e = rump_pub_netconfig_ifcreate(ifname)) != 0)
 		die(e, "create virt0");
-	if ((e = rump_pub_netconfig_dhcp_ipv4_oneshot("virt0")) != 0)
+	if ((e = rump_pub_netconfig_dhcp_ipv4_oneshot(ifname)) != 0)
 		die(e, "dhcp address");
 #endif
 
