@@ -69,7 +69,7 @@ main(int argc, char *argv[])
 
 #ifndef USE_SOCKIN
 	if ((e = rump_pub_netconfig_ifcreate(ifname)) != 0)
-		die(e, "create virt0");
+		die(e, "create interface");
 	if ((e = rump_pub_netconfig_dhcp_ipv4_oneshot(ifname)) != 0)
 		die(e, "dhcp address");
 #endif
