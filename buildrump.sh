@@ -339,7 +339,7 @@ maketools ()
 	    int main(void) {
 	        struct timespec ts;
 		return clock_gettime(CLOCK_REALTIME, &ts);}'
-	[ $? -eq 0 ] && { ${KERNONLY} || EXTRA_RUMPUSER='-lrt';}
+	[ ! $? -eq 0 ] && { ${KERNONLY} || EXTRA_RUMPUSER='-lrt';}
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
