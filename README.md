@@ -196,6 +196,9 @@ as follows:
     - Linux fuloong 3.11.6-gnu #8 PREEMPT Mon Oct 28 23:28:22 GMT 2013 mips64 ICT Loongson-2 V0.3 FPU V0.1 lemote-fuloong-2f-box GNU/Linux (Gentoo, __mips o32 le__)
     - Linux ubnt 2.6.32.13-UBNT #1 SMP Wed Oct 24 01:08:06 PDT 2012 mips64 GNU/Linux (__mips o32 be__)
 
+- Android
+    - Android 4.2.2 kernel 3.4.5 ARMv7 Processor rev 2 (v7l) (__arm__)
+
 - DragonFly BSD
     - DragonFly  3.2-RELEASE DragonFly v3.2.1.9.g80b03f-RELEASE #2: Wed Oct 31 20:17:57 PDT 2012     root@pkgbox32.dragonflybsd.org:/usr/obj/build/home/justin/src/sys/GENERIC  __i386__
 
