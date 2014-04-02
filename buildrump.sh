@@ -332,6 +332,15 @@ maketools ()
 		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 
+	# Do we need -lrt for time related stuff?
+	# If this builds ok we do not. Old glibc and Solaris do, but
+	# newer glibc and most other systems do not need or have librt.
+	doesitbuild '#include <time.h>\n
+	    int main(void) {
+	        struct timespec ts;
+		return clock_gettime(CLOCK_REALTIME, &ts);}' -c
+	[ $? -eq 0 ] && (${KERNONLY} || EXTRA_RUMPUSER='-lrt')
+
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
 	# its presence and if its not available, just leave out if_virt
@@ -973,7 +982,6 @@ evaltarget ()
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		cppdefines _BIG_ENDIAN && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
-		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	"netbsd")
@@ -982,7 +990,6 @@ evaltarget ()
 	"sunos")
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
-		${KERNONLY} || EXTRA_RUMPUSER='-lrt'
 
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
