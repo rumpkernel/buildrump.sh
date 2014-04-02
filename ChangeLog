@@ -7,6 +7,13 @@ are not described.  For a more complete list of NetBSD changes, see:
 http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 
+	Snapshot 2.4.2014
+
++ update NetBSD timestamp to 20140402 2000UTC
++ add Android support
++ add support for Linux eventfd to deliver signals
++ use sysconf to get processor count on all platforms
+
 	Snapshot 17.3.2014
 
 + update NetBSD timestamp to 20140317 2200UTC
