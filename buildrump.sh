@@ -314,7 +314,7 @@ maketools ()
 	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
 	# does target support __thread.  if yes, optimize curlwp
-	doesitbuild '__thread int lanka;\n' -c
+	doesitbuild '__thread int lanka; int main(void) {return 0;}\n'
 	[ $? -eq 0 ] && RUMP_CURLWP=__thread
 
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
