@@ -199,7 +199,7 @@ doesitbuild ()
 
 	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
-	    | ${CC} ${warnflags} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
+	    | ${CC} ${warnflags} ${BUILDRUMP_LDFLAGS} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
 	      > /dev/null 2>&1
 }
 
@@ -314,7 +314,7 @@ maketools ()
 	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
 	# does target support __thread.  if yes, optimize curlwp
-	doesitbuild '__thread int lanka; int main(void) {return 0;}\n'
+	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
 	[ $? -eq 0 ] && RUMP_CURLWP=__thread
 
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
