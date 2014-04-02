@@ -54,7 +54,14 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA=''
+NBSRC_EXTRA='
+    20140402 2000UTC:
+	src/lib/librumpuser
+	src/lib/librumpclient
+	src/lib/librumphijack
+	src/sys/rump/include/rump/rump.h
+	src/sys/rump/net/lib/libvirtif
+	src/usr.bin/rump_allserver'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
