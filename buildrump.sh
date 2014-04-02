@@ -161,11 +161,11 @@ chkcrt ()
 probeld ()
 {
 
-	if ${CC} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
+	if ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1 | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
-	elif ${CC} -Wl,--version 2>&1 | grep -q 'GNU gold' ; then
+	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1 | grep -q 'GNU gold' ; then
 		LD_FLAVOR=GNU
-	elif ${CC} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
+	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1 | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 	else
 		die 'GNU or Solaris ld required'
