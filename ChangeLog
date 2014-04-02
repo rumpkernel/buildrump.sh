@@ -9,10 +9,13 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	Snapshot 2.4.2014
 
-+ update NetBSD timestamp to 20140402 2000UTC
 + add Android support
-+ add support for Linux eventfd to deliver signals
++ on Linux, remote clients can be interrupted with a signal while they
+  are blocking on a rump kernel syscall (previously only SIGSTOP/SIGKILL
+  were possible)
 + use sysconf to get processor count on all platforms
++ functionality provided by the rumpkern_time component is now in
+  librump (i.e. do not use -lrumpkern_time)
 
 	Snapshot 17.3.2014
 
