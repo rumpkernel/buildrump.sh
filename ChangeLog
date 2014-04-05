@@ -7,6 +7,13 @@ are not described.  For a more complete list of NetBSD changes, see:
 http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 
+	[changes not yet part of a snapshot]
+
++ fix a critical bug in librumpclient (caused stdin to be closed)
++ actually include the rumpkern_time changes that were supposed to
+  be included in the previous snapshot
++ linux syscall compat for time-related syscalls
+
 	Snapshot 2.4.2014
 
 + add Android support
