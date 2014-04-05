@@ -724,6 +724,9 @@ evaltools ()
 	*-apple-darwin*)
 		TARGET=osx
 		;;
+	*-ibm-aix*)
+		TARGET=aix
+		;;
 	*)
 		TARGET=unknown
 		;;
@@ -1004,6 +1007,9 @@ evaltarget ()
 		;;
 	"cygwin")
 		MKPIC=no
+		target_supported=false
+		;;
+	"aix")
 		target_supported=false
 		;;
 	"osx")
