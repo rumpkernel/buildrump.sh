@@ -57,11 +57,19 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 NBSRC_EXTRA='
     20140402 2000UTC:
 	src/lib/librumpuser
-	src/lib/librumpclient
 	src/lib/librumphijack
 	src/sys/rump/include/rump/rump.h
 	src/sys/rump/net/lib/libvirtif
-	src/usr.bin/rump_allserver'
+	src/usr.bin/rump_allserver;
+    20140404 2000UTC:
+	src/lib/librumpclient
+	src/sys/rump/kern/Makefile.rumpkerncomp
+	src/sys/rump/kern/lib/Makefile
+	src/sys/rump/kern/lib/libtime
+	src/sys/rump/librump/rumpkern/Makefile.rumpkern
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/compat/common
+	src/sys/rump/kern/lib/libsys_linux'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
