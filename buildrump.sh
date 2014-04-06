@@ -1076,7 +1076,7 @@ evaltarget ()
 		MACH_ARCH="i486"
 		TOOLABI="elf"
 		;;
-	"arm"|"armv6l"|"armv7l")
+	"arm"|"arm*l")
 		check64
 		MACHINE="evbarm"
 		MACH_ARCH="arm"
