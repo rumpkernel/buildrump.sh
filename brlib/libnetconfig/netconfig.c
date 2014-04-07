@@ -48,6 +48,18 @@ static struct socket *rtso;
 
 #define CHECKDOMAIN(dom) if (!(dom)) return EAFNOSUPPORT
 
+static int
+wrapifioctl(struct socket *so, u_long cmd, void *data, struct lwp *l)
+{
+	int rv;
+
+	KERNEL_LOCK(1, NULL);
+	rv = ifioctl(so, cmd, data, l);
+	KERNEL_UNLOCK_ONE(NULL);
+
+	return rv;
+}
+
 int
 rump_netconfig_ifcreate(const char *ifname)
 {
@@ -55,7 +67,7 @@ rump_netconfig_ifcreate(const char *ifname)
 
 	memset(&ifr, 0, sizeof(ifr));
 	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-	return ifioctl(in4so, SIOCIFCREATE, &ifr, curlwp);
+	return wrapifioctl(in4so, SIOCIFCREATE, &ifr, curlwp);
 }
 
 static void
@@ -80,11 +92,11 @@ chflag(const char *ifname, void (*edflag)(short *))
 
 	memset(&ifr, 0, sizeof(ifr));
 	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-	if ((rv = ifioctl(in4so, SIOCGIFFLAGS, &ifr, curlwp)) != 0)
+	if ((rv = wrapifioctl(in4so, SIOCGIFFLAGS, &ifr, curlwp)) != 0)
 		return rv;
 	edflag(&ifr.ifr_flags);
 
-	return ifioctl(in4so, SIOCSIFFLAGS, &ifr, curlwp);
+	return wrapifioctl(in4so, SIOCSIFFLAGS, &ifr, curlwp);
 }
 
 int
@@ -112,7 +124,7 @@ rump_netconfig_ifsetlinkstr(const char *ifname, const char *linkstr)
 	ifd.ifd_data = __UNCONST(linkstr);
 	ifd.ifd_len = strlen(linkstr)+1;
 
-	return ifioctl(in4so, SIOCSLINKSTR, &ifd, curlwp);
+	return wrapifioctl(in4so, SIOCSLINKSTR, &ifd, curlwp);
 }
 
 int
@@ -122,7 +134,7 @@ rump_netconfig_ifdestroy(const char *ifname)
 
 	memset(&ifr, 0, sizeof(ifr));
 	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-	return ifioctl(in4so, SIOCIFDESTROY, &ifr, curlwp);
+	return wrapifioctl(in4so, SIOCIFDESTROY, &ifr, curlwp);
 }
 
 int
@@ -155,7 +167,7 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	sin->sin_len = sizeof(*sin);
 	sin->sin_addr.s_addr = ~m_addr;
 
-	rv = ifioctl(in4so, SIOCAIFADDR, &ia, curlwp);
+	rv = wrapifioctl(in4so, SIOCAIFADDR, &ia, curlwp);
 	/*
 	 * small pause so that we can assume interface is usable when
 	 * we return (ARPs have trickled through, etc.)
@@ -195,7 +207,7 @@ rump_netconfig_ipv6_ifaddr(const char *ifname, const char *addr, int prefixlen)
 	memset(&sin6->sin6_addr, 0, sizeof(sin6->sin6_addr));
 	memset(&sin6->sin6_addr, 0xff, prefixlen / 8);
 
-	rv = ifioctl(in6so, SIOCAIFADDR_IN6, &ia, curlwp);
+	rv = wrapifioctl(in6so, SIOCAIFADDR_IN6, &ia, curlwp);
 	/*
 	 * small pause so that we can assume interface is usable when
 	 * we return (ARPs have trickled through, etc.)
