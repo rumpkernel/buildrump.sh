@@ -8,7 +8,9 @@ apart from a working toolchain.  When invoked without parameters,
 buildrump.sh will download the necessary source code, build the kernel
 drivers, and run a number of tests:
 
-- `./buildrump.sh`
+```
+./buildrump.sh
+```
 
 See [the wiki](http://wiki.rumpkernel.org/Repo:-buildrump.sh) for more
 information and further instructions.
