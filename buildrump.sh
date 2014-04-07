@@ -727,6 +727,9 @@ evaltools ()
 	*-ibm-aix*)
 		TARGET=aix
 		;;
+	*-none-*)
+		TARGET=none
+		;;
 	*)
 		TARGET=unknown
 		;;
@@ -1004,6 +1007,10 @@ evaltarget ()
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		MKSTATICLIB=no
+		;;
+	"none")
+		${KERNONLY} || die "Must use -k (kernel only) with no OS"
+		MKPIC=no
 		;;
 	"cygwin")
 		MKPIC=no
