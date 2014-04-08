@@ -388,7 +388,7 @@ maketools ()
 			printf '&& continue\n\tnewargs="${newargs} $x"\n'
 			printf 'done\nexec %s ${newargs}\n' ${tool}
 		else
-			printf 'exec %s $*\n' ${tool}
+			printf 'exec %s "$@"\n' ${tool}
 		fi
 		exec 1>&3 3>&-
 		chmod 755 ${tname}
