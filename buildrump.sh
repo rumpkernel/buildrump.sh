@@ -414,7 +414,11 @@ maketools ()
 	> ${mkconf_final}
 
 	cat > "${MKCONF}" << EOF
+.ifdef BUILDRUMP_SYSROOT
+BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
+.else
 BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
+.endif
 CPPFLAGS+=-I${BRTOOLDIR}/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
