@@ -414,7 +414,7 @@ maketools ()
 	> ${mkconf_final}
 
 	cat > "${MKCONF}" << EOF
-.if ${BUILDRUMP_SYSROOT:Uno} == "yes"
+.if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
 BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
