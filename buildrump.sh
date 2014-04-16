@@ -998,6 +998,7 @@ evaltarget ()
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		cppdefines _BIG_ENDIAN && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
+		cppdefines _LITTLE_ENDIAN && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
@@ -1164,7 +1165,7 @@ evaltarget ()
 		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
-	"powerpc"|"ppc64")
+	"powerpc"|"ppc64"|"powerpc64le")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
