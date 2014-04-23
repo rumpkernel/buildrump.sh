@@ -166,7 +166,7 @@ probeld ()
 		LD_FLAVOR=GNU
 	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'GNU gold' ; then
-		LD_FLAVOR=GNU
+		LD_FLAVOR=gold
 	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
@@ -288,17 +288,14 @@ maketools ()
 	#
 	# Check if the linker supports all the features of the rump kernel
 	# component ldscript used for linking shared libraries.
-	# If not, build only static rump kernel components.
-	if [ ${LD_FLAVOR} = 'GNU' ]; then
+	if [ ! ${LD_FLAVOR} = 'sun' ]; then
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
 		if [ $? -ne 0 ]; then
-			# We know that older versions of NetBSD
-			# work without an ldscript
-			if [ "${TARGET}" = netbsd ]; then
+			if [ "${MKPIC}" = "no" ]; then
 				LDSCRIPT='-V RUMP_LDSCRIPT=no'
 			else
-				MKPIC=no
+				LDSCRIPT='-V RUMP_LDSCRIPT=ctor'
 			fi
 		fi
 		rm -f ldscript.test
