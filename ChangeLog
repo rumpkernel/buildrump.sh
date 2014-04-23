@@ -9,6 +9,10 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ [none]
+
+	Snapshot 5.4.2014
+
 + fix a critical bug in librumpclient (caused stdin to be closed)
 + actually include the rumpkern_time changes that were supposed to
   be included in the previous snapshot
