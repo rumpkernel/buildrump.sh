@@ -69,7 +69,17 @@ NBSRC_EXTRA='
 	src/sys/rump/librump/rumpkern/Makefile.rumpkern
 	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/compat/common
-	src/sys/rump/kern/lib/libsys_linux'
+	src/sys/rump/kern/lib/libsys_linux;
+    20140423 2333UTC:
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/rump/librump/rumpkern/rump_private.h
+	src/sys/rump/librump/rumpkern/threads.c
+	src/sys/rump/Makefile.rump
+	src/sys/rump/ldscript.rump
+	src/sys/rump/README.compileopts
+	src/sys/kern/uipc_domain.c
+	src/sys/sys/module.h
+	src/sys/sys/socket.h'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
