@@ -332,6 +332,10 @@ maketools ()
 		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 
+	# linker supports --warn-shared-textrel
+	doesitbuild 'int main() {return 0;}' -Wl,--warn-shared-textrel
+	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
+
 	# Do we need -lrt for time related stuff?
 	# Old glibc and Solaris need it, but newer glibc and most
 	# other systems do not need or have librt.
@@ -384,8 +388,7 @@ maketools ()
 		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
 			printf 'for x in $*; do\n'
 			printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
-			printf '\t[ "$x" = "-Wl,--warn-shared-textrel" ] '
-			printf '&& continue\n\tnewargs="${newargs} $x"\n'
+			printf '\tnewargs="${newargs} $x"\n'
 			printf 'done\nexec %s ${newargs}\n' ${tool}
 		else
 			printf 'exec %s "$@"\n' ${tool}
