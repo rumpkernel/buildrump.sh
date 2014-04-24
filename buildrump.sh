@@ -293,12 +293,14 @@ maketools ()
 		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
 		if [ $? -ne 0 ]; then
 			if [ "${MKPIC}" = "no" ]; then
-				LDSCRIPT='-V RUMP_LDSCRIPT=no'
+				LDSCRIPT='no'
 			else
-				LDSCRIPT='-V RUMP_LDSCRIPT=ctor'
+				LDSCRIPT='ctor'
 			fi
 		fi
 		rm -f ldscript.test
+	else
+		LDSCRIPT='sun'
 	fi
 
 	#
@@ -475,7 +477,7 @@ EOF
 		_tmpvar="${_tmpvar} ${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'sun' 'RUMP_LDSCRIPT'
+	appendmkconf 'Probe' "${LDSCRIPT}" "RUMP_LDSCRIPT"
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
 	appendmkconf 'Probe' "${SHLIB_WARNTEXTREL}" "SHLIB_WARNTEXTREL"
 	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
@@ -563,7 +565,7 @@ makemake ()
 	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
-	    ${LLVM} ${BEQUIET} ${LDSCRIPT} \
+	    ${LLVM} ${BEQUIET} \
 	    -E -Z S \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
