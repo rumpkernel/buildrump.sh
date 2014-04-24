@@ -477,6 +477,7 @@ EOF
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'sun' 'RUMP_LDSCRIPT'
 	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
+	appendmkconf 'Probe' "${SHLIB_WARNTEXTREL}" "SHLIB_WARNTEXTREL"
 	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
 	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
 	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
