@@ -333,7 +333,7 @@ maketools ()
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 
 	# linker supports --warn-shared-textrel
-	doesitbuild 'int main() {return 0;}' -Wl,--warn-shared-textrel
+	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
 	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
 
 	# Do we need -lrt for time related stuff?
