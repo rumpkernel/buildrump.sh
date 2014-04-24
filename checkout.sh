@@ -45,7 +45,7 @@
 # available via git.
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
-NBSRC_CVSDATE="20140317 2200UTC"
+NBSRC_CVSDATE="20140424 1200UTC"
 NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
@@ -54,34 +54,7 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='
-    20140402 2000UTC:
-	src/lib/librumpuser
-	src/lib/librumphijack
-	src/sys/rump/include/rump/rump.h
-	src/sys/rump/net/lib/libvirtif
-	src/usr.bin/rump_allserver;
-    20140404 2000UTC:
-	src/lib/librumpclient
-	src/sys/rump/kern/Makefile.rumpkerncomp
-	src/sys/rump/kern/lib/Makefile
-	src/sys/rump/kern/lib/libtime
-	src/sys/rump/librump/rumpkern/Makefile.rumpkern
-	src/sys/rump/librump/rumpkern/rump.c
-	src/sys/compat/common
-	src/sys/rump/kern/lib/libsys_linux;
-    20140423 2333UTC:
-	src/sys/rump/librump/rumpkern/rump.c
-	src/sys/rump/librump/rumpkern/rump_private.h
-	src/sys/rump/librump/rumpkern/threads.c
-	src/sys/rump/Makefile.rump
-	src/sys/rump/ldscript.rump
-	src/sys/rump/README.compileopts
-	src/sys/kern/uipc_domain.c
-	src/sys/sys/module.h
-	src/sys/sys/socket.h;
-    20140424 0015UTC:
-	src/share/mk/bsd.lib.mk'
+NBSRC_EXTRA=''
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
