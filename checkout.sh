@@ -99,6 +99,21 @@ die ()
 checkoutcvs ()
 {
 
+	# checkout or export
+	case $1 in
+	checkout)
+		op=checkout
+		prune=-P
+		;;
+	export)
+		op=export
+		prune=''
+		;;
+	*)
+		die invalid cvs style $1
+	esac
+	shift
+
 	case $1 in
 	-r|-D)
 		NBSRC_CVSPARAM=$1
@@ -156,7 +171,7 @@ checkoutcvs ()
 	echo ">> Fetching the necessary subset of NetBSD source tree to:"
 	echo "   "`pwd -P`
 	echo '>> This will take a few minutes and requires ~200MB of disk space'
-	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} co -P \
+	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} ${op} ${prune} \
 	    ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
 	      || die checkout failed
 
@@ -167,7 +182,9 @@ checkoutcvs ()
 		unset IFS
 		date=${1}
 		dirs=${2}
-		${CVS} ${NBSRC_CVSFLAGS} co -P -D "${date}" ${dirs} || die co2
+		rm -rf ${dirs}
+		${CVS} ${NBSRC_CVSFLAGS} ${op} ${prune} -D "${date}" ${dirs} \
+		    || die subset updates failed
 	done
 
 	# One silly workaround for case-insensitive file systems and cvs.
@@ -225,7 +242,7 @@ githubdate ()
 
 	# checkoutcvs does cd to SRCDIR
 	curdir="$(pwd)"
-	checkoutcvs
+	checkoutcvs export
 
 	echo '>> adding files to the "netbsd-cvs" branch'
 	${GIT} add -A
@@ -319,7 +336,7 @@ SRCDIR=${2}
 case "${1}" in
 cvs)
 	shift ; shift
-	checkoutcvs $*
+	checkoutcvs checkout $*
 	echo '>> checkout done'
 	;;
 git)
