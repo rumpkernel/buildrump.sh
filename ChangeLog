@@ -9,7 +9,8 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
-+ [none]
++ enable support for shared libs with the GNU gold linker and on
+  FreeBSD and OpenBSD
 
 	Snapshot 5.4.2014
 
