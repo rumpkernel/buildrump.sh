@@ -9,6 +9,8 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ update NetBSD timestamp to 20140424 1200UTC
++ added support for aio syscalls (via NetBSD)
 + enable support for shared libs with the GNU gold linker and on
   FreeBSD and OpenBSD
 
