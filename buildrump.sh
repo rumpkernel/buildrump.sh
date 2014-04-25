@@ -273,9 +273,6 @@ maketools ()
 	fi
 
 	cd ${OBJDIR}
-	cctestandsetW 'no-unused-but-set-variable'
-	cctestandsetW 'no-unused-local-typedefs'
-	cctestandsetW 'no-maybe-uninitialized'
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
 	# uses the different flavor of size_t (int vs. long) than what
