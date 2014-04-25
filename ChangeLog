@@ -14,6 +14,12 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 + enable support for shared libs with the GNU gold linker and on
   FreeBSD and OpenBSD
 
+	[changes that will happen when the timestamp is bumped]
+
++ librumpdev_scsitest is no longer installed (it was a test library
+  for the SCSI stack, and is not required for normal operation.  The
+  SCSI protocol stack is still offered as librumpdev_scsipi)
+
 	Snapshot 5.4.2014
 
 + fix a critical bug in librumpclient (caused stdin to be closed)
