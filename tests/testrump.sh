@@ -103,8 +103,9 @@ dodynamic ()
 		printf 'component load failed, skipping test\n'
 	elif [ ${rv} -ne 0 ]; then
 		die dynamic test failed
+	else
+		echo done
 	fi
-	echo done
 }
 
 ALLTESTS="init fstest fstest_img simpleclient
