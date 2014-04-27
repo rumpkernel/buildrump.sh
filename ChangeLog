@@ -9,13 +9,6 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
-+ update NetBSD timestamp to 20140424 1200UTC
-+ added support for aio syscalls (via NetBSD)
-+ enable support for shared libs with the GNU gold linker and on
-  FreeBSD and OpenBSD
-
-	[changes that will happen when the timestamp is bumped]
-
 + librumpdev_scsitest is no longer installed (it was a test library
   for the SCSI stack, and is not required for normal operation.  The
   SCSI protocol stack is still offered as librumpdev_scsipi)
@@ -23,6 +16,10 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
   it is now possible to dlopen() components even with the
   Solaris ld.so weak symbol semantics (affected platforms include
   Solaris, musl, and glibc with LD_DYNAMIC_WEAK unset)
++ update NetBSD timestamp to 20140424 1200UTC
++ added support for aio syscalls (via NetBSD)
++ enable support for shared libs with the GNU gold linker and on
+  FreeBSD and OpenBSD
 
 	Snapshot 5.4.2014
 
