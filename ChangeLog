@@ -19,6 +19,10 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 + librumpdev_scsitest is no longer installed (it was a test library
   for the SCSI stack, and is not required for normal operation.  The
   SCSI protocol stack is still offered as librumpdev_scsipi)
++ most weak symbols have been eliminated from rump kernels, and
+  it is now possible to dlopen() components even with the
+  Solaris ld.so weak symbol semantics (affected platforms include
+  Solaris, musl, and glibc with LD_DYNAMIC_WEAK unset)
 
 	Snapshot 5.4.2014
 
