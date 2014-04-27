@@ -93,8 +93,23 @@ donettest_routed6 ()
 	echo done
 }
 
+dodynamic ()
+{
+
+	printf 'Dynamic loading of components ... '
+	./dynamic
+	rv=$?
+	if [ ${rv} -eq 37 ]; then
+		printf 'component load failed, skipping test\n'
+	elif [ ${rv} -ne 0 ]; then
+		die dynamic test failed
+	fi
+	echo done
+}
+
 ALLTESTS="init fstest fstest_img simpleclient
-	nettest_simple nettest_simple6 nettest_routed nettest_routed6"
+	nettest_simple nettest_simple6 nettest_routed nettest_routed6
+	dynamic"
 
 alltests ()
 {
