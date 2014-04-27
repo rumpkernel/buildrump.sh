@@ -3,8 +3,14 @@ language: c
 compiler:
   - gcc
   - clang
+  - musl-gcc
 
-before_script: ./buildrump.sh checkout
+before_script:
+  - sudo add-apt-repository ppa:bortis/ppa -y
+  - sudo apt-get update -y
+  - sudo apt-get install musl -y
+  - sudo apt-get install musl-dev -y
+  - ./buildrump.sh checkout
 
 env:
   - LIBTYPE='MKPIC=no' DEBUG=''
