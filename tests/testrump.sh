@@ -97,7 +97,7 @@ dodynamic ()
 {
 
 	printf 'Dynamic loading of components ... '
-	LD_DYNAMIC_WEAK=1 ./dynamic
+	./dynamic
 	rv=$?
 	if [ ${rv} -eq 37 ]; then
 		printf 'component load failed, skipping test\n'
