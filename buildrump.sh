@@ -950,7 +950,10 @@ probearm ()
 {
 
 	# check for big endian
-	if cppdefines __ARM_BIG_ENDIAN; then
+	if cppdefines __ARMEL__; then
+		MACHINE="evbarm"
+		MACH_ARCH="arm"
+	else
 		MACHINE="evbarm-eb"
 		MACH_ARCH="armeb"
 	fi
@@ -1100,8 +1103,6 @@ evaltarget ()
 		;;
 	arm*)
 		check64
-		MACHINE="evbarm"
-		MACH_ARCH="arm"
 		TOOLABI="elf"
 		probearm
 		;;
