@@ -949,6 +949,12 @@ check64 ()
 probearm ()
 {
 
+	# check for big endian
+	if cppdefines __ARM_BIG_ENDIAN; then
+		MACHINE="evbarm-eb"
+		MACH_ARCH="armeb"
+	fi
+
 	# If target compiler produces ARMv6 by default, but does not
         # support ldrexd instruction, then force armv6k architecture
 	# due to NetBSD bug port-arm/47401.  This was originally a
@@ -1092,17 +1098,10 @@ evaltarget ()
 		MACH_ARCH="i486"
 		TOOLABI="elf"
 		;;
-	"arm"|arm*l)
+	arm*)
 		check64
 		MACHINE="evbarm"
 		MACH_ARCH="arm"
-		TOOLABI="elf"
-		probearm
-		;;
-	"armeb")
-		check64
-		MACHINE="evbarm-eb"
-		MACH_ARCH="armeb"
 		TOOLABI="elf"
 		probearm
 		;;
