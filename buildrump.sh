@@ -1121,7 +1121,7 @@ evaltarget ()
 			EXTRA_AFLAGS='-m64'
 		fi
 		;;
-	"mips64el")
+	"mipsel"|"mips64el")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
@@ -1137,7 +1137,7 @@ evaltarget ()
 		fi
 		probemips
 		;;
-	"mips64"|"mips64eb")
+	"mips"|"mipseb"|"mips64"|"mips64eb")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
@@ -1151,22 +1151,6 @@ evaltarget ()
 			EXTRA_LDFLAGS='-D__mips_n64 -mabi=64'
 			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
 		fi
-		probemips
-		;;
-	"mipsel")
-		check64
-		MACHINE="evbmips-el"
-		MACH_ARCH="mipsel"
-		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
-		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
-		probemips
-		;;
-	"mips"|"mipseb")
-		check64
-		MACHINE="evbmips-eb"
-		MACH_ARCH="mipseb"
-		EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
-		EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32'
 		probemips
 		;;
 	"powerpc"|"ppc64"|"powerpc64le")
