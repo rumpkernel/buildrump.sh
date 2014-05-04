@@ -949,11 +949,12 @@ check64 ()
 probearm ()
 {
 
-	# If target compiler produces ARMv6 by default, force armv6k
+	# If target compiler produces ARMv6 by default, but does not
+        # support ldrexd instruction, then force armv6k architecture
 	# due to NetBSD bug port-arm/47401.  This was originally a
-	# hack for Raspberry Pi support, but maybe we should attempt
-	# to remove it?
-	if cppdefines __ARM_ARCH_6__; then
+	# hack for Raspberry Pi support, but maybe we should remove it?
+	if cppdefines __ARM_ARCH_6__ && \
+	    cppdefines __ARM_FEATURE_LDREX -ne 15; then
 		EXTRA_CFLAGS='-march=armv6k'
 		EXTRA_AFLAGS='-march=armv6k'
 	fi
