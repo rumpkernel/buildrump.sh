@@ -993,11 +993,11 @@ probemips ()
 	fi
 
 	# NetBSD needs extra non default defines for MIPS ABI
-	if cppdefines '_MIPS_SIM' -eq '_ABIO32'; then
+	if [ cppdefines '_MIPS_SIM' = '_ABIO32' ]; then
 		MIPS_EXTRA='-D__mips_o32'
-	elif cppdefines '_MIPS_SIM' -eq '_ABIN32'; then
+	elif [ cppdefines '_MIPS_SIM' = '_ABIN32' ]; then
 		MIPS_EXTRA='-D__mips_n32'
-	elif cppdefines '_MIPS_SIM' -eq '_ABI64'; then
+	elif [ cppdefines '_MIPS_SIM' = '_ABI64' ]; then
 		MIPS_EXTRA='-D__mips_n64'
 	else
 		die 'Unsupported MIPS ABI'
