@@ -1076,19 +1076,8 @@ evaltarget ()
 		ccdefault=32
 	fi
 
-	# step 2: if the user specified 32/64, try to establish if it will work
-	if ${THIRTYTWO} && [ "${ccdefault}" -ne 32 ] ; then
-		doesitbuild 'int main(void) {return 0;}' \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || ${TITANMODE} || \
-		    die 'Gave -32, but probe shows it will not work.  Try -H?'
-	elif ${SIXTYFOUR} && [ "${ccdefault}" -ne 64 ] ; then
-		doesitbuild 'int main(void) {return 0;}' \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || ${TITANMODE} || \
-		    die 'Gave -64, but probe shows it will not work.  Try -H?'
-	else
-		# not specified.  use compiler default
+	# step 2: if the user did not specify 32/64, use compiler default
+	if ! ${THIRTYTWO} && ! ${SIXTYFOUR}; then
 		if [ "${ccdefault}" -eq 64 ]; then
 			SIXTYFOUR=true
 		else
@@ -1186,6 +1175,11 @@ evaltarget ()
 		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
+
+	doesitbuild 'int main(void) {return 0;}' \
+	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
+	[ $? -eq 0 ] || ${TITANMODE} || \
+	    die 'Probe cannot build a binary, incorrect -32/-64 setting?'
 }
 
 # create the makefiles used for building
