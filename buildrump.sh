@@ -950,7 +950,7 @@ probearm ()
 {
 
 	# check for big endian
-	if cppdefines __ARMEL__; then
+	if cppdefines '__ARMEL__'; then
 		MACHINE="evbarm"
 		MACH_ARCH="arm"
 	else
@@ -986,6 +986,7 @@ probearm ()
 # MIPS requires a few extra checks
 probemips ()
 {
+
 	# NetBSD/evbmips is softfloat by default but we can detect if this is correct
 	if cppdefines '__mips_hard_float'; then
 		MKSOFTFLOAT=no
