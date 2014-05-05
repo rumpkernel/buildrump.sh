@@ -990,21 +990,6 @@ probemips ()
 	if cppdefines '__mips_hard_float'; then
 		MKSOFTFLOAT=no
 	fi
-
-	# NetBSD needs extra non default defines for MIPS ABI
-	if cppdefines '_ABIO32'; then
-		MIPS_EXTRA='-D__mips_o32'
-	elif cppdefines '_ABIN32'; then
-		MIPS_EXTRA='-D__mips_n32'
-	elif cppdefines '_ABI64'; then
-		MIPS_EXTRA='-D__mips_n64'
-	else
-		die 'Unsupported MIPS ABI'
-	fi
-
-	EXTRA_CFLAGS="${EXTRA_CFLAGS} ${MIPS_EXTRA}"
-	EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${MIPS_EXTRA}"
-	EXTRA_AFLAGS="${EXTRA_AFLAGS} ${MIPS_EXTRA}"
 }
 
 evaltarget ()
@@ -1129,15 +1114,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -mabi=32'
+			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 			EXTRA_LDFLAGS='-mabi=32'
-			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -mabi=32'
+			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
-			EXTRA_CFLAGS='-fPIC -mabi=64'
+			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
 			EXTRA_LDFLAGS='-mabi=64'
-			EXTRA_AFLAGS='-fPIC -mabi=64'
+			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
 		fi
 		probemips
 		;;
@@ -1145,15 +1130,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -mabi=32'
+			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 			EXTRA_LDFLAGS='-mabi=32'
-			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -mabi=32'
+			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
-			EXTRA_CFLAGS='-fPIC -mabi=64'
+			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
 			EXTRA_LDFLAGS='-mabi=64'
-			EXTRA_AFLAGS='-fPIC -mabi=64'
+			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
 		fi
 		probemips
 		;;
