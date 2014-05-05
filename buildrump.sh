@@ -1176,7 +1176,7 @@ evaltarget ()
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
-	doesitbuild 'int main(void) {return 0;}' \
+	doesitbuild 'int main(void) {return 0;}\n' \
 	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 	[ $? -eq 0 ] || ${TITANMODE} || \
 	    die 'Probe cannot build a binary, incorrect -32/-64 setting?'
