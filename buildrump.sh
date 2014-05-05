@@ -181,7 +181,7 @@ cppdefines ()
 
 	[ -z "${BUILDRUMP_CPPCACHE}" ] \
 	   && BUILDRUMP_CPPCACHE=$(${CC} ${BUILDRUMP_CPPFLAGS} \
-		-E -dM - < /dev/null)
+		${BUILDRUMP_CFLAGS} -E -dM - < /dev/null)
 	var=${1}
 	(
 	    IFS=' '
