@@ -963,8 +963,8 @@ probearm ()
 	# due to NetBSD bug port-arm/47401.  This was originally a
 	# hack for Raspberry Pi support, but maybe we should remove it?
 	if cppdefines __ARM_ARCH_6__; then
-		EXTRA_CFLAGS='-march=armv6k'
-		EXTRA_AFLAGS='-march=armv6k'
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv6k"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -march=armv6k"
 	fi
 
 	# NetBSD/evbarm is softfloat by default, but force the NetBSD
@@ -977,8 +977,8 @@ probearm ()
 
 	# A thumb build requires thumb interwork as parts will be built with arm
 	if cppdefines '__THUMBE[BL]__'; then
-		EXTRA_CFLAGS='-mthumb-interwork'
-		EXTRA_AFLAGS='-mthumb-interwork'
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -mthumb-interwork"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -mthumb-interwork"
 	fi
 }
 
