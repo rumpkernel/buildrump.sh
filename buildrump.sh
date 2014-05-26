@@ -1017,6 +1017,7 @@ probemips ()
 	elif cppdefines '_ABIN32'; then
 		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n32"
 		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n32"
+		${TITANMODE} || die MIPS n32 ABI not yet working, use -mabi=32
 	elif cppdefines '_ABI64'; then
 		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64"
 		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64"
