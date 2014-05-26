@@ -6,10 +6,11 @@ Note that most improvements due to the bumping of the NetBSD timestamp
 are not described.  For a more complete list of NetBSD changes, see:
 http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
-
 	[changes not yet part of a snapshot]
 
-+ update NetBSD timestamp to 20140424 1200UTC
+	Snapshot 26.5.2014
+
++ update NetBSD timestamp to 20140526 1100UTC
 + most weak symbols have been eliminated from rump kernels, and
   it is now possible to dlopen() components even with the
   Solaris ld.so weak symbol semantics (fixed platforms include
