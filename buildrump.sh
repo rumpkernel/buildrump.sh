@@ -70,6 +70,7 @@ helpme ()
 	echo
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
+	printf "\t-F: specify flags: eg -F CFLAGS=...\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
@@ -161,13 +162,13 @@ chkcrt ()
 probeld ()
 {
 
-	if ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1	\
+	if ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
-	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1	\
+	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'GNU gold' ; then
 		LD_FLAVOR=gold
-	elif ${CC} ${BUILDRUMP_LDFLAGS} -Wl,--version 2>&1	\
+	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 	else
@@ -180,8 +181,7 @@ cppdefines ()
 {
 
 	[ -z "${BUILDRUMP_CPPCACHE}" ] \
-	   && BUILDRUMP_CPPCACHE=$(${CC} ${BUILDRUMP_CPPFLAGS} \
-		${BUILDRUMP_CFLAGS} -E -dM - < /dev/null)
+	   && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS} -E -dM - < /dev/null)
 	var=${1}
 	(
 	    IFS=' '
@@ -202,7 +202,7 @@ doesitbuild ()
 
 	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
-	    | ${CC} ${warnflags} ${BUILDRUMP_LDFLAGS} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
+	    | ${CC} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
 	      > /dev/null 2>&1
 }
 
@@ -766,7 +766,7 @@ parseargs ()
 	SRCDIR=./src
 	JNUM=4
 
-	while getopts '3:6:d:DhHj:kNo:qrs:T:V:' opt; do
+	while getopts '3:6:d:DhHj:kNo:qrs:T:V:F:' opt; do
 		case "$opt" in
 		3)
 			[ ${OPTARG} != '2' ] \
@@ -828,6 +828,27 @@ parseargs ()
 			;;
 		V)
 			appendvar BUILDSH_VARGS -V ${OPTARG}
+			;;
+		F)
+			ARG=${OPTARG#*=}
+			case ${OPTARG} in
+				CFLAGS\=*)
+					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
+					;;
+				AFLAGS\=*)
+					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
+					;;
+				LDFLAGS\=*)
+					EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${ARG}"
+					;;
+				ACFLAGS\=*)
+					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
+					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
+					;;
+				*)
+					die Unknown flag: ${OPTARG}
+					;;
+			esac
 			;;
 		-)
 			break
@@ -1076,9 +1097,9 @@ evaltarget ()
 			MACHINE="i386"
 			MACH_ARCH="i486"
 			TOOLABI="elf"
-			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-			EXTRA_LDFLAGS='-m32'
-			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
 		else
 			MACHINE="amd64"
 			MACH_ARCH="x86_64"
@@ -1100,29 +1121,29 @@ evaltarget ()
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
 			TOOLABI="elf"
-			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64'
-			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
 		else
 			MACHINE="sparc64"
 			MACH_ARCH="sparc64"
-			EXTRA_CFLAGS='-m64'
-			EXTRA_LDFLAGS='-m64'
-			EXTRA_AFLAGS='-m64'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
 		fi
 		;;
 	"mipsel"|"mips64el")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
-			EXTRA_LDFLAGS='-mabi=32'
-			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
-			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
-			EXTRA_LDFLAGS='-mabi=64'
-			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D__mips_n64 -mabi=64"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D__mips_n64 -mabi=64"
 		fi
 		probemips
 		;;
@@ -1130,15 +1151,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			EXTRA_CFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
-			EXTRA_LDFLAGS='-mabi=32'
-			EXTRA_AFLAGS='-fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
-			EXTRA_CFLAGS='-fPIC -D__mips_n64 -mabi=64'
-			EXTRA_LDFLAGS='-mabi=64'
-			EXTRA_AFLAGS='-fPIC -D__mips_n64 -mabi=64'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D__mips_n64 -mabi=64"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D__mips_n64 -mabi=64"
 		fi
 		probemips
 		;;
@@ -1146,15 +1167,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
-			EXTRA_CFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
-			EXTRA_LDFLAGS='-m32'
-			EXTRA_AFLAGS='-D_FILE_OFFSET_BITS=64 -m32'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
 		else
 			MACHINE="evbppc64"
 			MACH_ARCH="powerpc64"
-			EXTRA_CFLAGS='-m64'
-			EXTRA_LDFLAGS='-m64'
-			EXTRA_AFLAGS='-m64'
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
+			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
 		fi
 		;;
 	esac
@@ -1208,7 +1229,7 @@ domake ()
 ###
 
 evaltools
-parseargs $*
+parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
