@@ -14,8 +14,7 @@ env:
 
 script:
   -  dirsuf=${LIBTYPE}.${DEBUG}
-  -  ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 \
-       -V ${LIBTYPE} ${DEBUG} fullbuild tests
+  -  ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 -V ${LIBTYPE} ${DEBUG} fullbuild tests
 
 notifications:
   irc:
