@@ -1097,9 +1097,9 @@ evaltarget ()
 			MACHINE="i386"
 			MACH_ARCH="i486"
 			TOOLABI="elf"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
 		else
 			MACHINE="amd64"
 			MACH_ARCH="x86_64"
@@ -1110,14 +1110,10 @@ evaltarget ()
 		MACHINE="i386"
 		MACH_ARCH="i486"
 		TOOLABI="elf"
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
 		;;
 	arm*)
 		check64
 		TOOLABI="elf"
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
 		probearm
 		;;
 	"sparc")
@@ -1125,8 +1121,6 @@ evaltarget ()
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
 			TOOLABI="elf"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
 		else
 			MACHINE="sparc64"
 			MACH_ARCH="sparc64"
@@ -1139,9 +1133,9 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D__mips_o32 -mabi=32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D__mips_o32 -mabi=32"
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
@@ -1155,9 +1149,9 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC -D__mips_o32 -mabi=32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D__mips_o32 -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC -D__mips_o32 -mabi=32"
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
@@ -1171,9 +1165,9 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64 -m32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
 		else
 			MACHINE="evbppc64"
 			MACH_ARCH="powerpc64"
@@ -1184,6 +1178,14 @@ evaltarget ()
 		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
+
+	# clear cppdefines cache as we may have eg added -m32
+	unset BUILDRUMP_CPPCACHE
+	# always force 64 bit off_t
+	if ! cppdefines __LP64__; then
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
+	fi
 
 	doesitbuild 'int main(void) {return 0;}\n' \
 	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
