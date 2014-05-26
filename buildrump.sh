@@ -1103,11 +1103,13 @@ evaltarget ()
 
 	# step 2: if the user did not specify 32/64, use compiler default
 	if ! ${THIRTYTWO} && ! ${SIXTYFOUR}; then
+		CHANGED3264=false
 		if [ "${ccdefault}" -eq 64 ]; then
 			SIXTYFOUR=true
 		else
 			THIRTYTWO=true
 		fi
+	else CHANGED3264=true
 	fi
 
 	TOOLABI=''
@@ -1117,9 +1119,11 @@ evaltarget ()
 			MACHINE="i386"
 			MACH_ARCH="i486"
 			TOOLABI="elf"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
+			fi
 		else
 			MACHINE="amd64"
 			MACH_ARCH="x86_64"
@@ -1141,27 +1145,38 @@ evaltarget ()
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
 			TOOLABI="elf"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
+			fi
 		else
 			MACHINE="sparc64"
 			MACH_ARCH="sparc64"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
+			fi
 		fi
 		;;
 	"mipsel"|"mips64el")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
+			fi
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
+			fi
 		fi
 		probemips
 		;;
@@ -1169,15 +1184,19 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
+			fi
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
+			fi
 		fi
 		probemips
 		;;
@@ -1185,15 +1204,19 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
+			fi
 		else
 			MACHINE="evbppc64"
 			MACH_ARCH="powerpc64"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
-			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
+			if ${CHANGED3264}; then
+				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
+				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
+				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
+			fi
 		fi
 		;;
 	esac
