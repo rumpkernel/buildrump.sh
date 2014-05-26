@@ -1007,6 +1007,21 @@ probearm ()
 probemips ()
 {
 
+	# may have changed extra flags at this point
+	unset BUILDRUMP_CPPCACHE
+
+	# set env vars that NetBSD expects for the different MIPS ABIs
+	if cppdefines '_ABIO32'; then
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_o32"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_o32"
+	elif cppdefines '_ABIN32'; then
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n32"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n32"
+	elif cppdefines '_ABI64'; then
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64"
+	fi
+
 	# NetBSD/evbmips is softfloat by default but we can detect if this is correct
 	if cppdefines '__mips_hard_float'; then
 		MKSOFTFLOAT=no
@@ -1138,15 +1153,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_o32 -mabi=32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_o32 -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64 -mabi=64"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64 -mabi=64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
 		fi
 		probemips
 		;;
@@ -1154,15 +1169,15 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_o32 -mabi=32"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_o32 -mabi=32"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
-			EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64 -mabi=64"
+			EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
 			EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-			EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64 -mabi=64"
+			EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
 		fi
 		probemips
 		;;
