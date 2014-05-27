@@ -845,6 +845,12 @@ parseargs ()
 					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
 					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
 					;;
+				ALLFLAGS\=*)
+					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
+					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
+					EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${ARG}"
+					;;
+
 				*)
 					die Unknown flag: ${OPTARG}
 					;;
