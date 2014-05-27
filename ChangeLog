@@ -8,6 +8,8 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ add -F option for setting flags; replaces -32 and -64 options
+
 	Snapshot 26.5.2014
 
 + update NetBSD timestamp to 20140526 1100UTC
