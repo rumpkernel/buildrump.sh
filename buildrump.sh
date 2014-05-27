@@ -757,8 +757,6 @@ parseargs ()
 	TITANMODE=false
 	NOISE=2
 	debugginess=0
-	THIRTYTWO=false
-	SIXTYFOUR=false
 	KERNONLY=false
 	NATIVENETBSD=false
 	OBJDIR=./obj
@@ -766,20 +764,8 @@ parseargs ()
 	SRCDIR=./src
 	JNUM=4
 
-	while getopts '3:6:d:DhHj:kNo:qrs:T:V:F:' opt; do
+	while getopts 'd:DhHj:kNo:qrs:T:V:F:' opt; do
 		case "$opt" in
-		3)
-			[ ${OPTARG} != '2' ] \
-			    && die 'invalid option. did you mean -32?'
-			${SIXTYFOUR} && die 32+64 given.  Want a 48bit build?
-			THIRTYTWO=true
-			;;
-		6)
-			[ ${OPTARG} != '4' ] \
-			    && die 'invalid option. did you mean -64?'
-			${THIRTYTWO} && die 32+64 given.  Want a 48bit build?
-			SIXTYFOUR=true
-			;;
 		j)
 			JNUM=${OPTARG}
 			;;
@@ -965,13 +951,6 @@ resolvepaths ()
 	done
 }
 
-check64 ()
-{
-
-	${SIXTYFOUR} \
-	    && die Do not know how to do a 64bit build for \"${MACH_ARCH}\"
-}
-
 # ARM targets require a few extra checks
 probearm ()
 {
@@ -1012,9 +991,6 @@ probearm ()
 # MIPS requires a few extra checks
 probemips ()
 {
-
-	# may have changed extra flags at this point
-	unset BUILDRUMP_CPPCACHE
 
 	# set env vars that NetBSD expects for the different MIPS ABIs
 	if cppdefines '_ABIO32'; then
@@ -1101,22 +1077,13 @@ evaltarget ()
 		${TITANMODE} || die ELF required as target object format
 	fi
 
-	# decide 32/64bit build.  step one: probe compiler default
+	# always force 64 bit off_t
 	if cppdefines __LP64__; then
-		ccdefault=64
+		THIRTYTWO=false
 	else
-		ccdefault=32
-	fi
-
-	# step 2: if the user did not specify 32/64, use compiler default
-	if ! ${THIRTYTWO} && ! ${SIXTYFOUR}; then
-		CHANGED3264=false
-		if [ "${ccdefault}" -eq 64 ]; then
-			SIXTYFOUR=true
-		else
-			THIRTYTWO=true
-		fi
-	else CHANGED3264=true
+		THIRTYTWO=true
+		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
+		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
 	fi
 
 	TOOLABI=''
@@ -1126,24 +1093,17 @@ evaltarget ()
 			MACHINE="i386"
 			MACH_ARCH="i486"
 			TOOLABI="elf"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
-			fi
 		else
 			MACHINE="amd64"
 			MACH_ARCH="x86_64"
 		fi
 		;;
 	"i386"|"i486"|"i586"|"i686")
-		check64
 		MACHINE="i386"
 		MACH_ARCH="i486"
 		TOOLABI="elf"
 		;;
 	arm*)
-		check64
 		TOOLABI="elf"
 		probearm
 		;;
@@ -1152,38 +1112,18 @@ evaltarget ()
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
 			TOOLABI="elf"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
-			fi
 		else
 			MACHINE="sparc64"
 			MACH_ARCH="sparc64"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
-			fi
 		fi
 		;;
 	"mipsel"|"mips64el")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
 			MACH_ARCH="mipsel"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
-			fi
 		else
 			MACHINE="evbmips64-el"
 			MACH_ARCH="mips64el"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
-			fi
 		fi
 		probemips
 		;;
@@ -1191,19 +1131,9 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
 			MACH_ARCH="mipseb"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=32"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=32"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=32"
-			fi
 		else
 			MACHINE="evbmips64-eb"
 			MACH_ARCH="mips64"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -mabi=64"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -mabi=64"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -mabi=64"
-			fi
 		fi
 		probemips
 		;;
@@ -1211,36 +1141,18 @@ evaltarget ()
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m32"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m32"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m32"
-			fi
 		else
 			MACHINE="evbppc64"
 			MACH_ARCH="powerpc64"
-			if ${CHANGED3264}; then
-				EXTRA_CFLAGS="${EXTRA_CFLAGS} -m64"
-				EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -m64"
-				EXTRA_AFLAGS="${EXTRA_AFLAGS} -m64"
-			fi
 		fi
 		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
-	# clear cppdefines cache as we may have eg added -m32
-	unset BUILDRUMP_CPPCACHE
-	# always force 64 bit off_t
-	if ! cppdefines __LP64__; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
-	fi
-
 	doesitbuild 'int main(void) {return 0;}\n' \
 	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
 	[ $? -eq 0 ] || ${TITANMODE} || \
-	    die 'Probe cannot build a binary, incorrect -32/-64 setting?'
+	    die 'Probe cannot build a binary'
 }
 
 # create the makefiles used for building
