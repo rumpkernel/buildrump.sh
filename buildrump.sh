@@ -1003,6 +1003,7 @@ probemips ()
 	elif cppdefines '_ABI64'; then
 		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64"
 		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64"
+	else die unknown MIPS ABI
 	fi
 
 	# NetBSD/evbmips is softfloat by default but we can detect if this is correct
@@ -1010,7 +1011,7 @@ probemips ()
 		MKSOFTFLOAT=no
 	fi
 
-	# MIPS builds need to be -fPIC; NetBSD hosts do this anyway
+	# MIPS builds need to be position independent; NetBSD hosts do this anyway
 	# but others may need forcing
 	EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC"
 	EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC"
