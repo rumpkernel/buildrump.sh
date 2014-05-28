@@ -819,22 +819,22 @@ parseargs ()
 			ARG=${OPTARG#*=}
 			case ${OPTARG} in
 				CFLAGS\=*)
-					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
+					appendvar EXTRA_CFLAGS "${ARG}"
 					;;
 				AFLAGS\=*)
-					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
+					appendvar EXTRA_AFLAGS "${ARG}"
 					;;
 				LDFLAGS\=*)
-					EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${ARG}"
+					appendvar EXTRA_LDFLAGS "${ARG}"
 					;;
 				ACFLAGS\=*)
-					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
-					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
+					appendvar EXTRA_CFLAGS "${ARG}"
+					appendvar EXTRA_AFLAGS "${ARG}"
 					;;
 				ACLFLAGS\=*)
-					EXTRA_CFLAGS="${EXTRA_CFLAGS} ${ARG}"
-					EXTRA_AFLAGS="${EXTRA_AFLAGS} ${ARG}"
-					EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${ARG}"
+					appendvar EXTRA_CFLAGS "${ARG}"
+					appendvar EXTRA_AFLAGS "${ARG}"
+					appendvar EXTRA_LDFLAGS "${ARG}"
 					;;
 
 				*)
@@ -969,8 +969,8 @@ probearm ()
 	# due to NetBSD bug port-arm/47401.  This was originally a
 	# hack for Raspberry Pi support, but maybe we should remove it?
 	if cppdefines __ARM_ARCH_6__; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv6k"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -march=armv6k"
+		appendvar EXTRA_CFLAGS -march=armv6k
+		appendvar EXTRA_AFLAGS -march=armv6k
 	fi
 
 	# NetBSD/evbarm is softfloat by default, but force the NetBSD
@@ -983,8 +983,8 @@ probearm ()
 
 	# A thumb build requires thumb interwork as parts will be built with arm
 	if cppdefines '__THUMBE[BL]__'; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -mthumb-interwork"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -mthumb-interwork"
+		appendvar EXTRA_CFLAGS -mthumb-interwork
+		appendvar EXTRA_AFLAGS -mthumb-interwork
 	fi
 }
 
@@ -994,15 +994,15 @@ probemips ()
 
 	# set env vars that NetBSD expects for the different MIPS ABIs
 	if cppdefines '_ABIO32'; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_o32"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_o32"
+		appendvar EXTRA_CFLAGS -D__mips_o32
+		appendvar EXTRA_AFLAGS -D__mips_o32
 	elif cppdefines '_ABIN32'; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n32"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n32"
+		appendvar EXTRA_CFLAGS -D__mips_n32
+		appendvar EXTRA_AFLAGS -D__mips_n32
 		${TITANMODE} || die MIPS n32 ABI not yet working, use -mabi=32
 	elif cppdefines '_ABI64'; then
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D__mips_n64"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D__mips_n64"
+		appendvar EXTRA_CFLAGS -D__mips_n64
+		appendvar EXTRA_AFLAGS -D__mips_n64
 	else die unknown MIPS ABI
 	fi
 
@@ -1013,8 +1013,8 @@ probemips ()
 
 	# MIPS builds need to be position independent; NetBSD hosts do this anyway
 	# but others may need forcing
-	EXTRA_CFLAGS="${EXTRA_CFLAGS} -fPIC"
-	EXTRA_AFLAGS="${EXTRA_AFLAGS} -fPIC"
+	appendvar EXTRA_CFLAGS -fPIC
+	appendvar EXTRA_AFLAGS -fPIC
 }
 
 evaltarget ()
@@ -1083,8 +1083,8 @@ evaltarget ()
 		THIRTYTWO=false
 	else
 		THIRTYTWO=true
-		EXTRA_CFLAGS="${EXTRA_CFLAGS} -D_FILE_OFFSET_BITS=64"
-		EXTRA_AFLAGS="${EXTRA_AFLAGS} -D_FILE_OFFSET_BITS=64"
+		appendvar EXTRA_CFLAGS -D_FILE_OFFSET_BITS=64
+		appendvar EXTRA_AFLAGS -D_FILE_OFFSET_BITS=64
 	fi
 
 	TOOLABI=''
