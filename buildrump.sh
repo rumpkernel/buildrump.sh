@@ -964,15 +964,6 @@ probearm ()
 		MACH_ARCH="armeb"
 	fi
 
-	# If target compiler produces ARMv6 by default, then force
-        # armv6k architecture which has support ldrexd instruction
-	# due to NetBSD bug port-arm/47401.  This was originally a
-	# hack for Raspberry Pi support, but maybe we should remove it?
-	if cppdefines __ARM_ARCH_6__; then
-		appendvar EXTRA_CFLAGS -march=armv6k
-		appendvar EXTRA_AFLAGS -march=armv6k
-	fi
-
 	# NetBSD/evbarm is softfloat by default, but force the NetBSD
 	# build to use hardfloat if the compiler defaults to VFP.
 	# This is because the softfloat env is not always functional
