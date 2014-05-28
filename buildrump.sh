@@ -971,12 +971,6 @@ probearm ()
 	if cppdefines __VFP_FP__; then
 		MKSOFTFLOAT=no
 	fi
-
-	# A thumb build requires thumb interwork as parts will be built with arm
-	if cppdefines '__THUMBE[BL]__'; then
-		appendvar EXTRA_CFLAGS -mthumb-interwork
-		appendvar EXTRA_AFLAGS -mthumb-interwork
-	fi
 }
 
 # MIPS requires a few extra checks
