@@ -11,7 +11,7 @@ env:
   - LIBTYPE='MKPIC=no' DEBUG=''
   - LIBTYPE='MKSTATICLIB=no' DEBUG=''
   - LIBTYPE='MKSTATICLIB=no' DEBUG='-DDD'
-  - LIBTYPE='' DEBUG='-r'
+  - LIBTYPE='MKSTATICLIB=no' DEBUG='-r'
 
 script:
   -  dirsuf=${LIBTYPE}.${DEBUG}
