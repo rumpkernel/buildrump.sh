@@ -261,7 +261,7 @@ maketools ()
 		LLVM='-V HAVE_LLVM=1'
 	elif echo ${ccver} | grep -q pcc; then
 		CC_FLAVOR=pcc
-		PCC='-V MKPCC=yes -V MKPCCCMDS=yes'
+		PCC='-V HAVE_PCC=1'
 	else
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
