@@ -675,7 +675,7 @@ evaltools ()
 	# check for crossbuild
 	: ${CC:=cc}
 	NATIVEBUILD=true
-	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' ] \
+	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' -a ${CC} != 'pcc' ] \
 	    && NATIVEBUILD=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
@@ -697,7 +697,7 @@ evaltools ()
 			# this might be pcc
 			${CC} -v 2>&1 | grep pcc > /dev/null || \
 			    die \"${CC} -v failed\". Check that \"${CC}\" is a compiler
-			cc_target=$(${CC} -v 2>&1 | sed -n 's/^pcc.*for //p' )
+			cc_target=$(${CC} -v 2>&1 | sed -n -e 's/^pcc.*for //' -e 's/,.*//p' )
 		fi
 	fi
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
