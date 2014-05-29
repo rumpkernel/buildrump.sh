@@ -181,7 +181,7 @@ cppdefines ()
 {
 
 	[ -z "${BUILDRUMP_CPPCACHE}" ] \
-	   && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS} -E -dM - < /dev/null)
+	   && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS} -E -Wp,-dM - < /dev/null)
 	var=${1}
 	(
 	    IFS=' '
@@ -259,6 +259,9 @@ maketools ()
 	elif echo ${ccver} | grep -q clang; then
 		CC_FLAVOR=clang
 		LLVM='-V HAVE_LLVM=1'
+	elif echo ${ccver} | grep -q pcc; then
+		CC_FLAVOR=pcc
+		PCC='-V MKPCC=yes -V MKPCCCMDS=yes'
 	else
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
@@ -562,7 +565,7 @@ makemake ()
 	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
-	    ${LLVM} ${BEQUIET} \
+	    ${LLVM} ${PCC} ${BEQUIET} \
 	    -E -Z S \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
@@ -682,16 +685,20 @@ evaltools ()
 	# and if that works, be happy with it.  Not all compilers support
 	# it (e.g. older versions of clang), so if that doesn't work,
 	# try parsing the output of -v
-	if ! cc_target=$(${CC} -dumpmachine) ; then
+	if ! cc_target=$(${CC} -dumpmachine 2>/dev/null) ; then
 		# first check "${CC} -v" ... just in case it fails, we want a
 		# sensible return value instead of it being lost in the pipeline
 		# (this is easier than adjusting IFS)
-		${CC} -v >/dev/null 2>&1 || \
-		    die \"${CC} -v failed\". Check that \"${CC}\" is a compiler
-
-		# then actually process the output of ${CC} -v
-		cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
-		[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
+		if ${CC} -v >/dev/null 2>&1 ; then
+			# then actually process the output of ${CC} -v
+			cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
+			[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
+		else
+			# this might be pcc
+			${CC} -v 2>&1 | grep pcc > /dev/null || \
+			    die \"${CC} -v failed\". Check that \"${CC}\" is a compiler
+			cc_target=$(${CC} -v 2>&1 | sed -n 's/^pcc.*for //p' )
+		fi
 	fi
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
 
