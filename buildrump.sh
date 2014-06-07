@@ -843,7 +843,9 @@ parseargs ()
 					appendvar EXTRA_AFLAGS "${ARG}"
 					appendvar EXTRA_LDFLAGS "${ARG}"
 					;;
-
+				DBG\=*)
+					appendvar F_DBG "${ARG}"
+					;;
 				*)
 					die Unknown flag: ${OPTARG}
 					;;
@@ -859,7 +861,7 @@ parseargs ()
 	done
 	shift $((${OPTIND} - 1))
 
-	DBG="${BUILDRUMP_DBG:-${DBG}}"
+	DBG="${F_DBG:-${DBG}}"
 
 	BEQUIET="-N${NOISE}"
 	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
