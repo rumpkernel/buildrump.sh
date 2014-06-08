@@ -36,6 +36,13 @@
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
 
+# compat whine, remove after 9/2014
+if [ ! -z "${BUILDRUMP_DBG}" ]; then
+	echo '>>'
+	echo '>> WARNING: $BUILDRUMP_DBG is deprecated.  Use -F DBG'
+	echo '>>'
+fi
+
 #
 # support routines
 #
