@@ -139,6 +139,9 @@ alltests ()
 		) && ( cd ${TO} ; do${test} )
 		failed=$(( ${failed} + $? ))
 	done
+
+	pkill -TERM -P $$
+
 	[ ${failed} -ne 0 ] && die "FAILED ${failed} tests!"
 
 	echo
