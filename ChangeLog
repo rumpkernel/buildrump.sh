@@ -9,6 +9,10 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 	[changes not yet part of a snapshot]
 
 + add -F option for setting flags; replaces -32 and -64 options
++ add rump_boot_etfs_register(); used for registering etfs keys
+  that will be visible immediately when (if) mountroot runs during
+  rump kernel bootstrap, and can therefore be used for e.g. firmware
+  images for device drivers
 
 	Snapshot 26.5.2014
 
