@@ -58,7 +58,13 @@ NBSRC_EXTRA='
     20140528 2100UTC:
 	src/sys/rump/librump/rumpkern/emul.c
         src/sys/rump/net/lib/libshmif/if_shmem.c
-        src/sys/rump/librump/rumpvfs/rumpfs.c'
+        src/sys/rump/librump/rumpvfs/rumpfs.c;
+    20140613 1600UTC:
+	src/lib/librumpvfs/rump_etfs.3
+	src/sys/rump/include/rump.h
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/rump/librump/rumpvfs/rumpfs.c
+	src/sys/rump/librump/rumpdev/rump_dev.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
