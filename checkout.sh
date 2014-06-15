@@ -50,7 +50,7 @@ NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-#NBSRC_LISTDATE="20131029 1620UTC"
+NBSRC_LISTDATE="20140615 1440UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
@@ -66,7 +66,8 @@ NBSRC_EXTRA='
 	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/librump/rumpdev/rump_dev.c;
-    20140614 1200UTC:
+    20140615 1440UTC:
+	src/tools/Makefile
 	src/lib/librumpuser/rumpuser_sp.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
