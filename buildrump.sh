@@ -680,6 +680,25 @@ makeinstall ()
 	(cd ${stage}/usr ; tar -cf - .) | (cd ${DESTDIR} ; tar -xf -)
 }
 
+#
+# install kernel headers.
+# Note: Do _NOT_ do this unless you want to install a
+#       full rump kernel application stack
+#  
+makekernelheaders ()
+{
+
+	dodirs=$(cd ${SRCDIR}/sys \
+	    && ${RUMPMAKE} -V '${SUBDIR:Narch:Nmodules:Ncompat:Nnetnatm}')
+	# missing powerpc and mips
+	appendvar dodirs arch/amd64/include arch/i386/include arch/x86/include
+	appendvar dodirs arch/arm/include arch/arm/include/arm32
+	for dir in ${dodirs}; do
+		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} obj)
+		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} includes)
+	done
+}
+
 evaltools ()
 {
 
@@ -881,7 +900,7 @@ parseargs ()
 	# Determine what which parts we should execute.
 	#
 	allcmds='checkout checkoutcvs checkoutgit tools build install
-	    tests fullbuild'
+	    tests fullbuild kernelheaders'
 	fullbuildcmds="tools build install"
 
 	# for compat, so that previously valid invocations don't
@@ -1213,6 +1232,7 @@ resolvepaths
 
 ${dotools} && maketools
 ${dobuild} && makebuild
+${dokernelheaders} && makekernelheaders
 ${doinstall} && makeinstall
 
 if ${dotests}; then
