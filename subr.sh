@@ -64,7 +64,6 @@ userincludes ()
 	echo '>> installing userspace headers'
 	( cd ${rumpsrc}/include && ${rumpmake} includes )
 	for lib in $*; do 
-		echo processing $lib
 		( cd ${lib} && ${rumpmake} obj )
 		( cd ${lib} && ${rumpmake} includes )
 	done
