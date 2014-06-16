@@ -688,8 +688,8 @@ makeinstall ()
 makekernelheaders ()
 {
 
-	dodirs=$(cd ${SRCDIR}/sys \
-	    && ${RUMPMAKE} -V '${SUBDIR:Narch:Nmodules:Ncompat:Nnetnatm}')
+	dodirs=$(cd ${SRCDIR}/sys && \
+	    ${RUMPMAKE} -V '${SUBDIR:Narch:Nmodules:Ncompat:Nnetnatm}' includes)
 	# missing powerpc and mips
 	appendvar dodirs arch/amd64/include arch/i386/include arch/x86/include
 	appendvar dodirs arch/arm/include arch/arm/include/arm32
