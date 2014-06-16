@@ -12,14 +12,16 @@
 usermtree ()
 {
 
+	destbase=$1
+
 	INCSDIRS='adosfs altq arpa crypto dev filecorefs fs i386 isofs miscfs
 	    msdosfs net net80211 netatalk netbt netinet netinet6 netipsec
 	    netisdn netkey netmpls netnatm netsmb nfs ntfs openssl pcap
 	    ppath prop protocols rpc rpcsvc ssp sys ufs uvm x86'
 	for dir in ${INCSDIRS}; do
-		mkdir -p rump/include/$dir
+		mkdir -p ${destbase}/include/$dir
 	done
-	mkdir -p rumpobj/dest.stage/usr/lib/pkgconfig
+	mkdir -p ${destbase}/lib/pkgconfig
 }
 
 # ok, urgh, we need just one tree due to how build systems work (or
