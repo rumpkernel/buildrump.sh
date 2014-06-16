@@ -697,6 +697,8 @@ makekernelheaders ()
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} obj)
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} includes)
 	done
+	# create machine symlink
+	(cd ${SRCDIR}/sys/arch && ${RUMPMAKE} NOSUBDIR=1 includes)
 }
 
 evaltools ()
