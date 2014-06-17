@@ -35,11 +35,15 @@ docheckout ()
 	rumpsrc="$1"
 	usersrc="$2"
 
-	[ -d ${rumpsrc} ] && return
-	
-	git submodule update --init --recursive
-	./buildrump.sh/buildrump.sh -s ${rumpsrc} checkout
-	cp -Rp ${usersrc}/* ${rumpsrc}/
+	if git submodule status ${usersrc} | grep -q '^-' ; then
+		git submodule update --init --recursive
+	fi
+	if [ ! -d ${rumpsrc} ]; then
+		./buildrump.sh/buildrump.sh -s ${rumpsrc} checkout
+	fi
+	if [ ! -f ${rumpsrc}/updatesrc.sh ] ; then
+		cp -Rp ${usersrc}/* ${rumpsrc}/
+	fi
 }
 
 makeuserlib ()
