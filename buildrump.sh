@@ -322,11 +322,9 @@ maketools ()
 	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
 	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
 
-	if [ ${RUMP_CURLWP} = auto ]; then
-		# does target support __thread.  if yes, optimize curlwp
-		doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
-		[ $? -eq 0 ] && RUMP_CURLWP=__thread || RUMP_CURLWP=hypercall
-	fi
+	# does target support __thread.  if yes, optimize curlwp
+	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
+	[ $? -eq 0 ] && RUMP_CURLWP=__thread
 
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
 	# to avoid line number conflicts
@@ -804,7 +802,6 @@ parseargs ()
 	DESTDIR=./rump
 	SRCDIR=./src
 	JNUM=4
-	RUMP_CURLWP=auto
 
 	while getopts 'd:DhHj:kNo:qrs:T:V:F:' opt; do
 		case "$opt" in
@@ -880,9 +877,6 @@ parseargs ()
 					;;
 				DBG\=*)
 					appendvar F_DBG "${ARG}"
-					;;
-				CURLWP\=*)
-					RUMP_CURLWP="${ARG}"
 					;;
 				*)
 					die Unknown flag: ${OPTARG}
