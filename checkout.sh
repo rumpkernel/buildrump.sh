@@ -72,7 +72,10 @@ NBSRC_EXTRA='
     20140620 1300UTC:
 	src/sys/rump/librump/rumpvfs/devnodes.c
 	src/sys/rump/Makefile.rump
-	src/sys/rump/README.compileopts'
+	src/sys/rump/README.compileopts;
+    20140622 2030UTC:
+        src/lib/librumpuser/rumpuser_pth.c
+        src/sys/rump/librump/rumpkern/intr.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
