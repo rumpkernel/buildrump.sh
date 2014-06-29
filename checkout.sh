@@ -63,7 +63,6 @@ NBSRC_EXTRA='
     20140613 1600UTC:
 	src/lib/librumpvfs/rump_etfs.3
 	src/sys/rump/include/rump/rump.h
-	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/librump/rumpdev/rump_dev.c;
     20140615 1440UTC:
@@ -75,7 +74,9 @@ NBSRC_EXTRA='
 	src/sys/rump/README.compileopts;
     20140622 2030UTC:
         src/lib/librumpuser/rumpuser_pth.c
-        src/sys/rump/librump/rumpkern/intr.c'
+        src/sys/rump/librump/rumpkern/intr.c;
+    20140629 1140UTC:
+	src/sys/rump/librump/rumpkern/rump.c'
 
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
 GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
