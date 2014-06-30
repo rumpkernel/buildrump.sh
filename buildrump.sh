@@ -773,6 +773,9 @@ evaltools ()
 	*-ibm-aix*)
 		TARGET=aix
 		;;
+	*-minix)
+		TARGET=minix
+		;;
 	*-none-*)
 		TARGET=none
 		;;
@@ -1086,6 +1089,9 @@ evaltarget ()
 		target_supported=false
 		;;
 	"aix")
+		target_supported=false
+		;;
+	"minix")
 		target_supported=false
 		;;
 	"osx")
