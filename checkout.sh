@@ -63,6 +63,7 @@ NBSRC_EXTRA='
     20140613 1600UTC:
 	src/lib/librumpvfs/rump_etfs.3
 	src/sys/rump/include/rump/rump.h
+	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/librump/rumpdev/rump_dev.c;
     20140615 1440UTC:
