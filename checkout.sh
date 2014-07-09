@@ -30,13 +30,11 @@
 #	NOTE!
 #
 # DO NOT CHANGE THE VALUES WITHOUT UPDATING THE GIT REPO!
-# (also, do not update NBSRC_CVSDATE for just a small fix, it
-# causes changes to all CVS/Entries files)
 #
 # The procedure is:
 # 1) change the cvs tags, commit the change, DO NOT PUSH
-# 2) run "./checkout.sh githubdate rumpkernel-netbsd-src"
-# 3) push rumpkernel-netbsd-src
+# 2) run "./checkout.sh githubdate src-netbsd"
+# 3) push src-netbsd
 # 4) push buildrump.sh
 #
 # The rationale for the procedure is to prevent "race conditions"
@@ -54,33 +52,42 @@ NBSRC_LISTDATE="20140709 1230UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA='
+NBSRC_EXTRA_sys='
     20140528 2100UTC:
 	src/sys/rump/librump/rumpkern/emul.c
         src/sys/rump/net/lib/libshmif/if_shmem.c
         src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/dev/lib/libmiiphy/Makefile;
     20140613 1600UTC:
-	src/lib/librumpvfs/rump_etfs.3
 	src/sys/rump/include/rump/rump.h
 	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/librump/rumpdev/rump_dev.c;
     20140615 1440UTC:
-	src/tools/Makefile
-	src/lib/librumpuser/rumpuser_sp.c;
+	src/tools/Makefile;
     20140620 1300UTC:
 	src/sys/rump/librump/rumpvfs/devnodes.c
 	src/sys/rump/Makefile.rump
 	src/sys/rump/README.compileopts;
     20140622 2030UTC:
-        src/lib/librumpuser/rumpuser_pth.c
         src/sys/rump/librump/rumpkern/intr.c;
     20140629 1140UTC:
 	src/sys/rump/librump/rumpkern/rump.c'
 
+NBSRC_EXTRA_posix='
+    20140613 1600UTC:
+	src/lib/librumpvfs/rump_etfs.3;
+    20140615 1440UTC:
+	src/lib/librumpuser/rumpuser_sp.c;
+    20140622 2030UTC:
+        src/lib/librumpuser/rumpuser_pth.c'
+
+NBSRC_EXTRA_usr='
+    20140616 1200UTC:
+        src/crypto/external/bsd/openssl'
+
 GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
-GITREPOPUSH='git@github.com:rumpkernel/rumpkernel-netbsd-src'
+GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
 GITREVFILE='.srcgitrev'
 
 die ()
@@ -110,24 +117,28 @@ checkoutcvs ()
 	esac
 	shift
 
+	what=$1
+	shift
+
 	case $1 in
 	-r|-D)
 		NBSRC_CVSPARAM=$1
 		shift
 		NBSRC_CVSREV=$*
 		NBSRC_CVSLISTREV=$*
-		NBSRC_EXTRA=''
+		extrasrc=''
 		;;
 	HEAD)
 		NBSRC_CVSPARAM=''
 		NBSRC_CVSREV=''
 		NBSRC_CVSLISTREV=''
-		NBSRC_EXTRA=''
+		extrasrc=''
 		;;
 	'')
 		NBSRC_CVSPARAM=-D
 		NBSRC_CVSREV="${NBSRC_CVSDATE}"
 		NBSRC_CVSLISTREV="${NBSRC_LISTDATE:-${NBSRC_CVSDATE}}"
+		eval extrasrc="\${NBSRC_EXTRA_${what}}"
 		;;
 	*)
 		die 'Invalid parameters to checkoutcvs'
@@ -145,9 +156,6 @@ checkoutcvs ()
 		die \"${CVS}\" not found
 	fi
 
-	mkdir -p ${SRCDIR} || die cannot access ${SRCDIR}
-	cd ${SRCDIR} || die cannot access ${SRCDIR}
-
 	# squelch .cvspass whine
 	export CVS_PASSFILE=/dev/null
 
@@ -164,15 +172,15 @@ checkoutcvs ()
 	ln -s . src
 
 	# now, do the real checkout
-	echo ">> Fetching the necessary subset of NetBSD source tree to:"
+	echo ">> Fetching the \"${what}\" subset of NetBSD source tree to:"
 	echo "   "`pwd -P`
-	echo '>> This will take a few minutes and requires ~200MB of disk space'
-	sh listsrcdirs -c | xargs ${CVS} ${NBSRC_CVSFLAGS} ${op} ${prune} \
-	    ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
+	sh listsrcdirs -c ${what} | xargs ${CVS} ${NBSRC_CVSFLAGS} ${op} \
+	    ${prune} ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
 	      || die checkout failed
 
 	IFS=';'
-	for x in ${NBSRC_EXTRA}; do
+	[ -z "${extrasrc}" ] || echo ">> Fetching extra files for \"${what}\""
+	for x in ${extrasrc}; do
 		IFS=':'
 		set -- ${x}
 		unset IFS
@@ -222,9 +230,29 @@ checkoutgit ()
 	    die 'Could not checkout correct git revision. Wrong repo?'
 }
 
+hubdateonebranch ()
+{
+
+	exportname=${1}
+	branchbase=${2}
+
+	git checkout ${branchbase}-src-clean
+	rm -rf *
+	checkoutcvs export ${exportname}
+	echo ">> adding files to the \"${branchbase}-src-clean\" branch"
+	${GIT} add -A
+	echo '>> committing'
+	${GIT} commit -m "NetBSD src for \"${branchbase}\", checkout.sh rev ${gitrev}"
+	echo ">> merging \"${branchbase}-src-clean\" to \"${branchbase}-src\""
+	${GIT} checkout ${branchbase}-src
+	${GIT} merge ${branchbase}-src-clean
+}
+
 # do a cvs checkout and push the results into the github mirror
 githubdate ()
 {
+
+	curdir="$(pwd)"
 
 	[ -z "$(${GIT} status --porcelain | grep 'M checkout.sh')" ] \
 	    || die checkout.sh contains uncommitted changes!
@@ -234,24 +262,30 @@ githubdate ()
 
 	set -e
 
-	${GIT} clone -n -b netbsd-cvs ${GITREPOPUSH} ${SRCDIR}
+	${GIT} clone ${GITREPOPUSH} ${SRCDIR}
+	cd ${SRCDIR} || die cannot access srcdir
 
-	# checkoutcvs does cd to SRCDIR
-	curdir="$(pwd)"
-	checkoutcvs export
+	# handle basic branches
+	hubdateonebranch sys kernel
+	hubdateonebranch posix posix
+	hubdateonebranch usr user
 
-	echo '>> adding files to the "netbsd-cvs" branch'
-	${GIT} add -A
-	echo '>> committing'
-	${GIT} commit -m "NetBSD cvs for buildrump.sh git rev ${gitrev}"
-	echo '>> merging "netbsd-cvs" to "master"'
+	${GIT} checkout buildrump-src
+	${GIT} merge --no-edit kernel-src posix-src
+
+	${GIT} checkout appstack-src
+	${GIT} merge --no-edit kernel-src user-src
+
+	${GIT} checkout all-src
+	${GIT} merge --no-edit kernel-src user-src posix-src
+
 	${GIT} checkout master
-	${GIT} merge netbsd-cvs
-	gitsrcrev=$(${GIT} rev-parse HEAD)
-	cd "${curdir}"
-	echo ${gitsrcrev} > ${GITREVFILE}
-	${GIT} commit -m "Source for buildrump.sh git rev ${gitrev}" \
-	    ${GITREVFILE}
+
+	#gitsrcrev=$(${GIT} rev-parse HEAD)
+	#cd "${curdir}"
+	#echo ${gitsrcrev} > ${GITREVFILE}
+	#${GIT} commit -m "Source for buildrump.sh git rev ${gitrev}" \
+	    #${GITREVFILE}
 
 	set +e
 }
@@ -296,11 +330,14 @@ checkcheckout ()
 listdates ()
 {
 
+	[ -z "${1}" ] && die $0 requires a parameter
+	eval extrasrc="\${NBSRC_EXTRA_${1}}"
+
 	echo '>> Base date for NetBSD sources:'
 	echo '>>' ${NBSRC_CVSDATE}
-	[ -z "${NBSRC_EXTRA}" ] || printf '>>\n>> Overrides:\n'
+	[ -z "${extrasrc}" ] || printf '>>\n>> Overrides:\n'
 	IFS=';'
-	for x in ${NBSRC_EXTRA}; do
+	for x in ${extrasrc}; do
 		IFS=':'
 		set -- ${x}
 		unset IFS
@@ -332,6 +369,8 @@ SRCDIR=${2}
 case "${1}" in
 cvs)
 	shift ; shift
+	mkdir -p ${SRCDIR} || die cannot create srcdir
+	cd ${SRCDIR} || die cannot access srcdir
 	checkoutcvs checkout $*
 	echo '>> checkout done'
 	;;
