@@ -260,9 +260,9 @@ checkcheckout ()
 {
 
 	# if it's not a git repo, don't bother
-	if [ ! -e "${SRCDIR}/.git" ]; then
+	if [ ! -e "${SRCDIR}/.buildrumpsh-repo" ]; then
 		echo '>>'
-		echo ">> NOTICE: Not a git repo in ${SRCDIR}"
+		echo ">> NOTICE: Not a buildrump.sh-based repo in ${SRCDIR}"
 		echo '>> Cannot verify repository version.  Proceeding ...'
 		echo '>>'
 		return 0
