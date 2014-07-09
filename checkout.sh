@@ -271,8 +271,8 @@ githubdate ()
 	cd ${SRCDIR} || die cannot access srcdir
 
 	# handle basic branches
-	hubdateonebranch sys kernel
 	hubdateonebranch posix posix
+	hubdateonebranch sys kernel
 	hubdateonebranch usr user
 
 	${GIT} checkout buildrump-src
