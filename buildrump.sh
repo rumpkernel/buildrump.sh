@@ -407,7 +407,7 @@ maketools ()
 	done
 	# create a cpp wrapper, but run it via cc -E
 	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-cpp
-	printf '#!/bin/sh\n\nexec %s -E "${@}"\n' ${CC} > ${tname}
+	printf '#!/bin/sh\n\nexec %s -E -x c "${@}"\n' ${CC} > ${tname}
 	chmod 755 ${tname}
 
 	# Create bounce directory used as the install target.  The
