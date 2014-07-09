@@ -286,6 +286,7 @@ githubdate ()
 
 	${GIT} checkout master
 
+	echo '>> WARNING: NOT UPDATING buildrump.sh git rev.  FIXXXME!'
 	#gitsrcrev=$(${GIT} rev-parse HEAD)
 	#cd "${curdir}"
 	#echo ${gitsrcrev} > ${GITREVFILE}
