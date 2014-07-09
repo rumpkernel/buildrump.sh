@@ -241,11 +241,16 @@ hubdateonebranch ()
 	checkoutcvs export ${exportname}
 	echo ">> adding files to the \"${branchbase}-src-clean\" branch"
 	${GIT} add -A
-	echo '>> committing'
-	${GIT} commit -m "NetBSD src for \"${branchbase}\", checkout.sh rev ${gitrev}"
+
+	if [ -z "$(${GIT} status --porcelain)" ]; then
+		echo ">> no changes to \"${branchbase}\""
+	else
+		echo '>> committing'
+		${GIT} commit -m "NetBSD src for \"${branchbase}\", checkout.sh rev ${gitrev}"
+	fi
 	echo ">> merging \"${branchbase}-src-clean\" to \"${branchbase}-src\""
 	${GIT} checkout ${branchbase}-src
-	${GIT} merge ${branchbase}-src-clean
+	${GIT} merge --no-edit ${branchbase}-src-clean
 }
 
 # do a cvs checkout and push the results into the github mirror
