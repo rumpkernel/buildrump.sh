@@ -378,7 +378,8 @@ cvs)
 	shift ; shift
 	mkdir -p ${SRCDIR} || die cannot create srcdir
 	cd ${SRCDIR} || die cannot access srcdir
-	checkoutcvs checkout $*
+	checkoutcvs checkout sys $*
+	checkoutcvs checkout posix $*
 	echo '>> checkout done'
 	;;
 git)
