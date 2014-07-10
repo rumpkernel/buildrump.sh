@@ -86,7 +86,7 @@ NBSRC_EXTRA_usr='
     20140616 1200UTC:
         src/crypto/external/bsd/openssl'
 
-GITREPO='https://github.com/rumpkernel/rumpkernel-netbsd-src'
+GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
 GITREVFILE='.srcgitrev'
 
@@ -275,23 +275,24 @@ githubdate ()
 	hubdateonebranch sys kernel
 	hubdateonebranch usr user
 
-	${GIT} checkout buildrump-src
-	${GIT} merge --no-edit kernel-src posix-src
-
 	${GIT} checkout appstack-src
 	${GIT} merge --no-edit kernel-src user-src
 
 	${GIT} checkout all-src
 	${GIT} merge --no-edit kernel-src user-src posix-src
 
+	# buildrump-src revision gets embedded in buildrump.sh
+	${GIT} checkout buildrump-src
+	${GIT} merge --no-edit kernel-src posix-src
+	gitsrcrev=$(${GIT} rev-parse HEAD)
+
 	${GIT} checkout master
 
-	echo '>> WARNING: NOT UPDATING buildrump.sh git rev.  FIXXXME!'
-	#gitsrcrev=$(${GIT} rev-parse HEAD)
-	#cd "${curdir}"
-	#echo ${gitsrcrev} > ${GITREVFILE}
-	#${GIT} commit -m "Source for buildrump.sh git rev ${gitrev}" \
-	    #${GITREVFILE}
+	# finally, embed revision in $GITREVFILE in buildrump.sh
+	cd "${curdir}"
+	echo ${gitsrcrev} > ${GITREVFILE}
+	${GIT} commit -m "Source for buildrump.sh git rev ${gitrev}" \
+	    ${GITREVFILE}
 
 	set +e
 }
