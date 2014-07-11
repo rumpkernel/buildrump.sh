@@ -161,7 +161,7 @@ checkoutcvs ()
 
 	# we need listsrcdirs
 	echo ">> Fetching the list of files we need to checkout ..."
-	${CVS} ${NBSRC_CVSFLAGS} co -p \
+	${CVS} co -p \
 	    ${NBSRC_CVSPARAM} ${NBSRC_CVSLISTREV:+"${NBSRC_CVSLISTREV}"} \
 	    src/sys/rump/listsrcdirs > listsrcdirs 2>/dev/null \
 	      || die listsrcdirs checkout failed
@@ -174,7 +174,7 @@ checkoutcvs ()
 	# now, do the real checkout
 	echo ">> Fetching the \"${what}\" subset of NetBSD source tree to:"
 	echo "   "`pwd -P`
-	sh listsrcdirs -c ${what} | xargs ${CVS} ${NBSRC_CVSFLAGS} ${op} \
+	sh listsrcdirs -c ${what} | xargs ${CVS} ${op} \
 	    ${prune} ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
 	      || die checkout failed
 
