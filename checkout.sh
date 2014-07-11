@@ -44,7 +44,7 @@
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
 NBSRC_CVSDATE="20140526 1100UTC"
-NBSRC_CVSFLAGS="-z3 -d ${BUILDRUMP_CVSROOT}"
+NBSRC_CVSFLAGS="-d ${BUILDRUMP_CVSROOT}"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
