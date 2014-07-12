@@ -67,12 +67,13 @@ NBSRC_EXTRA_sys='
 	src/tools/Makefile;
     20140620 1300UTC:
 	src/sys/rump/librump/rumpvfs/devnodes.c
-	src/sys/rump/Makefile.rump
-	src/sys/rump/README.compileopts;
+	src/sys/rump/Makefile.rump;
     20140622 2030UTC:
         src/sys/rump/librump/rumpkern/intr.c;
     20140629 1140UTC:
-	src/sys/rump/librump/rumpkern/rump.c'
+	src/sys/rump/librump/rumpkern/rump.c;
+    20140711 2030UTC:
+	src/sys/rump/README.compileopts'
 
 NBSRC_EXTRA_posix='
     20140613 1600UTC:
@@ -80,7 +81,17 @@ NBSRC_EXTRA_posix='
     20140615 1440UTC:
 	src/lib/librumpuser/rumpuser_sp.c;
     20140622 2030UTC:
-        src/lib/librumpuser/rumpuser_pth.c'
+        src/lib/librumpuser/rumpuser_pth.c;
+    20140709 2350UTC:
+	src/lib/librumpuser/rumpuser.c
+	src/lib/librumpuser/rumpuser_file.c
+	src/lib/librumpuser/rumpuser_mem.c;
+    20140711 2030UTC:
+	src/lib/librumpuser/Makefile
+	src/lib/librumpuser/rumpfiber.c
+	src/lib/librumpuser/rumpfiber.h
+	src/lib/librumpuser/rumpfiber_bio.c
+	src/lib/librumpuser/rumpfiber_sp.c'
 
 NBSRC_EXTRA_usr='
     20140616 1200UTC:
