@@ -8,14 +8,15 @@ before_script:
   - ./buildrump.sh checkout
 
 env:
-  - LIBTYPE='MKPIC=no' BUILDTYPE=''
-  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE=''
-  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-DDD'
-  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-r'
+  - LIBTYPE='MKPIC=no' BUILDTYPE='' TESTS='tests'
+  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='' TESTS='tests'
+  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-DDD' TESTS='tests'
+  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-r' TESTS='tests'
+  - LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-V RUMPUSER_THREADS=fiber -V RUMP_CURLWP=hypercall' TESTS=''
 
 script:
   -  dirsuf=${LIBTYPE}.${BUILDTYPE}
-  -  ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 -V ${LIBTYPE} ${BUILDTYPE} fullbuild tests
+  -  ./buildrump.sh -o obj.${dirsuf} -d rump.${dirsuf} -qq -j16 -V ${LIBTYPE} ${BUILDTYPE} fullbuild ${TESTS}
 
 notifications:
   irc:
