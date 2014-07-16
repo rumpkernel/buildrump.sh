@@ -233,7 +233,7 @@ checkoutgit ()
 		cd ${SRCDIR}
 		[ -z "$(${GIT} status --porcelain)" ] \
 		    || die "Cloned repo in ${SRCDIR} is not clean, aborting."
-		${GIT} fetch origin master || die Failed to update git repo
+		${GIT} fetch origin buildrump-src || die Failed to fetch repo
 	else
 		${GIT} clone -n ${GITREPO} ${SRCDIR} || die Clone failed
 		cd ${SRCDIR}
