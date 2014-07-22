@@ -73,7 +73,10 @@ NBSRC_EXTRA_sys='
     20140629 1140UTC:
 	src/sys/rump/librump/rumpkern/rump.c;
     20140711 2030UTC:
-	src/sys/rump/README.compileopts'
+	src/sys/rump/README.compileopts;
+    20140722 1333UTC:
+	src/sys/rump/dev/lib/libvnd
+	src/sys/dev/vnd.c'
 
 NBSRC_EXTRA_posix='
     20140613 1600UTC:
