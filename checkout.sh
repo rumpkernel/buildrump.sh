@@ -75,6 +75,7 @@ NBSRC_EXTRA_sys='
     20140711 2030UTC:
 	src/sys/rump/README.compileopts;
     20140722 1333UTC:
+	src/sys/rump/dev/Makefile.rumpdevcomp
 	src/sys/rump/dev/lib/libvnd
 	src/sys/dev/vnd.c'
 
