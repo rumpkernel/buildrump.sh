@@ -60,7 +60,6 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/dev/lib/libmiiphy/Makefile;
     20140613 1600UTC:
 	src/sys/rump/include/rump/rump.h
-	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/rump/librump/rumpvfs/rumpfs.c
 	src/sys/rump/librump/rumpdev/rump_dev.c;
     20140615 1440UTC:
@@ -74,7 +73,10 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/librump/rumpkern/rump.c;
     20140711 2030UTC:
 	src/sys/rump/README.compileopts;
-    20140722 1333UTC:
+    20140723 1145UTC:
+	src/sys/kern/makesyscalls.sh
+	src/sys/rump/librump/rumpkern/rump_syscalls.c
+	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/rump/dev/Makefile.rumpdevcomp
 	src/sys/rump/dev/lib/libvnd
 	src/sys/dev/vnd.c'
