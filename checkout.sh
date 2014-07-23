@@ -77,6 +77,8 @@ NBSRC_EXTRA_sys='
 	src/sys/kern/makesyscalls.sh
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
 	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/sys/syscallargs.h
+	src/sys/sys/syscall.h
 	src/sys/rump/dev/Makefile.rumpdevcomp
 	src/sys/rump/dev/lib/libvnd
 	src/sys/dev/vnd.c'
