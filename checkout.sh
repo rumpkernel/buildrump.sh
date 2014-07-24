@@ -85,20 +85,8 @@ NBSRC_EXTRA_sys='
 NBSRC_EXTRA_posix='
     20140613 1600UTC:
 	src/lib/librumpvfs/rump_etfs.3;
-    20140615 1440UTC:
-	src/lib/librumpuser/rumpuser_sp.c;
-    20140622 2030UTC:
-        src/lib/librumpuser/rumpuser_pth.c;
-    20140709 2350UTC:
-	src/lib/librumpuser/rumpuser.c
-	src/lib/librumpuser/rumpuser_file.c
-	src/lib/librumpuser/rumpuser_mem.c;
-    20140711 2030UTC:
-	src/lib/librumpuser/Makefile
-	src/lib/librumpuser/rumpfiber.c
-	src/lib/librumpuser/rumpfiber.h
-	src/lib/librumpuser/rumpfiber_bio.c
-	src/lib/librumpuser/rumpfiber_sp.c'
+    20140724 1200UTC:
+	src/lib/librumpuser'
 
 NBSRC_EXTRA_usr='
     20140616 1200UTC:
