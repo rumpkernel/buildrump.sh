@@ -67,14 +67,12 @@ NBSRC_EXTRA_sys='
     20140620 1300UTC:
 	src/sys/rump/librump/rumpvfs/devnodes.c
 	src/sys/rump/Makefile.rump;
-    20140622 2030UTC:
-        src/sys/rump/librump/rumpkern/intr.c;
-    20140629 1140UTC:
-	src/sys/rump/librump/rumpkern/rump.c;
-    20140711 2030UTC:
-	src/sys/rump/README.compileopts;
     20140723 1145UTC:
+	src/sys/rump/librump/rumpkern/intr.c
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/rump/README.compileopts
 	src/sys/kern/makesyscalls.sh
+	src/sys/kern/syscalls.master
 	src/sys/rump/librump/rumpkern/rump_syscalls.c
 	src/sys/rump/include/rump/rump_syscalls.h
 	src/sys/sys/syscallargs.h
