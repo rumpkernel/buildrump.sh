@@ -80,7 +80,9 @@ NBSRC_EXTRA_sys='
 	src/sys/kern/kern_sysctl.c
 	src/sys/rump/dev/Makefile.rumpdevcomp
 	src/sys/rump/dev/lib/libvnd
-	src/sys/dev/vnd.c'
+	src/sys/dev/vnd.c;
+    20140803 0115UTC:
+	src/build.sh'
 
 NBSRC_EXTRA_posix='
     20140613 1600UTC:
