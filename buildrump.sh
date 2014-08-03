@@ -1125,7 +1125,7 @@ evaltarget ()
 	"amd64"|"x86_64")
 		if ${THIRTYTWO} ; then
 			MACHINE="i386"
-			MACH_ARCH="i486"
+			MACH_ARCH="i386"
 			TOOLABI="elf"
 		else
 			MACHINE="amd64"
@@ -1134,7 +1134,7 @@ evaltarget ()
 		;;
 	"i386"|"i486"|"i586"|"i686")
 		MACHINE="i386"
-		MACH_ARCH="i486"
+		MACH_ARCH="i386"
 		TOOLABI="elf"
 		;;
 	arm*)
