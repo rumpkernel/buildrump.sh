@@ -573,7 +573,8 @@ makemake ()
 	stage=$2
 	cmd=$3
 
-	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh -m ${MACHINE} -u \
+	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh \
+	    -m ${MACHINE} -a ${MACH_ARCH} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${PCC} ${BEQUIET} \
@@ -1001,10 +1002,10 @@ probearm ()
 
 	# check for big endian
 	if cppdefines '__ARMEL__'; then
-		MACHINE="evbarm"
+		MACHINE="evbearm-el"
 		MACH_ARCH="arm"
 	else
-		MACHINE="evbarm-eb"
+		MACHINE="evbearm-eb"
 		MACH_ARCH="armeb"
 	fi
 
