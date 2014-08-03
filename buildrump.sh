@@ -574,7 +574,7 @@ makemake ()
 	cmd=$3
 
 	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh \
-	    -m ${MACHINE} -a ${MACH_ARCH} -u \
+	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
 	    ${LLVM} ${PCC} ${BEQUIET} \
@@ -1009,6 +1009,8 @@ probearm ()
 		MACH_ARCH="armeb"
 	fi
 
+	TOOLABI="elf-eabi"
+
 	# NetBSD/evbarm is softfloat by default, but force the NetBSD
 	# build to use hardfloat if the compiler defaults to VFP.
 	# This is because the softfloat env is not always functional
@@ -1134,11 +1136,10 @@ evaltarget ()
 		;;
 	"i386"|"i486"|"i586"|"i686")
 		MACHINE="i386"
-		MACH_ARCH="i386"
+		MACH_ARCH="i486"
 		TOOLABI="elf"
 		;;
 	arm*)
-		TOOLABI="elf"
 		probearm
 		;;
 	"sparc")
