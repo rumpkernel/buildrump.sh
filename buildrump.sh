@@ -1020,6 +1020,24 @@ probearm ()
 	fi
 }
 
+# aarch64 requires a few checks
+probeaarch64 ()
+{
+
+	# check for big endian
+	if cppdefines '__AARCH64EL__'; then
+		MACHINE="evbarm64-el"
+		MACH_ARCH="aarch64"
+	else
+		MACHINE="evbarm64-eb"
+		MACH_ARCH="aarch64_be"
+	fi
+
+	TOOLABI=""
+
+	${TITANMODE} || ${CC} --version | grep -q clang || die aarch64 requires clang
+}
+
 # MIPS requires a few extra checks
 probemips ()
 {
@@ -1141,6 +1159,9 @@ evaltarget ()
 		;;
 	arm*)
 		probearm
+		;;
+	aarch64*)
+		probeaarch64
 		;;
 	"sparc")
 		if ${THIRTYTWO} ; then
