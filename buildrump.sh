@@ -1035,6 +1035,9 @@ probeaarch64 ()
 	fi
 
 	TOOLABI=""
+
+	# the NetBSD aarch64 port uses long long for int64_t
+	appendvar EXTRA_CWARNFLAGS -Wno-format
 }
 
 # MIPS requires a few extra checks
