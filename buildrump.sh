@@ -621,7 +621,8 @@ makebuild ()
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
-	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" ]; then
+	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" \
+	     ${MACHINE} != "aarch64" ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
 
