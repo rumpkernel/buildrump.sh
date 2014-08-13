@@ -1035,8 +1035,6 @@ probeaarch64 ()
 	fi
 
 	TOOLABI=""
-
-	${TITANMODE} || ${CC} --version | grep -q clang || die aarch64 requires clang
 }
 
 # MIPS requires a few extra checks
