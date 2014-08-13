@@ -582,6 +582,7 @@ makemake ()
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
 	    -V MKGROFF=no \
+	    -V MKLLVM=no \
 	    -V MKLINT=no \
 	    -V MKZFS=no \
 	    -V MKDYNAMICROOT=no \
@@ -1034,8 +1035,6 @@ probeaarch64 ()
 	fi
 
 	TOOLABI=""
-
-	${TITANMODE} || ${CC} --version | grep -q clang || die aarch64 requires clang
 }
 
 # MIPS requires a few extra checks
