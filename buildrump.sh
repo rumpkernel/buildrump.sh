@@ -70,14 +70,14 @@ helpme ()
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
-	printf "\t-32: build 32bit binaries (if supported).  default: from cc\n"
-	printf "\t-64: build 64bit binaries (if supported).  default: from cc\n"
 	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
 	printf "\t-N: emulate NetBSD, set -D__NetBSD__ etc.  default: no\n"
 	echo
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
-	printf "\t-F: specify flags: eg -F CFLAGS=...\n"
+	printf "\t-F: specify build flags with -F XFLAGS=value\n"
+	printf "\t    possible values for XFLAGS:\n"
+	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS, DBG\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
