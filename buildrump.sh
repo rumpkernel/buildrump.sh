@@ -810,9 +810,6 @@ parseargs ()
 
 	while getopts 'd:DhHj:kNo:qrs:T:V:F:' opt; do
 		case "$opt" in
-		j)
-			JNUM=${OPTARG}
-			;;
 		d)
 			DESTDIR=${OPTARG}
 			;;
@@ -827,37 +824,6 @@ parseargs ()
 			[ ${debugginess} -gt 0 ] && DBG='-O1 -g'
 			[ ${debugginess} -gt 1 ] && RUMP_DEBUG=1
 			[ ${debugginess} -gt 2 ] && RUMP_LOCKDEBUG=1
-			;;
-		H)
-			TITANMODE=true
-			;;
-		k)
-			KERNONLY=true
-			;;
-		N)
-			NATIVENETBSD=true
-			;;
-		o)
-			OBJDIR=${OPTARG}
-			;;
-		q)
-			# build.sh handles value going negative
-			NOISE=$((NOISE-1))
-			;;
-		r)
-			[ ${debugginess} -gt 0 ] \
-			    && die Cannot specify debbuggy release
-			RUMP_DIAGNOSTIC=no
-			DBG=''
-			;;
-		s)
-			SRCDIR=${OPTARG}
-			;;
-		T)
-			BRTOOLDIR=${OPTARG}
-			;;
-		V)
-			appendvar BUILDSH_VARGS -V ${OPTARG}
 			;;
 		F)
 			ARG=${OPTARG#*=}
@@ -887,6 +853,40 @@ parseargs ()
 					die Unknown flag: ${OPTARG}
 					;;
 			esac
+			;;
+		H)
+			TITANMODE=true
+			;;
+		j)
+			JNUM=${OPTARG}
+			;;
+		k)
+			KERNONLY=true
+			;;
+		N)
+			NATIVENETBSD=true
+			;;
+		o)
+			OBJDIR=${OPTARG}
+			;;
+		q)
+			# build.sh handles value going negative
+			NOISE=$((NOISE-1))
+			;;
+		r)
+			[ ${debugginess} -gt 0 ] \
+			    && die Cannot specify debbuggy release
+			RUMP_DIAGNOSTIC=no
+			DBG=''
+			;;
+		s)
+			SRCDIR=${OPTARG}
+			;;
+		T)
+			BRTOOLDIR=${OPTARG}
+			;;
+		V)
+			appendvar BUILDSH_VARGS -V ${OPTARG}
 			;;
 		-)
 			break
