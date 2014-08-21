@@ -8,6 +8,12 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
 	[changes not yet part of a snapshot]
 
++ add initial aarch64 support
++ support cooperatively scheduled fibers as an alternative to
+  pthreads on POSIX platforms
++ migrate to new github mirror of NetBSD source code at
+  https://github.com/rumpkernel/src-netbsd (branch buildrump-src is
+  the default one used by buildrump.sh)
 + add -F option for setting flags; replaces -32 and -64 options
 + add rump_boot_etfs_register(); used for registering etfs keys
   that will be visible immediately when (if) mountroot runs during
