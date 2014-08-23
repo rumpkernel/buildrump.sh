@@ -1118,6 +1118,7 @@ evaltarget ()
 		target_supported=false
 		;;
 	"osx")
+		echo '>> Mach-O object format used by OS X is not yet supported'
 		target_supported=false
 		;;
 	"unknown"|*)
