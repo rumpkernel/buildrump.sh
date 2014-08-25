@@ -406,7 +406,11 @@ maketools ()
 		chmod 755 ${tname}
 	done
 	# create a cpp wrapper, but run it via cc -E
-	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-cpp
+	if [ "${CC_FLAVOR}" = 'clang' ]; then
+		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-clang-cpp
+	else
+		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-cpp
+	fi
 	printf '#!/bin/sh\n\nexec %s -E -x c "${@}"\n' ${CC} > ${tname}
 	chmod 755 ${tname}
 
