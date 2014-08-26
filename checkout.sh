@@ -260,7 +260,18 @@ hubdateonebranch ()
 	fi
 	echo ">> merging \"${branchbase}-src-clean\" to \"${branchbase}-src\""
 	${GIT} checkout ${branchbase}-src
-	${GIT} merge --no-edit ${branchbase}-src-clean
+
+	# we might have conflicts at this point.  ask user to merge manually
+	if ! ${GIT} merge --no-edit ${branchbase}-src-clean; then
+		echo '>> MERGE CONFLICT!'
+		echo '>> Merge manually and commit in another terminal.'
+		echo '>> Press enter to continue'
+		read jooei
+		if [ ! -z "$(${GIT} status --porcelain)" ]; then
+			echo '>> Merge conflicts still present.  Aborting'
+			exit 1
+		fi
+	fi
 }
 
 # do a cvs checkout and push the results into the github mirror
