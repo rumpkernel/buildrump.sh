@@ -43,56 +43,20 @@
 # available via git.
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
-NBSRC_CVSDATE="20140526 1100UTC"
+NBSRC_CVSDATE="20140826 1100UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-NBSRC_LISTDATE="20140709 1230UTC"
+NBSRC_LISTDATE=""
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA_sys='
-    20140528 2100UTC:
-	src/sys/rump/librump/rumpkern/emul.c
-        src/sys/rump/net/lib/libshmif/if_shmem.c
-        src/sys/rump/librump/rumpvfs/rumpfs.c
-	src/sys/rump/dev/lib/libmiiphy/Makefile;
-    20140613 1600UTC:
-	src/sys/rump/include/rump/rump.h
-	src/sys/rump/librump/rumpvfs/rumpfs.c
-	src/sys/rump/librump/rumpdev/rump_dev.c;
-    20140615 1440UTC:
-	src/tools/Makefile;
-    20140620 1300UTC:
-	src/sys/rump/librump/rumpvfs/devnodes.c
-	src/sys/rump/Makefile.rump;
-    20140724 1202UTC:
-	src/sys/rump/librump/rumpkern/intr.c
-	src/sys/rump/librump/rumpkern/rump.c
-	src/sys/rump/README.compileopts
-	src/sys/kern/makesyscalls.sh
-	src/sys/kern/syscalls.master
-	src/sys/rump/librump/rumpkern/rump_syscalls.c
-	src/sys/rump/include/rump/rump_syscalls.h
-	src/sys/sys/syscallargs.h
-	src/sys/sys/syscall.h
-	src/sys/kern/kern_sysctl.c
-	src/sys/rump/dev/Makefile.rumpdevcomp
-	src/sys/rump/dev/lib/libvnd
-	src/sys/dev/vnd.c;
-    20140803 0115UTC:
-	src/build.sh'
+NBSRC_EXTRA_sys=''
 
-NBSRC_EXTRA_posix='
-    20140613 1600UTC:
-	src/lib/librumpvfs/rump_etfs.3;
-    20140724 1200UTC:
-	src/lib/librumpuser'
+NBSRC_EXTRA_posix=''
 
-NBSRC_EXTRA_usr='
-    20140616 1200UTC:
-        src/crypto/external/bsd/openssl'
+NBSRC_EXTRA_usr=''
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
