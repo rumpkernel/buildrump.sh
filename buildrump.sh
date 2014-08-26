@@ -299,7 +299,7 @@ maketools ()
 		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
 		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
 		if [ $? -ne 0 ]; then
-			if [ "${MKPIC}" = "no" ]; then
+			if ${KERNONLY} || [ "${MKPIC}" = "no" ]; then
 				LDSCRIPT='no'
 			else
 				LDSCRIPT='ctor'
