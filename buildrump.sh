@@ -1170,7 +1170,7 @@ evaltarget ()
 	aarch64*)
 		probeaarch64
 		;;
-	"sparc")
+	"sparc"|"sparc64")
 		if ${THIRTYTWO} ; then
 			MACHINE="sparc"
 			MACH_ARCH="sparc"
