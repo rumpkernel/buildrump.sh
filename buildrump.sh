@@ -779,7 +779,7 @@ evaltools ()
 	*-ibm-aix*)
 		TARGET=aix
 		;;
-	*-minix)
+	*-minix*)
 		TARGET=minix
 		;;
 	*-none-*)
