@@ -77,7 +77,8 @@ helpme ()
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-F: specify build flags with -F XFLAGS=value\n"
 	printf "\t    possible values for XFLAGS:\n"
-	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS, DBG\n"
+	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS,"
+	printf "\t    MKDEPFLAGS, DBG\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
@@ -110,6 +111,7 @@ printenv ()
 	printoneconfig 'Env' 'BUILDRUMP_CFLAGS' "${BUILDRUMP_CFLAGS}"
 	printoneconfig 'Env' 'BUILDRUMP_AFLAGS' "${BUILDRUMP_AFLAGS}"
 	printoneconfig 'Env' 'BUILDRUMP_LDFLAGS' "${BUILDRUMP_LDFLAGS}"
+	printoneconfig 'Env' 'BUILDRUMP_MKDEPFLAGS' "${BUILDRUMP_MKDEPFLAGS}"
 }
 
 appendmkconf ()
@@ -480,6 +482,7 @@ EOF
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
+	appendmkconf 'Probe' "${EXTRA_MKDEPFLAGS}" "MKDEPFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
 	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
 	unset _tmpvar
@@ -514,6 +517,7 @@ CPPFLAGS+=\${BUILDRUMP_CPPFLAGS}
 CFLAGS+=\${BUILDRUMP_CFLAGS}
 AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
+MKDEPFLAGS+=\${BUILDRUMP_MKDEPFLAGS}
 EOF
 
 	# Temporary fix for CTFMERGE issues on eg FreeBSD.  Yes, the
@@ -849,6 +853,9 @@ parseargs ()
 					appendvar EXTRA_CFLAGS "${ARG}"
 					appendvar EXTRA_AFLAGS "${ARG}"
 					appendvar EXTRA_LDFLAGS "${ARG}"
+					;;
+				MKDEPFLAGS\=*)
+					appendvar EXTRA_MKDEPFLAGS "${ARG}"
 					;;
 				DBG\=*)
 					appendvar F_DBG "${ARG}"
