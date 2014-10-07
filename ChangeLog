@@ -6,8 +6,9 @@ Note that most improvements due to the bumping of the NetBSD timestamp
 are not described.  For a more complete list of NetBSD changes, see:
 http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 
-	[changes not yet part of a snapshot]
+	Snapshot 7.10.2014
 
++ update NetBSD timestamp to 20140826 1100UTC
 + add initial aarch64 support
 + support cooperatively scheduled fibers as an alternative to
   pthreads on POSIX platforms
