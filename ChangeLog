@@ -9,6 +9,8 @@ http://ftp.netbsd.org/pub/NetBSD/NetBSD-current/src/doc/CHANGES
 	Snapshot 7.10.2014
 
 + update NetBSD timestamp to 20140826 1100UTC
++ remove prehistoric examples subdirectory, just use rumprun-*
+  if you want a POSIX-like API to the rump kernel
 + add initial aarch64 support
 + support cooperatively scheduled fibers as an alternative to
   pthreads on POSIX platforms
