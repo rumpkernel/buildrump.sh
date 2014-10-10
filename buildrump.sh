@@ -627,8 +627,9 @@ makebuild ()
 	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
 	    sys/rump/include ${BRDIR}/brlib"
 
-	if [ ${MACHINE} != "sparc" -a ${MACHINE} != "sparc64" \
-	     -a ${MACHINE} != "aarch64" ]; then
+	if [ ${MACHINE} == "i386" -o ${MACHINE} == "amd64" \
+	     -o ${MACHINE} == "evbearm-el" -o ${MACHINE} == "evbearm-eb" \
+	     -o ${MACHINE} == "evbppc" -o ${MACHINE} == "evbppc64" ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
 
