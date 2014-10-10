@@ -1215,6 +1215,10 @@ evaltarget ()
 			MACH_ARCH="powerpc64"
 		fi
 		;;
+	"alpha")
+		MACHINE="alpha"
+		MACH_ARCH="alpha"
+		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
