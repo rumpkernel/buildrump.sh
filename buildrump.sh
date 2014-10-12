@@ -1219,6 +1219,15 @@ evaltarget ()
 		MACHINE="alpha"
 		MACH_ARCH="alpha"
 		;;
+	"riscv"|"riscv64")
+		if ${THIRTYTWO} ; then
+			MACHINE="riscv"
+			MACH_ARCH="riscv32"
+		else
+			MACHINE="riscv"
+			MACH_ARCH="riscv64"
+		fi
+		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
