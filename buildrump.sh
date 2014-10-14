@@ -282,6 +282,10 @@ maketools ()
 	if ! ${AR} -V 2>/dev/null | egrep '(GNU|BSD) ar' > /dev/null ; then
 		die Need GNU or BSD ar "(`type ${AR}`)"
 	fi
+	# Check for GNU nm
+	if ! ${NM} -V 2>/dev/null | egrep 'GNU nm' > /dev/null ; then
+		die Need GNU nm "(`type ${NM}`)"
+	fi
 
 	cd ${OBJDIR}
 
