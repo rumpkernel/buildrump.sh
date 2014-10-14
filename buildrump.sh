@@ -770,7 +770,7 @@ evaltools ()
 	*-netbsd*)
 		TARGET=netbsd
 		;;
-	*-sun-solaris*)
+	*-sun-solaris*|*-pc-solaris*)
 		TARGET=sunos
 		;;
 	*-pc-cygwin)
