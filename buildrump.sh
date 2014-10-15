@@ -196,6 +196,17 @@ probenm ()
 	[ "${lastfield}" = 'testsym' ] || die incompatible output from "${NM}"
 }
 
+# For ar, we just check the --version.  Works so far.  If it breaks,
+# need to start building archives ...
+probear ()
+{
+
+	# Check for GNU/BSD ar
+	if ! ${AR} -V 2>/dev/null | egrep '(GNU|BSD) ar' > /dev/null ; then
+		die Need GNU or BSD ar "(`type ${AR}`)"
+	fi
+}
+
 # check if cpp defines the given parameter (with any value)
 cppdefines ()
 {
@@ -289,11 +300,7 @@ maketools ()
 	# Check for ld because we need to make some adjustments based on it
 	probeld
 	probenm
-
-	# Check for GNU/BSD ar
-	if ! ${AR} -V 2>/dev/null | egrep '(GNU|BSD) ar' > /dev/null ; then
-		die Need GNU or BSD ar "(`type ${AR}`)"
-	fi
+	probear
 
 	cd ${OBJDIR}
 
