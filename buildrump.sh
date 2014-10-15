@@ -194,7 +194,7 @@ probenm ()
 	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
 	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '/testsym/{print $NF}')
 	if [ "${lastfield}" != 'testsym' ]; then
-		echo nm: got \"${lastfield}\"
+		echo nm: expected \"testsym\", got \"${lastfield}\"
 		die incompatible output from probing \"${NM}\"
 	fi
 }
