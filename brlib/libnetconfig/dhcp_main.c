@@ -333,13 +333,15 @@ rump_netconfig_dhcp_ipv4_oneshot(const char *ifname)
 		goto out;
 	}
 
-	for (tries = 0; tries < MAXTRIES; tries++) {
-		if (send_request(iface) == 0)
-			break;
-		kpause("dhcpreq", false, hz, NULL);
-	}
+	for (rv = false, tries = 0; !rv && tries < MAXTRIES; tries++) {
+		if (send_request(iface) != 0) {
+			kpause("dhcpreq", false, hz, NULL);
+			continue;
+		}
 
-	if (!get_ack(iface)) {
+		rv = get_ack(iface);
+	}
+	if (!rv) {
 		error = EADDRNOTAVAIL; /* hoh hoh hoh */
 		goto out;
 	}
