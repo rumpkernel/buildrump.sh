@@ -184,6 +184,18 @@ probeld ()
 	fi
 }
 
+# Check if $NM outputs the format we except, i.e. if symbols
+# are the alone in the last whitespace-separated column.
+# GNU and OpenBSD nm do this, e.g. Solaris does not.
+probenm ()
+{
+
+	echo 'void testsym(void); void testsym(void) {return;}\n' \
+	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
+	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '{print $NF}')
+	[ "${lastfield}" = 'testsym' ] || die incompatible output from "${NM}"
+}
+
 # check if cpp defines the given parameter (with any value)
 cppdefines ()
 {
@@ -274,17 +286,13 @@ maketools ()
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
 
-	#
 	# Check for ld because we need to make some adjustments based on it
 	probeld
+	probenm
 
 	# Check for GNU/BSD ar
 	if ! ${AR} -V 2>/dev/null | egrep '(GNU|BSD) ar' > /dev/null ; then
 		die Need GNU or BSD ar "(`type ${AR}`)"
-	fi
-	# Check for GNU nm
-	if ! ${NM} -V 2>/dev/null | egrep 'GNU nm' > /dev/null ; then
-		die Need GNU nm "(`type ${NM}`)"
 	fi
 
 	cd ${OBJDIR}
