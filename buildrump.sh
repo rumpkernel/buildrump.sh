@@ -192,7 +192,7 @@ probenm ()
 
 	echo 'void testsym(void); void testsym(void) {return;}' \
 	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
-	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '{print $NF}')
+	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '/testsym/{print $NF}')
 	if [ "${lastfield}" != 'testsym' ]; then
 		echo nm: got \"${lastfield}\"
 		die incompatible output from probing \"${NM}\"
