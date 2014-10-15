@@ -119,7 +119,7 @@ send_request(struct interface *iface)
 }
 
 /* wait for 5s by default */
-#define RESPWAIT 5000
+#define RESPWAIT 5
 static bool
 get_network(struct interface *iface, uint8_t *raw,
 	const struct dhcp_message **dhcpp)
@@ -136,9 +136,11 @@ get_network(struct interface *iface, uint8_t *raw,
 		register_t rv[2];
 		struct timespec ts;
 
-		ts.tv_sec = 5;
+		ts.tv_sec = RESPWAIT;
 		ts.tv_nsec = 0;
+
 		if (pollcommon(rv, &pfd, 1, &ts, NULL) != 0 || rv[0] != 1) {
+			printf("dhcp get: timed out waiting for response.\n");
 			return false;
 		}
 			
