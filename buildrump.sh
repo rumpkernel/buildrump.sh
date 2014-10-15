@@ -193,7 +193,10 @@ probenm ()
 	echo 'void testsym(void); void testsym(void) {return;}' \
 	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
 	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '{print $NF}')
-	[ "${lastfield}" = 'testsym' ] || die incompatible output from "${NM}"
+	if [ "${lastfield}" != 'testsym' ]; then
+		echo nm: got \"${lastfield}\"
+		die incompatible output from probing \"${NM}\"
+	fi
 }
 
 # For ar, we just check the --version.  Works so far.  If it breaks,
