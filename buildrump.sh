@@ -190,7 +190,7 @@ probeld ()
 probenm ()
 {
 
-	echo 'void testsym(void); void testsym(void) {return;}\n' \
+	echo 'void testsym(void); void testsym(void) {return;}' \
 	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
 	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '{print $NF}')
 	[ "${lastfield}" = 'testsym' ] || die incompatible output from "${NM}"
