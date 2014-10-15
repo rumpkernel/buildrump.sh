@@ -572,7 +572,7 @@ EOF
 	# so we provide some foo which macquerades as libz.a.
 	export ac_cv_header_zlib_h=yes
 	echo 'int gzdopen(int); int gzdopen(int v) { return 0; }' > fakezlib.c
-	${HOST_CC:-cc} -o libz.a -c fakezlib.c
+	${HOST_CC} -o libz.a -c fakezlib.c
 
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
@@ -734,6 +734,11 @@ makekernelheaders ()
 
 evaltools ()
 {
+
+	# is the compiler which targets the host "cc" or something else
+	: ${HOST_CC:=cc}
+	type ${HOST_CC} >/dev/null 2>&1 \
+	    || die set '${HOST_CC}' to a host targeted cc "(now \"${HOST_CC}\")"
 
 	# check for crossbuild
 	: ${CC:=cc}
