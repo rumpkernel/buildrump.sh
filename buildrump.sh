@@ -270,6 +270,32 @@ checkcheckout ()
 	fi
 }
 
+rumpuser_probe ()
+{
+
+	#
+	# Check if the target supports posix_memalign()
+	doesitbuild \
+	    '#include <stdlib.h>
+		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
+	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
+
+	doesitbuild \
+	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
+	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
+	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
+
+	# two or three-arg pthread_setname_np().  or none?
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
+}
+
 maketools ()
 {
 
@@ -333,17 +359,7 @@ maketools ()
 		LDSCRIPT='sun'
 	fi
 
-	#
-	# Check if the target supports posix_memalign()
-	doesitbuild \
-	    '#include <stdlib.h>
-		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
-	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
-
-	doesitbuild \
-	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
-	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
-	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
+	rumpuser_probe
 
 	# does target support __thread.  if yes, optimize curlwp
 	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
@@ -353,16 +369,6 @@ maketools ()
 	# to avoid line number conflicts
 	doesitbuild 'int a = __COUNTER__;\n' -c
 	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
-
-	# two or three-arg pthread_setname_np().  or none?
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 
 	# linker supports --warn-shared-textrel
 	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
