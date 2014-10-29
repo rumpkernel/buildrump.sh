@@ -312,19 +312,9 @@ probe_rumpuserbits ()
 	fi
 }
 
-maketools ()
+# probes relating to cc and ld, mostly affect how we build kernel code
+probe_compiler ()
 {
-
-	#
-	# Perform various checks and set values
-	#
-
-	checkcheckout
-
-	#
-	# does build.sh even exist, or is this just a kernel-only checkout?
-	#
-	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
 
 	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
@@ -341,13 +331,6 @@ maketools ()
 	else
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
-
-	# Check for ld because we need to make some adjustments based on it
-	probeld
-	probenm
-	probear
-
-	cd ${OBJDIR}
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
 	# uses the different flavor of size_t (int vs. long) than what
@@ -375,8 +358,6 @@ maketools ()
 		LDSCRIPT='sun'
 	fi
 
-	probe_rumpuserbits
-
 	# does target support __thread.  if yes, optimize curlwp
 	if ! ${KERNONLY}; then
 		doesitbuild \
@@ -392,6 +373,31 @@ maketools ()
 	# linker supports --warn-shared-textrel
 	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
 	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
+}
+
+maketools ()
+{
+
+	#
+	# Perform various checks and set values
+	#
+
+	checkcheckout
+
+	#
+	# does build.sh even exist, or is this just a kernel-only checkout?
+	#
+	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
+
+	# Check for ld because we need to make some adjustments based on it
+	probeld
+	probenm
+	probear
+
+	cd ${OBJDIR}
+
+	probe_rumpuserbits
+	probe_compiler
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
