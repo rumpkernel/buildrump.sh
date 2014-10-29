@@ -378,8 +378,11 @@ maketools ()
 	probe_rumpuserbits
 
 	# does target support __thread.  if yes, optimize curlwp
-	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
-	[ $? -eq 0 ] && RUMP_CURLWP=__thread
+	if ! ${KERNONLY}; then
+		doesitbuild \
+		    '__thread int lanka; int main(void) {return lanka;}\n'
+		[ $? -eq 0 ] && RUMP_CURLWP=__thread
+	fi
 
 	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
 	# to avoid line number conflicts
