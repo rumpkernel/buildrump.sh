@@ -398,10 +398,9 @@ maketools ()
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
 	# its presence and if its not available, just leave out if_virt
 	# instead of suffering a crushing build failure.
-	if [ "${TARGET}" = 'linux' ] && ! ${NATIVEBUILD} ; then
+	if [ "${TARGET}" = 'linux' ]; then
 		doesitbuild '#include <linux/if_tun.h>' -c || RUMP_VIRTIF=no
-	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' \
-	    -a "${TARGET}" != 'linux' ]; then
+	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' ]; then
 		RUMP_VIRTIF=no
 	fi
 
