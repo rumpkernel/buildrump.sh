@@ -157,16 +157,6 @@ chkcrt ()
 	    && echo "_GCC_CRT${up}=" >>"${MKCONF}"
 }
 
-#
-# Create tools and wrappers.  This step needs to be run at least once
-# and is always run by default, but you might want to skip it for:
-# 1) iteration speed on a slow-ish host
-# 2) making manual modification to the tools for testing and avoiding
-#    the script nuke them on the next iteration
-#
-# external toolchain links are created in the format that
-# build.sh expects.
-#
 probeld ()
 {
 
@@ -375,6 +365,18 @@ probe_compiler ()
 	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
 }
 
+#
+# Create tools and wrappers.  This step needs to be run at least once.
+# The routine is run if the "tools" argument is specified.
+#
+# You might want to skip it because:
+# 1) iteration speed on a slow-ish host
+# 2) making manual modifications to the tools for testing and avoiding
+#    the script nuking them on the next iteration
+#
+# external toolchain links are created in the format that
+# build.sh expects.
+#
 maketools ()
 {
 
