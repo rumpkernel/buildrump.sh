@@ -270,7 +270,7 @@ checkcheckout ()
 	fi
 }
 
-rumpuser_probe ()
+probe_rumpuserbits ()
 {
 
 	#
@@ -375,7 +375,7 @@ maketools ()
 		LDSCRIPT='sun'
 	fi
 
-	rumpuser_probe
+	probe_rumpuserbits
 
 	# does target support __thread.  if yes, optimize curlwp
 	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
