@@ -293,6 +293,16 @@ probe_rumpuserbits ()
 			break
 		fi
 	done
+
+	# the musl env usually does not contain linux kernel headers
+	# by default.  Since we need <linux/if_tun.h> for virtif, probe
+	# its presence and if its not available, just leave out if_virt
+	# instead of suffering a crushing build failure.
+	if [ "${TARGET}" = 'linux' ]; then
+		doesitbuild '#include <linux/if_tun.h>' -c || RUMP_VIRTIF=no
+	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' ]; then
+		RUMP_VIRTIF=no
+	fi
 }
 
 # probes relating to cc and ld, mostly affect how we build kernel code
@@ -393,16 +403,6 @@ maketools ()
 
 	probe_compiler
 	${KERNONLY} || probe_rumpuserbits
-
-	# the musl env usually does not contain linux kernel headers
-	# by default.  Since we need <linux/if_tun.h> for virtif, probe
-	# its presence and if its not available, just leave out if_virt
-	# instead of suffering a crushing build failure.
-	if [ "${TARGET}" = 'linux' ]; then
-		doesitbuild '#include <linux/if_tun.h>' -c || RUMP_VIRTIF=no
-	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' ]; then
-		RUMP_VIRTIF=no
-	fi
 
 	#
 	# Create external toolchain wrappers.
