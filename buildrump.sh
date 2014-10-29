@@ -294,6 +294,22 @@ rumpuser_probe ()
 	    int main(void) {
 		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
+
+	# Do we need -lrt for time related stuff?
+	# Old glibc and Solaris need it, but newer glibc and most
+	# other systems do not need or have librt.
+	if ! ${KERNONLY} ; then
+		for l in '' '-lrt' ; do 
+			doesitbuild '#include <time.h>\n
+			    int main(void) {
+				struct timespec ts;
+				return clock_gettime(CLOCK_REALTIME, &ts);}' $l
+			if [ $? -eq 0 ]; then
+				EXTRA_RUMPUSER="$l"
+				break
+			fi
+		done
+	fi
 }
 
 maketools ()
@@ -373,22 +389,6 @@ maketools ()
 	# linker supports --warn-shared-textrel
 	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
 	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
-
-	# Do we need -lrt for time related stuff?
-	# Old glibc and Solaris need it, but newer glibc and most
-	# other systems do not need or have librt.
-	if ! ${KERNONLY} ; then
-		for l in '' '-lrt' ; do 
-			doesitbuild '#include <time.h>\n
-			    int main(void) {
-				struct timespec ts;
-				return clock_gettime(CLOCK_REALTIME, &ts);}' $l
-			if [ $? -eq 0 ]; then
-				EXTRA_RUMPUSER="$l"
-				break
-			fi
-		done
-	fi
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
