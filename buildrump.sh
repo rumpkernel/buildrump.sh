@@ -180,6 +180,7 @@ probenm ()
 		echo nm: expected \"testsym\", got \"${lastfield}\"
 		die incompatible output from probing \"${NM}\"
 	fi
+	rm -f ${OBJDIR}/probenm.o
 }
 
 # For ar, we just check the --version.  Works so far.  If it breaks,
@@ -582,6 +583,7 @@ EOF
 	export ac_cv_header_zlib_h=yes
 	echo 'int gzdopen(int); int gzdopen(int v) { return 0; }' > fakezlib.c
 	${HOST_CC} -o libz.a -c fakezlib.c
+	rm -f fakezlib.c
 
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
