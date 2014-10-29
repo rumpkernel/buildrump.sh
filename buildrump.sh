@@ -288,18 +288,16 @@ probe_rumpuserbits ()
 	# Do we need -lrt for time related stuff?
 	# Old glibc and Solaris need it, but newer glibc and most
 	# other systems do not need or have librt.
-	if ! ${KERNONLY} ; then
-		for l in '' '-lrt' ; do 
-			doesitbuild '#include <time.h>\n
-			    int main(void) {
-				struct timespec ts;
-				return clock_gettime(CLOCK_REALTIME, &ts);}' $l
-			if [ $? -eq 0 ]; then
-				EXTRA_RUMPUSER="$l"
-				break
-			fi
-		done
-	fi
+	for l in '' '-lrt' ; do
+		doesitbuild '#include <time.h>\n
+		    int main(void) {
+			struct timespec ts;
+			return clock_gettime(CLOCK_REALTIME, &ts);}' $l
+		if [ $? -eq 0 ]; then
+			EXTRA_RUMPUSER="$l"
+			break
+		fi
+	done
 }
 
 # probes relating to cc and ld, mostly affect how we build kernel code
@@ -398,8 +396,8 @@ maketools ()
 
 	cd ${OBJDIR}
 
-	probe_rumpuserbits
 	probe_compiler
+	${KERNONLY} || probe_rumpuserbits
 
 	# the musl env usually does not contain linux kernel headers
 	# by default.  Since we need <linux/if_tun.h> for virtif, probe
