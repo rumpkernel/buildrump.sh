@@ -205,7 +205,8 @@ cppdefines ()
 {
 
 	[ -z "${BUILDRUMP_CPPCACHE}" ] \
-	   && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS} -E -Wp,-dM - < /dev/null)
+	    && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS}	\
+		-E -Wp,-dM - < /dev/null)
 	var=${1}
 	(
 	    IFS=' '
@@ -226,8 +227,8 @@ doesitbuild ()
 
 	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
-	    | ${CC} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS} -x c - -o /dev/null $* \
-	      > /dev/null 2>&1
+	    | ${CC} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
+		-x c - -o /dev/null $* > /dev/null 2>&1
 }
 
 cctestandsetW ()
@@ -758,7 +759,7 @@ evaltools ()
 	# check for crossbuild
 	: ${CC:=cc}
 	NATIVEBUILD=true
-	[ ${CC} != 'cc' -a ${CC} != 'gcc' -a ${CC} != 'clang' -a ${CC} != 'pcc' ] \
+	[ $CC != 'cc' -a $CC != 'gcc' -a $CC != 'clang' -a $CC != 'pcc' ] \
 	    && NATIVEBUILD=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
@@ -774,13 +775,16 @@ evaltools ()
 		# (this is easier than adjusting IFS)
 		if ${CC} -v >/dev/null 2>&1 ; then
 			# then actually process the output of ${CC} -v
-			cc_target=$(LC_ALL=C ${CC} -v 2>&1 | sed -n 's/^Target: //p' )
-			[ -z "${cc_target}" ] && die failed to probe target of \"${CC}\"
+			cc_target=$(LC_ALL=C ${CC} -v 2>&1 \
+			    | sed -n 's/^Target: //p' )
+			[ -z "${cc_target}" ] \
+			    && die failed to probe target of \"${CC}\"
 		else
 			# this might be pcc
 			${CC} -v 2>&1 | grep pcc > /dev/null || \
-			    die \"${CC} -v failed\". Check that \"${CC}\" is a compiler
-			cc_target=$(${CC} -v 2>&1 | sed -n -e 's/^pcc.*for //' -e 's/,.*//p' )
+			    die \"${CC} -v failed\". Check \"${CC}\"
+			cc_target=$(${CC} -v 2>&1 \
+			    | sed -n -e 's/^pcc.*for //' -e 's/,.*//p' )
 		fi
 	fi
 	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
@@ -1110,13 +1114,14 @@ probemips ()
 	else die unknown MIPS ABI
 	fi
 
-	# NetBSD/evbmips is softfloat by default but we can detect if this is correct
+	# NetBSD/evbmips is softfloat by default
+	# but we can detect if this is correct
 	if cppdefines '__mips_hard_float'; then
 		MKSOFTFLOAT=no
 	fi
 
-	# MIPS builds need to be position independent; NetBSD hosts do this anyway
-	# but others may need forcing
+	# MIPS builds need to be position independent;
+	# NetBSD hosts do this anyway but others may need forcing
 	appendvar EXTRA_CFLAGS -fPIC
 	appendvar EXTRA_AFLAGS -fPIC
 }
@@ -1139,8 +1144,10 @@ evaltarget ()
 		;;
 	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
-		cppdefines _BIG_ENDIAN && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
-		cppdefines _LITTLE_ENDIAN && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
+		cppdefines _BIG_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
+		cppdefines _LITTLE_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
