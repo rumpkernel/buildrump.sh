@@ -48,11 +48,13 @@ NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-NBSRC_LISTDATE=""
+NBSRC_LISTDATE="20141029 2120UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
-NBSRC_EXTRA_sys=''
+NBSRC_EXTRA_sys='
+    20141030 2120UTC:
+        src/external/cddl/osnet/usr.bin/ztest;'
 
 NBSRC_EXTRA_posix=''
 
