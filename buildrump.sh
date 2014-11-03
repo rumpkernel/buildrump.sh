@@ -258,28 +258,6 @@ checkcheckout ()
 probe_rumpuserbits ()
 {
 
-	#
-	# Check if the target supports posix_memalign()
-	doesitbuild \
-	    '#include <stdlib.h>
-		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
-	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
-
-	doesitbuild \
-	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
-	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
-	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
-
-	# two or three-arg pthread_setname_np().  or none?
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
-
 	# Do we need -lrt for time related stuff?
 	# Old glibc and Solaris need it, but newer glibc and most
 	# other systems do not need or have librt.
@@ -303,6 +281,45 @@ probe_rumpuserbits ()
 	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' ]; then
 		RUMP_VIRTIF=no
 	fi
+
+	# is it a source tree which comes with autoconf?  if so, prefer that
+	if [ -x ${SRCDIR}/lib/librumpuser/configure ]; then
+		echo '>> librumpuser configure script detected.  running'
+		echo '>>'
+		mkdir ${BRTOOLDIR}/autoconf
+		( cd ${BRTOOLDIR}/autoconf \
+		    && ${SRCDIR}/lib/librumpuser/configure )
+
+		echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
+		echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
+		return 0
+	fi
+
+	#
+	# else, homegrown autoconf for old source trees
+	#
+
+	#
+	# Check if the target supports posix_memalign()
+	doesitbuild \
+	    '#include <stdlib.h>
+		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
+	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
+
+	doesitbuild \
+	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
+	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
+	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
+
+	# two or three-arg pthread_setname_np().  or none?
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
+	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
+	    int main(void) {
+		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
+	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 }
 
 # probes relating to cc and ld, mostly affect how we build kernel code
@@ -401,6 +418,13 @@ maketools ()
 
 	cd ${OBJDIR}
 
+	# Create mk.conf.  Create it under a temp name first so as to
+	# not affect the tool build with its contents
+	MKCONF="${BRTOOLDIR}/mk.conf.building"
+	> "${MKCONF}"
+	mkconf_final="${BRTOOLDIR}/mk.conf"
+	> ${mkconf_final}
+
 	probe_compiler
 	${KERNONLY} || probe_rumpuserbits
 
@@ -459,13 +483,7 @@ maketools ()
 	    || die create ${BRTOOLDIR}/compat/include/sys
 	cp -p ${SRCDIR}/sys/sys/queue.h ${BRTOOLDIR}/compat/include/sys
 
-	# Create mk.conf.  Create it under a temp name first so as to
-	# not affect the tool build with its contents
-	MKCONF="${BRTOOLDIR}/mk.conf.building"
-	mkconf_final="${BRTOOLDIR}/mk.conf"
-	> ${mkconf_final}
-
-	cat > "${MKCONF}" << EOF
+	cat >> "${MKCONF}" << EOF
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
