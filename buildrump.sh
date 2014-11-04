@@ -289,6 +289,7 @@ probe_rumpuserbits ()
 		mkdir ${BRTOOLDIR}/autoconf
 		( cd ${BRTOOLDIR}/autoconf \
 		    && ${SRCDIR}/lib/librumpuser/configure )
+		[ $? -eq 0 ] || die configure script failed
 
 		echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
 		echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
