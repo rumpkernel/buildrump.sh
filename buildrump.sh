@@ -288,7 +288,8 @@ probe_rumpuserbits ()
 		echo '>>'
 		mkdir -p ${BRTOOLDIR}/autoconf
 		( cd ${BRTOOLDIR}/autoconf \
-		    && ${SRCDIR}/lib/librumpuser/configure )
+		    && ${SRCDIR}/lib/librumpuser/configure \
+		      $( ! ${NATIVEBUILD} && echo --host ${CC_TARGET} ) )
 		[ $? -eq 0 ] || die configure script failed
 
 		echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
