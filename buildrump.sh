@@ -286,7 +286,7 @@ probe_rumpuserbits ()
 	if [ -x ${SRCDIR}/lib/librumpuser/configure ]; then
 		echo '>> librumpuser configure script detected.  running'
 		echo '>>'
-		mkdir ${BRTOOLDIR}/autoconf
+		mkdir -p ${BRTOOLDIR}/autoconf
 		( cd ${BRTOOLDIR}/autoconf \
 		    && ${SRCDIR}/lib/librumpuser/configure )
 		[ $? -eq 0 ] || die configure script failed
