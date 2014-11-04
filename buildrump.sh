@@ -782,38 +782,38 @@ evaltools ()
 	# and if that works, be happy with it.  Not all compilers support
 	# it (e.g. older versions of clang), so if that doesn't work,
 	# try parsing the output of -v
-	if ! cc_target=$(${CC} -dumpmachine 2>/dev/null) ; then
+	if ! CC_TARGET=$(${CC} -dumpmachine 2>/dev/null) ; then
 		# first check "${CC} -v" ... just in case it fails, we want a
 		# sensible return value instead of it being lost in the pipeline
 		# (this is easier than adjusting IFS)
 		if ${CC} -v >/dev/null 2>&1 ; then
 			# then actually process the output of ${CC} -v
-			cc_target=$(LC_ALL=C ${CC} -v 2>&1 \
+			CC_TARGET=$(LC_ALL=C ${CC} -v 2>&1 \
 			    | sed -n 's/^Target: //p' )
-			[ -z "${cc_target}" ] \
+			[ -z "${CC_TARGET}" ] \
 			    && die failed to probe target of \"${CC}\"
 		else
 			# this might be pcc
 			${CC} -v 2>&1 | grep pcc > /dev/null || \
 			    die \"${CC} -v failed\". Check \"${CC}\"
-			cc_target=$(${CC} -v 2>&1 \
+			CC_TARGET=$(${CC} -v 2>&1 \
 			    | sed -n -e 's/^pcc.*for //' -e 's/,.*//p' )
 		fi
 	fi
-	MACH_ARCH=$(echo ${cc_target} | sed 's/-.*//' )
+	MACH_ARCH=$(echo ${CC_TARGET} | sed 's/-.*//' )
 
 	if ${NATIVEBUILD}; then
 		: ${AR:=ar}
 		: ${NM:=nm}
 		: ${OBJCOPY:=objcopy}
 	else
-		: ${AR:=${cc_target}-ar}
-		: ${NM:=${cc_target}-nm}
-		: ${OBJCOPY:=${cc_target}-objcopy}
+		: ${AR:=${CC_TARGET}-ar}
+		: ${NM:=${CC_TARGET}-nm}
+		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
 
 	# Try to figure out the target system we're building for.
-	case ${cc_target} in
+	case ${CC_TARGET} in
 	*-linux*)
 		TARGET=linux
 		;;
