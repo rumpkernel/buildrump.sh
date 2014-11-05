@@ -59,10 +59,11 @@ NBSRC_EXTRA_sys='
 NBSRC_EXTRA_posix='
     20141105 0001UTC:
 	src/lib/librumphijack
-	src/lib/librumpuser
 	src/usr.bin/rump_halt
 	src/usr.bin/rump_allserver
-	src/usr.bin/shmif_dumpbus'
+	src/usr.bin/shmif_dumpbus;
+    20141105 0100UTC:
+	src/lib/librumpuser'
 
 NBSRC_EXTRA_usr='
     20141101 0001UTC:
