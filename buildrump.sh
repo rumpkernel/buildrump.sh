@@ -287,7 +287,10 @@ probe_rumpuserbits ()
 		echo '>> librumpuser configure script detected.  running'
 		echo '>>'
 		mkdir -p ${BRTOOLDIR}/autoconf
-		( cd ${BRTOOLDIR}/autoconf \
+		( export CFLAGS="${EXTRA_CFLAGS}"
+		  export LDFLAGS="${EXTRA_LDFLAGS}"
+		  export CPPFLAGS="${EXTRA_CPPFLAGS}"
+		  cd ${BRTOOLDIR}/autoconf \
 		    && ${SRCDIR}/lib/librumpuser/configure \
 		      $( ! ${NATIVEBUILD} && echo --host ${CC_TARGET} ) )
 		[ $? -eq 0 ] || die configure script failed
