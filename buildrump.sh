@@ -691,7 +691,9 @@ makebuild ()
 
 	DIRS_third="${DIRS_third} ${DIRS_emul}"
 
-	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
+	ANDROID=cppdefines '__ANDROID__'
+	if [ \( ${TARGET} = "linux" -a -z ${ANDROID} \) \
+	     -o ${TARGET} = "netbsd" ]; then
 		DIRS_final="lib/librumphijack"
 	fi
 
