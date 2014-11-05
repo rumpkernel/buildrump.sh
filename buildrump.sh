@@ -492,7 +492,7 @@ maketools ()
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
-BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
+BUILDRUMP_CPPFLAGS=${EXTRA_CPPFLAGS} -I\${BUILDRUMP_STAGE}/usr/include
 .endif
 CPPFLAGS+=-I${BRTOOLDIR}/compat/include
 LIBDO.pthread=_external
