@@ -62,7 +62,7 @@ NBSRC_EXTRA_posix='
 	src/usr.bin/rump_halt
 	src/usr.bin/rump_allserver
 	src/usr.bin/shmif_dumpbus;
-    20141105 0100UTC:
+    20141105 0142UTC:
 	src/lib/librumpuser'
 
 NBSRC_EXTRA_usr='
