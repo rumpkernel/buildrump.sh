@@ -54,7 +54,12 @@ NBSRC_LISTDATE="20141029 2120UTC"
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA_sys='
     20141030 2120UTC:
-        src/external/cddl/osnet/usr.bin/ztest;'
+        src/external/cddl/osnet/usr.bin/ztest;
+    20141106 0300UTC:
+	src/sys/rump/dev/Makefile.rumpdevcomp
+	src/sys/rump/dev/lib/libvirtio_viornd
+	src/sys/dev/pci/files.pci
+	src/sys/dev/pci/viornd.c'
 
 NBSRC_EXTRA_posix='
     20141105 0001UTC:
