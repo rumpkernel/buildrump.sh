@@ -59,7 +59,9 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/dev/Makefile.rumpdevcomp
 	src/sys/rump/dev/lib/libvirtio_viornd
 	src/sys/dev/pci/files.pci
-	src/sys/dev/pci/viornd.c'
+	src/sys/dev/pci/viornd.c;
+    20141106 2330UTC:
+	src/sys/rump/net/lib/libvirtif/if_virt.c'
 
 NBSRC_EXTRA_posix='
     20141105 0001UTC:
