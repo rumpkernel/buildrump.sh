@@ -1301,10 +1301,12 @@ evaltarget ()
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
-	doesitbuild 'int main(void) {return 0;}\n' \
-	    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-	[ $? -eq 0 ] || ${TITANMODE} || \
-	    die 'Probe cannot build a binary'
+	if ! ${KERNONLY}; then
+		doesitbuild 'int main(void) {return 0;}\n' \
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
+		[ $? -eq 0 ] || ${TITANMODE} || \
+		    die 'Probe cannot build a binary'
+	fi
 }
 
 # create the makefiles used for building
