@@ -22,7 +22,7 @@ main(int argc, char *argv[])
 	char imgpath[MAXPATHLEN+1];
 	union u u;
 	char buf[8192];
-	int fd;
+	int fd, rv;
 
 	/*
 	 * the driver doesn't support endian swapping, so pick image
@@ -36,12 +36,13 @@ main(int argc, char *argv[])
 		snprintf(imgpath, sizeof(imgpath),
 		    "%s/%s", argv[1], "sysvbfs_le.img");
 	}
-		
 
         rump_init();
 
 #define MYFSDEV "/de-vice"
-	rump_pub_etfs_register(MYFSDEV, imgpath, RUMP_ETFS_BLK);
+	rv = rump_pub_etfs_register(MYFSDEV, imgpath, RUMP_ETFS_BLK);
+	if (rv != 0)
+		die("etfs reg failed: %d", rv);
 	args.fspec =  (void *)(uintptr_t)MYFSDEV;
 
 	if (rump_sys_mkdir("/mnt", 0755) == -1)
