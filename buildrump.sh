@@ -907,6 +907,16 @@ evalplatform ()
 	if ! ${target_supported:-true}; then
 		${TITANMODE} || die unsupported target OS: ${TARGET}
 	fi
+
+	if ! cppdefines __ELF__; then
+		${TITANMODE} || die ELF required as target object format
+	fi
+
+	if cppdefines __LP64__; then
+		THIRTYTWO=false
+	else
+		THIRTYTWO=true
+	fi
 }
 
 # ARM targets require a few extra checks
@@ -982,18 +992,8 @@ probemips ()
 	appendvar EXTRA_AFLAGS -fPIC
 }
 
-evaltarget ()
+evalmachine ()
 {
-
-	if ! cppdefines __ELF__; then
-		${TITANMODE} || die ELF required as target object format
-	fi
-
-	if cppdefines __LP64__; then
-		THIRTYTWO=false
-	else
-		THIRTYTWO=true
-	fi
 
 	TOOLABI=''
 	case ${MACH_ARCH} in
@@ -1333,7 +1333,7 @@ resolvepaths
 
 evaltools
 evalplatform
-evaltarget
+evalmachine
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 abspath SRCDIR
