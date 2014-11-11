@@ -247,11 +247,24 @@ cctestandsetW ()
 checkcheckout ()
 {
 
+	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
+
 	[ ! -z "${TARBALLMODE}" ] && return
 
 	if ! ${BRDIR}/checkout.sh checkcheckout ${SRCDIR} \
 	    && ! ${TITANMODE}; then
 		die 'revision mismatch, run checkout (or -H to override)'
+	fi
+}
+
+checkcompiler ()
+{
+
+	if ! ${KERNONLY}; then
+		doesitbuild 'int main(void) {return 0;}\n' \
+		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
+		[ $? -eq 0 ] || ${TITANMODE} || \
+		    die 'Probe cannot build a binary'
 	fi
 }
 
@@ -405,16 +418,7 @@ probe_compiler ()
 maketools ()
 {
 
-	#
-	# Perform various checks and set values
-	#
-
 	checkcheckout
-
-	#
-	# does build.sh even exist, or is this just a kernel-only checkout?
-	#
-	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
 
 	# Check for ld because we need to make some adjustments based on it
 	probeld
@@ -432,6 +436,8 @@ maketools ()
 
 	probe_compiler
 	${KERNONLY} || probe_rumpuserbits
+
+	checkcompiler
 
 	#
 	# Create external toolchain wrappers.
@@ -1287,12 +1293,6 @@ evaltarget ()
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
 
-	if ! ${KERNONLY}; then
-		doesitbuild 'int main(void) {return 0;}\n' \
-		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
-		[ $? -eq 0 ] || ${TITANMODE} || \
-		    die 'Probe cannot build a binary'
-	fi
 }
 
 # create the makefiles used for building
