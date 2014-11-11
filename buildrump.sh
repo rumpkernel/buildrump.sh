@@ -25,14 +25,6 @@
 #
 
 #
-# This script will build rump kernel components and the hypervisor
-# for a non-NetBSD target.  It will install the components as libraries
-# to rump/lib and headers to rump/include.  For information on how to
-# convert the installed files into running rump kernels, see the examples
-# and tests directories.
-#
-
-#
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
 
