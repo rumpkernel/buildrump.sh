@@ -909,6 +909,172 @@ evalplatform ()
 	fi
 }
 
+# ARM targets require a few extra checks
+probearm ()
+{
+
+	# check for big endian
+	if cppdefines '__ARMEL__'; then
+		MACHINE="evbearm-el"
+		MACH_ARCH="arm"
+	else
+		MACHINE="evbearm-eb"
+		MACH_ARCH="armeb"
+	fi
+
+	TOOLABI="elf-eabi"
+
+	# NetBSD/evbarm is softfloat by default, but force the NetBSD
+	# build to use hardfloat if the compiler defaults to VFP.
+	# This is because the softfloat env is not always functional
+	# in case hardfloat is the compiler default.
+	if cppdefines __VFP_FP__; then
+		MKSOFTFLOAT=no
+	fi
+}
+
+# aarch64 requires a few checks
+probeaarch64 ()
+{
+
+	# check for big endian
+	if cppdefines '__AARCH64EL__'; then
+		MACHINE="evbarm64-el"
+		MACH_ARCH="aarch64"
+	else
+		MACHINE="evbarm64-eb"
+		MACH_ARCH="aarch64_be"
+	fi
+
+	TOOLABI=""
+
+	# the NetBSD aarch64 port uses long long for int64_t
+	appendvar EXTRA_CWARNFLAGS -Wno-format
+}
+
+# MIPS requires a few extra checks
+probemips ()
+{
+
+	# set env vars that NetBSD expects for the different MIPS ABIs
+	if cppdefines '_ABIO32'; then
+		appendvar EXTRA_CFLAGS -D__mips_o32
+		appendvar EXTRA_AFLAGS -D__mips_o32
+	elif cppdefines '_ABIN32'; then
+		appendvar EXTRA_CFLAGS -D__mips_n32
+		appendvar EXTRA_AFLAGS -D__mips_n32
+		${TITANMODE} || die MIPS n32 ABI not yet working, use -mabi=32
+	elif cppdefines '_ABI64'; then
+		appendvar EXTRA_CFLAGS -D__mips_n64
+		appendvar EXTRA_AFLAGS -D__mips_n64
+	else die unknown MIPS ABI
+	fi
+
+	# NetBSD/evbmips is softfloat by default
+	# but we can detect if this is correct
+	if cppdefines '__mips_hard_float'; then
+		MKSOFTFLOAT=no
+	fi
+
+	# MIPS builds need to be position independent;
+	# NetBSD hosts do this anyway but others may need forcing
+	appendvar EXTRA_CFLAGS -fPIC
+	appendvar EXTRA_AFLAGS -fPIC
+}
+
+evaltarget ()
+{
+
+	if ! cppdefines __ELF__; then
+		${TITANMODE} || die ELF required as target object format
+	fi
+
+	if cppdefines __LP64__; then
+		THIRTYTWO=false
+	else
+		THIRTYTWO=true
+	fi
+
+	TOOLABI=''
+	case ${MACH_ARCH} in
+	"amd64"|"x86_64")
+		if ${THIRTYTWO} ; then
+			MACHINE="i386"
+			MACH_ARCH="i486"
+			TOOLABI="elf"
+		else
+			MACHINE="amd64"
+			MACH_ARCH="x86_64"
+		fi
+		;;
+	"i386"|"i486"|"i586"|"i686")
+		MACHINE="i386"
+		MACH_ARCH="i486"
+		TOOLABI="elf"
+		;;
+	arm*)
+		probearm
+		;;
+	aarch64*)
+		probeaarch64
+		;;
+	"sparc"|"sparc64")
+		if ${THIRTYTWO} ; then
+			MACHINE="sparc"
+			MACH_ARCH="sparc"
+			TOOLABI="elf"
+		else
+			MACHINE="sparc64"
+			MACH_ARCH="sparc64"
+		fi
+		;;
+	"mipsel"|"mips64el")
+		if ${THIRTYTWO} ; then
+			MACHINE="evbmips-el"
+			MACH_ARCH="mipsel"
+		else
+			MACHINE="evbmips64-el"
+			MACH_ARCH="mips64el"
+		fi
+		probemips
+		;;
+	"mips"|"mipseb"|"mips64"|"mips64eb")
+		if ${THIRTYTWO} ; then
+			MACHINE="evbmips-eb"
+			MACH_ARCH="mipseb"
+		else
+			MACHINE="evbmips64-eb"
+			MACH_ARCH="mips64"
+		fi
+		probemips
+		;;
+	"powerpc"|"ppc64"|"powerpc64le")
+		if ${THIRTYTWO} ; then
+			MACHINE="evbppc"
+			MACH_ARCH="powerpc"
+		else
+			MACHINE="evbppc64"
+			MACH_ARCH="powerpc64"
+		fi
+		;;
+	"alpha")
+		MACHINE="alpha"
+		MACH_ARCH="alpha"
+		;;
+	"riscv"|"riscv64")
+		if ${THIRTYTWO} ; then
+			MACHINE="riscv"
+			MACH_ARCH="riscv32"
+		else
+			MACHINE="riscv"
+			MACH_ARCH="riscv64"
+		fi
+		;;
+	esac
+	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
+
+}
+
 parseargs ()
 {
 
@@ -1119,172 +1285,6 @@ resolvepaths ()
 			    || die create ${dstage}/share/man/${man}${x}
 		done
 	done
-}
-
-# ARM targets require a few extra checks
-probearm ()
-{
-
-	# check for big endian
-	if cppdefines '__ARMEL__'; then
-		MACHINE="evbearm-el"
-		MACH_ARCH="arm"
-	else
-		MACHINE="evbearm-eb"
-		MACH_ARCH="armeb"
-	fi
-
-	TOOLABI="elf-eabi"
-
-	# NetBSD/evbarm is softfloat by default, but force the NetBSD
-	# build to use hardfloat if the compiler defaults to VFP.
-	# This is because the softfloat env is not always functional
-	# in case hardfloat is the compiler default.
-	if cppdefines __VFP_FP__; then
-		MKSOFTFLOAT=no
-	fi
-}
-
-# aarch64 requires a few checks
-probeaarch64 ()
-{
-
-	# check for big endian
-	if cppdefines '__AARCH64EL__'; then
-		MACHINE="evbarm64-el"
-		MACH_ARCH="aarch64"
-	else
-		MACHINE="evbarm64-eb"
-		MACH_ARCH="aarch64_be"
-	fi
-
-	TOOLABI=""
-
-	# the NetBSD aarch64 port uses long long for int64_t
-	appendvar EXTRA_CWARNFLAGS -Wno-format
-}
-
-# MIPS requires a few extra checks
-probemips ()
-{
-
-	# set env vars that NetBSD expects for the different MIPS ABIs
-	if cppdefines '_ABIO32'; then
-		appendvar EXTRA_CFLAGS -D__mips_o32
-		appendvar EXTRA_AFLAGS -D__mips_o32
-	elif cppdefines '_ABIN32'; then
-		appendvar EXTRA_CFLAGS -D__mips_n32
-		appendvar EXTRA_AFLAGS -D__mips_n32
-		${TITANMODE} || die MIPS n32 ABI not yet working, use -mabi=32
-	elif cppdefines '_ABI64'; then
-		appendvar EXTRA_CFLAGS -D__mips_n64
-		appendvar EXTRA_AFLAGS -D__mips_n64
-	else die unknown MIPS ABI
-	fi
-
-	# NetBSD/evbmips is softfloat by default
-	# but we can detect if this is correct
-	if cppdefines '__mips_hard_float'; then
-		MKSOFTFLOAT=no
-	fi
-
-	# MIPS builds need to be position independent;
-	# NetBSD hosts do this anyway but others may need forcing
-	appendvar EXTRA_CFLAGS -fPIC
-	appendvar EXTRA_AFLAGS -fPIC
-}
-
-evaltarget ()
-{
-
-	if ! cppdefines __ELF__; then
-		${TITANMODE} || die ELF required as target object format
-	fi
-
-	if cppdefines __LP64__; then
-		THIRTYTWO=false
-	else
-		THIRTYTWO=true
-	fi
-
-	TOOLABI=''
-	case ${MACH_ARCH} in
-	"amd64"|"x86_64")
-		if ${THIRTYTWO} ; then
-			MACHINE="i386"
-			MACH_ARCH="i486"
-			TOOLABI="elf"
-		else
-			MACHINE="amd64"
-			MACH_ARCH="x86_64"
-		fi
-		;;
-	"i386"|"i486"|"i586"|"i686")
-		MACHINE="i386"
-		MACH_ARCH="i486"
-		TOOLABI="elf"
-		;;
-	arm*)
-		probearm
-		;;
-	aarch64*)
-		probeaarch64
-		;;
-	"sparc"|"sparc64")
-		if ${THIRTYTWO} ; then
-			MACHINE="sparc"
-			MACH_ARCH="sparc"
-			TOOLABI="elf"
-		else
-			MACHINE="sparc64"
-			MACH_ARCH="sparc64"
-		fi
-		;;
-	"mipsel"|"mips64el")
-		if ${THIRTYTWO} ; then
-			MACHINE="evbmips-el"
-			MACH_ARCH="mipsel"
-		else
-			MACHINE="evbmips64-el"
-			MACH_ARCH="mips64el"
-		fi
-		probemips
-		;;
-	"mips"|"mipseb"|"mips64"|"mips64eb")
-		if ${THIRTYTWO} ; then
-			MACHINE="evbmips-eb"
-			MACH_ARCH="mipseb"
-		else
-			MACHINE="evbmips64-eb"
-			MACH_ARCH="mips64"
-		fi
-		probemips
-		;;
-	"powerpc"|"ppc64"|"powerpc64le")
-		if ${THIRTYTWO} ; then
-			MACHINE="evbppc"
-			MACH_ARCH="powerpc"
-		else
-			MACHINE="evbppc64"
-			MACH_ARCH="powerpc64"
-		fi
-		;;
-	"alpha")
-		MACHINE="alpha"
-		MACH_ARCH="alpha"
-		;;
-	"riscv"|"riscv64")
-		if ${THIRTYTWO} ; then
-			MACHINE="riscv"
-			MACH_ARCH="riscv32"
-		else
-			MACHINE="riscv"
-			MACH_ARCH="riscv64"
-		fi
-		;;
-	esac
-	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
-
 }
 
 # create the makefiles used for building
