@@ -1076,7 +1076,6 @@ resolvepaths ()
 	abspath DESTDIR
 	abspath OBJDIR
 	abspath BRTOOLDIR
-	abspath SRCDIR
 
 	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
 
@@ -1377,6 +1376,7 @@ evalplatform
 evaltarget
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
+abspath SRCDIR
 
 ${dotools} && maketools
 ${dobuild} && makebuild
