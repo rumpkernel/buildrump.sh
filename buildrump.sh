@@ -1067,7 +1067,6 @@ evalmachine ()
 		;;
 	esac
 	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
-
 }
 
 parseargs ()
