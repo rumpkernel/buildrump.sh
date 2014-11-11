@@ -570,11 +570,6 @@ AFLAGS+=\${BUILDRUMP_AFLAGS}
 LDFLAGS+=\${BUILDRUMP_LDFLAGS}
 EOF
 
-	# Temporary fix for CTFMERGE issues on eg FreeBSD.  Yes, the
-	# test looks ridiculous, but it mirrors the issue in NetBSD sys.mk
-	[ -x /usr/bin/ctfconvert -a -x /usr/bin/ctfmerge ] && \
-	    echo 'CTFMERGE=:' >> "${MKCONF}"
-
 	if ! ${KERNONLY}; then
 		echo >> "${MKCONF}"
 		cat >> "${MKCONF}" << EOF
