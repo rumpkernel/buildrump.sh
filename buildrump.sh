@@ -820,6 +820,17 @@ evaltools ()
 		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
 
+	# check if we're running from a tarball, i.e. is checkout possible
+	BRDIR=$(dirname $0)
+	unset TARBALLMODE
+	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
+		TARBALLMODE='Run from tarball'
+	fi
+}
+
+evalplatform ()
+{
+
 	# Try to figure out the target system we're building for.
 	case ${CC_TARGET} in
 	*-linux*)
@@ -859,13 +870,6 @@ evaltools ()
 		TARGET=unknown
 		;;
 	esac
-
-	# check if we're running from a tarball, i.e. is checkout possible
-	BRDIR=$(dirname $0)
-	unset TARBALLMODE
-	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
-		TARBALLMODE='Run from tarball'
-	fi
 }
 
 parseargs ()
@@ -1351,6 +1355,7 @@ domake ()
 ###
 
 evaltools
+evalplatform
 parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
