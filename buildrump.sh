@@ -779,11 +779,23 @@ evaltools ()
 
 	# check for crossbuild
 	: ${CC:=cc}
-	NATIVEBUILD=true
-	[ $CC != 'cc' -a $CC != 'gcc' -a $CC != 'clang' -a $CC != 'pcc' ] \
-	    && NATIVEBUILD=false
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
+
+	if ${KERNONLY}; then
+		NATIVEBUILD=false
+	else
+		printf 'int main(void) { return 0; }' \
+		    | ${CC} ${EXTRA_CFLAGS} ${EXTRA_LDFLAGS} -x c - \
+			-o ${OBJDIR}/canrun > /dev/null 2>&1
+		[ $? -eq 0 ] && ${OBJDIR}/canrun
+		if [ $? -eq 0 ]; then
+			NATIVEBUILD=true
+		else
+			NATIVEBUILD=false
+		fi
+		rm -f ${OBJDIR}/canrun
+	fi
 
 	# Check the arch we're building for so as to work out the necessary
 	# NetBSD machine code we need to use.  First try -dumpmachine,
@@ -819,7 +831,6 @@ evaltools ()
 		: ${NM:=${CC_TARGET}-nm}
 		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
-
 }
 
 evalplatform ()
