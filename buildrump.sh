@@ -825,7 +825,7 @@ evaltools ()
 
 	# Set names of tools we're going to use.  try to guess them
 	# for common scenarios
-	if ${NATIVEBUILD}; then
+	if ${NATIVEBUILD} || ${KERNONLY}; then
 		: ${AR:=ar}
 		: ${NM:=nm}
 		: ${OBJCOPY:=objcopy}
