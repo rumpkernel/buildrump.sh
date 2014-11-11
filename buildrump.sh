@@ -777,11 +777,12 @@ evaltools ()
 	type ${HOST_CC} >/dev/null 2>&1 \
 	    || die set '${HOST_CC}' to a host targeted cc "(now \"${HOST_CC}\")"
 
-	# check for crossbuild
+	# target compiler
 	: ${CC:=cc}
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
+	# check for crossbuild
 	if ${KERNONLY}; then
 		NATIVEBUILD=false
 	else
@@ -822,6 +823,8 @@ evaltools ()
 	fi
 	MACH_ARCH=$(echo ${CC_TARGET} | sed 's/-.*//' )
 
+	# Set names of tools we're going to use.  try to guess them
+	# for common scenarios
 	if ${NATIVEBUILD}; then
 		: ${AR:=ar}
 		: ${NM:=nm}
