@@ -878,6 +878,67 @@ evalplatform ()
 		TARGET=unknown
 		;;
 	esac
+
+	# and then set options based on that
+	case ${TARGET} in
+	"dragonfly")
+		RUMPKERN_UNDEF='-U__DragonFly__'
+		;;
+	"openbsd")
+		RUMPKERN_UNDEF='-U__OpenBSD__'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		appendvar EXTRA_CWARNFLAGS -Wno-bounded -Wno-format
+		;;
+	"freebsd")
+		RUMPKERN_UNDEF='-U__FreeBSD__'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		;;
+	"linux")
+		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		cppdefines _BIG_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
+		cppdefines _LITTLE_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
+		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		;;
+	"netbsd")
+		# what do you expect? ;)
+		;;
+	"sunos")
+		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
+		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
+
+		# I haven't managed to get static libs to work on Solaris,
+		# so just be happy with shared ones
+		MKSTATICLIB=no
+		;;
+	"none")
+		${KERNONLY} || die "Must use -k (kernel only) with no OS"
+		MKPIC=no
+		;;
+	"cygwin")
+		MKPIC=no
+		target_supported=false
+		;;
+	"aix")
+		target_supported=false
+		;;
+	"minix")
+		target_supported=false
+		;;
+	"osx")
+		echo '>> Mach-O object format used by OS X is not yet supported'
+		target_supported=false
+		;;
+	"unknown"|*)
+		target_supported=false
+		;;
+	esac
+
+	if ! ${target_supported:-true}; then
+		${TITANMODE} || die unsupported target OS: ${TARGET}
+	fi
 }
 
 parseargs ()
@@ -1167,66 +1228,6 @@ probemips ()
 
 evaltarget ()
 {
-
-	case ${TARGET} in
-	"dragonfly")
-		RUMPKERN_UNDEF='-U__DragonFly__'
-		;;
-	"openbsd")
-		RUMPKERN_UNDEF='-U__OpenBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		appendvar EXTRA_CWARNFLAGS -Wno-bounded -Wno-format
-		;;
-	"freebsd")
-		RUMPKERN_UNDEF='-U__FreeBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		;;
-	"linux")
-		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
-		cppdefines _BIG_ENDIAN \
-		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
-		cppdefines _LITTLE_ENDIAN \
-		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
-		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		;;
-	"netbsd")
-		# what do you expect? ;)
-		;;
-	"sunos")
-		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
-		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
-
-		# I haven't managed to get static libs to work on Solaris,
-		# so just be happy with shared ones
-		MKSTATICLIB=no
-		;;
-	"none")
-		${KERNONLY} || die "Must use -k (kernel only) with no OS"
-		MKPIC=no
-		;;
-	"cygwin")
-		MKPIC=no
-		target_supported=false
-		;;
-	"aix")
-		target_supported=false
-		;;
-	"minix")
-		target_supported=false
-		;;
-	"osx")
-		echo '>> Mach-O object format used by OS X is not yet supported'
-		target_supported=false
-		;;
-	"unknown"|*)
-		target_supported=false
-		;;
-	esac
-
-	if ! ${target_supported:-true}; then
-		${TITANMODE} || die unsupported target OS: ${TARGET}
-	fi
 
 	if ! cppdefines __ELF__; then
 		${TITANMODE} || die ELF required as target object format
