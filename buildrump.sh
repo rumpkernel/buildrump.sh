@@ -843,57 +843,6 @@ evalplatform ()
 	case ${CC_TARGET} in
 	*-linux*)
 		TARGET=linux
-		;;
-	*-dragonflybsd)
-		TARGET=dragonfly
-		;;
-	*-openbsd*)
-		TARGET=openbsd
-		;;
-	*-freebsd*)
-		TARGET=freebsd
-		;;
-	*-netbsd*)
-		TARGET=netbsd
-		;;
-	*-sun-solaris*|*-pc-solaris*)
-		TARGET=sunos
-		;;
-	*-pc-cygwin)
-		TARGET=cygwin
-		;;
-	*-apple-darwin*)
-		TARGET=osx
-		;;
-	*-ibm-aix*)
-		TARGET=aix
-		;;
-	*-minix*)
-		TARGET=minix
-		;;
-	*-none-*)
-		TARGET=none
-		;;
-	*)
-		TARGET=unknown
-		;;
-	esac
-
-	# and then set options based on that
-	case ${TARGET} in
-	"dragonfly")
-		RUMPKERN_UNDEF='-U__DragonFly__'
-		;;
-	"openbsd")
-		RUMPKERN_UNDEF='-U__OpenBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		appendvar EXTRA_CWARNFLAGS -Wno-bounded -Wno-format
-		;;
-	"freebsd")
-		RUMPKERN_UNDEF='-U__FreeBSD__'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		;;
-	"linux")
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		cppdefines _BIG_ENDIAN \
 		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
@@ -902,36 +851,57 @@ evalplatform ()
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
-	"netbsd")
-		# what do you expect? ;)
+	*-dragonflybsd)
+		TARGET=dragonfly
+		RUMPKERN_UNDEF='-U__DragonFly__'
 		;;
-	"sunos")
+	*-openbsd*)
+		TARGET=openbsd
+		RUMPKERN_UNDEF='-U__OpenBSD__'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		appendvar EXTRA_CWARNFLAGS -Wno-bounded -Wno-format
+		;;
+	*-freebsd*)
+		RUMPKERN_UNDEF='-U__FreeBSD__'
+		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		TARGET=freebsd
+		;;
+	*-netbsd*)
+		TARGET=netbsd
+		;;
+	*-sun-solaris*|*-pc-solaris*)
+		TARGET=sunos
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
-
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		MKSTATICLIB=no
 		;;
-	"none")
-		${KERNONLY} || die "Must use -k (kernel only) with no OS"
-		MKPIC=no
-		;;
-	"cygwin")
+	*-pc-cygwin)
+		TARGET=cygwin
 		MKPIC=no
 		target_supported=false
 		;;
-	"aix")
-		target_supported=false
-		;;
-	"minix")
-		target_supported=false
-		;;
-	"osx")
+	*-apple-darwin*)
+		TARGET=osx
 		echo '>> Mach-O object format used by OS X is not yet supported'
 		target_supported=false
 		;;
-	"unknown"|*)
+	*-ibm-aix*)
+		TARGET=aix
+		target_supported=false
+		;;
+	*-minix*)
+		TARGET=minix
+		target_supported=false
+		;;
+	*-none-*)
+		TARGET=none
+		${KERNONLY} || die "Must use -k (kernel only) with no OS"
+		MKPIC=no
+		;;
+	*)
+		TARGET=unknown
 		target_supported=false
 		;;
 	esac
