@@ -1232,13 +1232,10 @@ evaltarget ()
 		${TITANMODE} || die ELF required as target object format
 	fi
 
-	# always force 64 bit off_t
 	if cppdefines __LP64__; then
 		THIRTYTWO=false
 	else
 		THIRTYTWO=true
-		appendvar EXTRA_CFLAGS -D_FILE_OFFSET_BITS=64
-		appendvar EXTRA_AFLAGS -D_FILE_OFFSET_BITS=64
 	fi
 
 	TOOLABI=''
