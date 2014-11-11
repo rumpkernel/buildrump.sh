@@ -820,12 +820,6 @@ evaltools ()
 		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
 
-	# check if we're running from a tarball, i.e. is checkout possible
-	BRDIR=$(dirname $0)
-	unset TARBALLMODE
-	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
-		TARBALLMODE='Run from tarball'
-	fi
 }
 
 evalplatform ()
@@ -1050,6 +1044,13 @@ abspath ()
 
 resolvepaths ()
 {
+
+	# check if we're running from a tarball, i.e. is checkout possible
+	BRDIR=$(dirname $0)
+	unset TARBALLMODE
+	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
+		TARBALLMODE='Run from tarball'
+	fi
 
 	# resolve critical directories
 	abspath BRDIR
@@ -1354,15 +1355,14 @@ domake ()
 ###
 ###
 
+parseargs "$@"
+resolvepaths
+
 evaltools
 evalplatform
-parseargs "$@"
-
-${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
-
 evaltarget
 
-resolvepaths
+${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
 ${dotools} && maketools
 ${dobuild} && makebuild
