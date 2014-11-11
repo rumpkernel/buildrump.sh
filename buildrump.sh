@@ -148,12 +148,15 @@ probeld ()
 	if ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
+		LD_AS_NEEDED='-Wl,--no-as-needed'
 	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'GNU gold' ; then
 		LD_FLAVOR=gold
+		LD_AS_NEEDED='-Wl,--no-as-needed'
 	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
 	    | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
+		SHLIB_MKMAP=no
 	else
 		die 'GNU or Solaris ld required'
 	fi
@@ -538,16 +541,16 @@ EOF
 	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
 	unset _tmpvar
 	for x in ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}; do
-		_tmpvar="${_tmpvar} ${x#-l}"
+		appendvar _tmpvar "${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
 	unset _tmpvar
 	for x in ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}; do
-		_tmpvar="${_tmpvar} ${x#-l}"
+		appendvar _tmpvar "${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
 	appendmkconf 'Probe' "${LDSCRIPT}" "RUMP_LDSCRIPT"
-	[ ${LD_FLAVOR} = 'sun' ] && appendmkconf 'Probe' 'no' 'SHLIB_MKMAP'
+	appendmkconf 'Probe' "${SHLIB_MKMAP}" 'SHLIB_MKMAP'
 	appendmkconf 'Probe' "${SHLIB_WARNTEXTREL}" "SHLIB_WARNTEXTREL"
 	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
 	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
@@ -586,8 +589,7 @@ LIBC=
 LDFLAGS+= -L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R${DESTDIR}/lib
 LDADD+= ${EXTRA_RUMPCOMMON} ${EXTRA_RUMPUSER} ${EXTRA_RUMPCLIENT}
 EOF
-		[ ${LD_FLAVOR} != 'sun' ] \
-		    && echo 'LDFLAGS+=-Wl,--no-as-needed' >> "${MKCONF}"
+		appendmkconf 'Probe' "${LD_AS_NEEDED}" LDFLAGS +
 		echo '.endif # PROG' >> "${MKCONF}"
 	fi
 
