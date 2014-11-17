@@ -61,5 +61,7 @@ main(int argc, char *argv[])
 	if (rump_sys_unmount("/mnt", 0) == -1)
 		die("unmount failed");
 
+
+	rump_sys_reboot(0, NULL);
 	return 0;
 }
