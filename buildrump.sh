@@ -145,19 +145,19 @@ chkcrt ()
 probeld ()
 {
 
-	if ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
-	    | grep -q 'GNU ld' ; then
+	linkervers=$(${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1)
+	if echo ${linkervers} | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
 		LD_AS_NEEDED='-Wl,--no-as-needed'
-	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
-	    | grep -q 'GNU gold' ; then
+	elif echo ${linkervers} | grep -q 'GNU gold' ; then
 		LD_FLAVOR=gold
 		LD_AS_NEEDED='-Wl,--no-as-needed'
-	elif ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1	\
-	    | grep -q 'Solaris Link Editor' ; then
+	elif echo ${linkervers} | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 		SHLIB_MKMAP=no
 	else
+		echo '>> output from linker:'
+		echo ${linkervers}
 		die 'GNU or Solaris ld required'
 	fi
 }
