@@ -65,7 +65,9 @@ NBSRC_EXTRA_sys='
     20141117 1432UTC:
 	src/sys/rump/librump/rumpvfs/rumpblk.c
 	src/sys/rump/librump/rumpvfs/rump_vfs.c
-	src/sys/rump/librump/rumpvfs/rump_vfs_private.h'
+	src/sys/rump/librump/rumpvfs/rump_vfs_private.h;
+    20141129 1330UTC:
+	src/include/ssp/string.h'
 
 NBSRC_EXTRA_posix='
     20141105 0001UTC:
