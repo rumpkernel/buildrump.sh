@@ -28,6 +28,11 @@
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
 
+# defaults, can be overriden by probes
+RUMP_VIRTIF=no
+HIJACK=false
+SYS_SUNOS=false
+
 #
 # support routines
 #
@@ -849,9 +854,6 @@ evalcompiler ()
 evalplatform ()
 {
 
-	RUMP_VIRTIF=no
-	HIJACK=false
-	SYS_SUNOS=false
 	case ${CC_TARGET} in
 	*-netbsd*)
 		RUMP_VIRTIF=yes
