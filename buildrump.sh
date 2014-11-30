@@ -848,6 +848,16 @@ evalcompiler ()
 		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 		;;
 	esac
+
+	if ! cppdefines __ELF__; then
+		${TITANMODE} || die ELF required as target object format
+	fi
+
+	if cppdefines __LP64__; then
+		THIRTYTWO=false
+	else
+		THIRTYTWO=true
+	fi
 }
 
 # Figure out what we need for the target platform
@@ -896,16 +906,6 @@ evalplatform ()
 
 	if ! ${target_supported:-true}; then
 		${TITANMODE} || die unsupported target: ${CC_TARGET}
-	fi
-
-	if ! cppdefines __ELF__; then
-		${TITANMODE} || die ELF required as target object format
-	fi
-
-	if cppdefines __LP64__; then
-		THIRTYTWO=false
-	else
-		THIRTYTWO=true
 	fi
 }
 
