@@ -280,16 +280,6 @@ probe_rumpuserbits ()
 		fi
 	done
 
-	# the musl env usually does not contain linux kernel headers
-	# by default.  Since we need <linux/if_tun.h> for virtif, probe
-	# its presence and if its not available, just leave out if_virt
-	# instead of suffering a crushing build failure.
-	if [ "${TARGET}" = 'linux' ]; then
-		doesitbuild '#include <linux/if_tun.h>' -c || RUMP_VIRTIF=no
-	elif [ "${TARGET}" != 'netbsd' -a "${TARGET}" != 'dragonfly' ]; then
-		RUMP_VIRTIF=no
-	fi
-
 	# is it a source tree which comes with autoconf?  if so, prefer that
 	if [ -x ${SRCDIR}/lib/librumpuser/configure ]; then
 		echo '>> librumpuser configure script detected.  running'
@@ -522,7 +512,7 @@ EOF
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
-	if ${NATIVENETBSD} && [ ${TARGET} != 'netbsd' ]; then
+	if ${NATIVENETBSD} && ! cppdefines __NetBSD__; then
 		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
 	else
@@ -686,16 +676,10 @@ makebuild ()
 	     -o ${MACHINE} = "evbppc" -o ${MACHINE} = "evbppc64" ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
-
-	if [ ${TARGET} = "sunos" ]; then
-		DIRS_emul="${DIRS_emul} sys/rump/kern/lib/libsys_sunos"
-	fi
+	${SYS_SUNOS} && appendvar DIRS_emul sys/rump/kern/lib/libsys_sunos
+	${HIJACK} && DIRS_final="lib/librumphijack"
 
 	DIRS_third="${DIRS_third} ${DIRS_emul}"
-
-	if [ ${TARGET} = "linux" -o ${TARGET} = "netbsd" ]; then
-		cppdefines '__ANDROID__' || DIRS_final="lib/librumphijack"
-	fi
 
 	if ${KERNONLY}; then
 		mkmakefile ${OBJDIR}/Makefile.all \
@@ -865,64 +849,51 @@ evalcompiler ()
 evalplatform ()
 {
 
+	RUMP_VIRTIF=no
+	HIJACK=false
+	SYS_SUNOS=false
 	case ${CC_TARGET} in
-	*-linux*)
-		TARGET=linux
-		EXTRA_RUMPCOMMON='-ldl'
-		EXTRA_RUMPCLIENT='-lpthread'
+	*-netbsd*)
+		RUMP_VIRTIF=yes
+		HIJACK=true
 		;;
 	*-dragonflybsd)
-		TARGET=dragonfly
+		RUMP_VIRTIF=yes
+		;;
+	*-linux*)
+		EXTRA_RUMPCOMMON='-ldl'
+		EXTRA_RUMPCLIENT='-lpthread'
+		doesitbuild '#include <linux/if_tun.h>' -c && RUMP_VIRTIF=yes
+		cppdefines '__ANDROID__' || HIJACK=true
 		;;
 	*-openbsd*)
-		TARGET=openbsd
 		EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	*-freebsd*)
 		EXTRA_RUMPCLIENT='-lpthread'
-		TARGET=freebsd
-		;;
-	*-netbsd*)
-		TARGET=netbsd
 		;;
 	*-sun-solaris*|*-pc-solaris*)
-		TARGET=sunos
 		EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		MKSTATICLIB=no
+		SYS_SUNOS=true
 		;;
 	*-pc-cygwin)
-		TARGET=cygwin
 		MKPIC=no
 		target_supported=false
 		;;
 	*-apple-darwin*)
-		TARGET=osx
 		echo '>> Mach-O object format used by OS X is not yet supported'
 		target_supported=false
 		;;
-	*-ibm-aix*)
-		TARGET=aix
-		target_supported=false
-		;;
-	*-minix*)
-		TARGET=minix
-		target_supported=false
-		;;
-	*-none-*)
-		TARGET=none
-		${KERNONLY} || die "Must use -k (kernel only) with no OS"
-		MKPIC=no
-		;;
 	*)
-		TARGET=unknown
 		target_supported=false
 		;;
 	esac
 
 	if ! ${target_supported:-true}; then
-		${TITANMODE} || die unsupported target OS: ${TARGET}
+		${TITANMODE} || die unsupported target: ${CC_TARGET}
 	fi
 
 	if ! cppdefines __ELF__; then
