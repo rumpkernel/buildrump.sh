@@ -24,28 +24,6 @@ usermtree ()
 	mkdir -p ${destbase}/lib/pkgconfig
 }
 
-# ok, urgh, we need just one tree due to how build systems work (or
-# don't work).  We actually have two trees: the "kernel" tree and
-# the "userland" tree.  We unify them with cp.  No, this is not a
-# very optimal approach, and will prevent updates unless preceeded
-# by rm -rf, but, ...
-docheckout ()
-{
-
-	rumpsrc="$1"
-	usersrc="$2"
-
-	if git submodule status ${usersrc} | grep -q '^-' ; then
-		git submodule update --init --recursive
-	fi
-	if [ ! -d ${rumpsrc} ]; then
-		./buildrump.sh/buildrump.sh -s ${rumpsrc} checkout
-	fi
-	if [ ! -f ${rumpsrc}/updatesrc.sh ] ; then
-		cp -Rp ${usersrc}/* ${rumpsrc}/
-	fi
-}
-
 makeuserlib ()
 {
 
