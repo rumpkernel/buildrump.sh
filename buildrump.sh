@@ -831,33 +831,54 @@ evaltools ()
 	fi
 }
 
-evalplatform ()
+# We can build rump kernels with more or less any compiler.
+# The trick is to make sure that the compiler is no longer building
+# for the target it was originally created for.
+evalcompiler ()
 {
 
-	# Try to figure out the target system we're building for.
 	case ${CC_TARGET} in
 	*-linux*)
-		TARGET=linux
 		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
 		cppdefines _BIG_ENDIAN \
 		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
 		cppdefines _LITTLE_ENDIAN \
 		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
+		;;
+	*-dragonflybsd)
+		RUMPKERN_UNDEF='-U__DragonFly__'
+		;;
+	*-openbsd*)
+		RUMPKERN_UNDEF='-U__OpenBSD__'
+		appendvar EXTRA_CWARNFLAGS -Wno-format
+		;;
+	*-freebsd*)
+		RUMPKERN_UNDEF='-U__FreeBSD__'
+		;;
+	*-sun-solaris*|*-pc-solaris*)
+		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
+		;;
+	esac
+}
+
+# Figure out what we need for the target platform
+evalplatform ()
+{
+
+	case ${CC_TARGET} in
+	*-linux*)
+		TARGET=linux
 		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	*-dragonflybsd)
 		TARGET=dragonfly
-		RUMPKERN_UNDEF='-U__DragonFly__'
 		;;
 	*-openbsd*)
 		TARGET=openbsd
-		RUMPKERN_UNDEF='-U__OpenBSD__'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
-		appendvar EXTRA_CWARNFLAGS -Wno-format
 		;;
 	*-freebsd*)
-		RUMPKERN_UNDEF='-U__FreeBSD__'
 		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
 		TARGET=freebsd
 		;;
@@ -866,7 +887,6 @@ evalplatform ()
 		;;
 	*-sun-solaris*|*-pc-solaris*)
 		TARGET=sunos
-		RUMPKERN_UNDEF='-U__sun__ -U__sun -Usun'
 		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
@@ -1328,6 +1348,7 @@ parseargs "$@"
 resolvepaths
 
 evaltools
+evalcompiler
 evalplatform
 evalmachine
 
