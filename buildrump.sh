@@ -868,18 +868,18 @@ evalplatform ()
 	case ${CC_TARGET} in
 	*-linux*)
 		TARGET=linux
-		${KERNONLY} || EXTRA_RUMPCOMMON='-ldl'
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		EXTRA_RUMPCOMMON='-ldl'
+		EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	*-dragonflybsd)
 		TARGET=dragonfly
 		;;
 	*-openbsd*)
 		TARGET=openbsd
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	*-freebsd*)
-		${KERNONLY} || EXTRA_RUMPCLIENT='-lpthread'
+		EXTRA_RUMPCLIENT='-lpthread'
 		TARGET=freebsd
 		;;
 	*-netbsd*)
@@ -887,7 +887,7 @@ evalplatform ()
 		;;
 	*-sun-solaris*|*-pc-solaris*)
 		TARGET=sunos
-		${KERNONLY} || EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
+		EXTRA_RUMPCOMMON='-lsocket -ldl -lnsl'
 		# I haven't managed to get static libs to work on Solaris,
 		# so just be happy with shared ones
 		MKSTATICLIB=no
@@ -1349,7 +1349,7 @@ resolvepaths
 
 evaltools
 evalcompiler
-evalplatform
+${KERNONLY} || evalplatform
 evalmachine
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
