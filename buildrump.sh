@@ -753,7 +753,7 @@ makekernelheaders ()
 	(cd ${SRCDIR}/sys/arch && ${RUMPMAKE} NOSUBDIR=1 includes)
 }
 
-evaltools ()
+evaltoolchain ()
 {
 
 	# is the compiler which targets the host "cc" or something else
@@ -818,13 +818,6 @@ evaltools ()
 		: ${NM:=${CC_TARGET}-nm}
 		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
-}
-
-# We can build rump kernels with more or less any compiler.
-# The trick is to make sure that the compiler is no longer building
-# for the target it was originally created for.
-evalcompiler ()
-{
 
 	case ${CC_TARGET} in
 	*-linux*)
@@ -1327,8 +1320,7 @@ if ${dotools} || ${dobuild} || ${dokernelheaders} || ${doinstall} || ${dotests}
 then
 	resolvepaths
 
-	evaltools
-	evalcompiler
+	evaltoolchain
 	${KERNONLY} || evalplatform
 	evalmachine
 
