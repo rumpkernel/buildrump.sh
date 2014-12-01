@@ -225,25 +225,6 @@ doesitbuild ()
 		-x c - -o /dev/null $* > /dev/null 2>&1
 }
 
-cctestandsetW ()
-{
-
-	[ "`pwd`" = "${OBJDIR}" ] || die call cctestandsetW only when in OBJDIR
-
-	#
-	# Try to test if cc supports the given warning flag.
-	# This is a bit tricky since apparently some version of gcc
-	# don't complain about the flag unless there is some other
-	# error to complain about as well.
-	# So we try compiling a broken source file...
-	echo 'no you_shall_not_compile' > broken.c
-	${CC} -W${1} broken.c > broken.out 2>&1
-	if ! grep -q "W${1}" broken.out ; then
-		appendvar EXTRA_CWARNFLAGS -W${1}
-	fi
-	rm -f broken.c broken.out
-}
-
 checkcheckout ()
 {
 
