@@ -1323,7 +1323,8 @@ parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
-if ${dotools} || ${dobuild} || ${dokernelheaders} || ${doinstall}; then
+if ${dotools} || ${dobuild} || ${dokernelheaders} || ${doinstall} || ${dotests}
+then
 	resolvepaths
 
 	evaltools
