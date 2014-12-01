@@ -412,19 +412,12 @@ maketools ()
 	rm -f ${BRTOOLDIR}/dest/usr
 	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
 
-	# queue.h is not available on all systems, but we need it for
-	# the hypervisor build.  So, we make it available in tooldir.
-	mkdir -p ${BRTOOLDIR}/compat/include/sys \
-	    || die create ${BRTOOLDIR}/compat/include/sys
-	cp -p ${SRCDIR}/sys/sys/queue.h ${BRTOOLDIR}/compat/include/sys
-
 	cat >> "${MKCONF}" << EOF
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
 BUILDRUMP_CPPFLAGS=${EXTRA_CPPFLAGS} -I\${BUILDRUMP_STAGE}/usr/include
 .endif
-CPPFLAGS+=-I${BRTOOLDIR}/compat/include
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
@@ -435,6 +428,15 @@ MKHTML=no
 MKCATPAGES=yes
 RUMP_NPF_TESTING?=no
 EOF
+
+	if ! ${KERNONLY}; then
+		# queue.h is not available on all systems, but we need it for
+		# the hypervisor build.  So, we make it available in tooldir.
+		mkdir -p ${BRTOOLDIR}/compat/include/sys \
+		    || die create ${BRTOOLDIR}/compat/include/sys
+		cp -p ${SRCDIR}/sys/sys/queue.h ${BRTOOLDIR}/compat/include/sys
+		echo "CPPFLAGS+=-I${BRTOOLDIR}/compat/include" >> "${MKCONF}"
+	fi
 
 	printoneconfig 'Cmd' "SRCDIR" "${SRCDIR}"
 	printoneconfig 'Cmd' "DESTDIR" "${DESTDIR}"
