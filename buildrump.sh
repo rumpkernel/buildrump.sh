@@ -1244,7 +1244,6 @@ resolvepaths ()
 {
 
 	# check if we're running from a tarball, i.e. is checkout possible
-	BRDIR=$(dirname $0)
 	unset TARBALLMODE
 	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
 		TARBALLMODE='Run from tarball'
@@ -1260,6 +1259,7 @@ resolvepaths ()
 	abspath DESTDIR
 	abspath OBJDIR
 	abspath BRTOOLDIR
+	abspath SRCDIR
 
 	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
 
@@ -1317,28 +1317,32 @@ domake ()
 ###
 ###
 
-parseargs "$@"
-resolvepaths
+BRDIR=$(dirname $0)
 
-evaltools
-evalcompiler
-${KERNONLY} || evalplatform
-evalmachine
+parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
-abspath SRCDIR
 
-${dotools} && maketools
-${dobuild} && makebuild
-${dokernelheaders} && makekernelheaders
-${doinstall} && makeinstall
+if ${dotools} || ${dobuild} || ${dokernelheaders} || ${doinstall}; then
+	resolvepaths
 
-if ${dotests}; then
-	if ${KERNONLY}; then
-		echo '>> Kernel-only; skipping tests (no hypervisor)'
-	else
-		. ${BRDIR}/tests/testrump.sh
-		alltests
+	evaltools
+	evalcompiler
+	${KERNONLY} || evalplatform
+	evalmachine
+
+	${dotools} && maketools
+	${dobuild} && makebuild
+	${dokernelheaders} && makekernelheaders
+	${doinstall} && makeinstall
+
+	if ${dotests}; then
+		if ${KERNONLY}; then
+			echo '>> Kernel-only; skipping tests (no hypervisor)'
+		else
+			. ${BRDIR}/tests/testrump.sh
+			alltests
+		fi
 	fi
 fi
 
