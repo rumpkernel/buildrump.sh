@@ -165,6 +165,23 @@ probeld ()
 		echo ${linkervers}
 		die 'GNU or Solaris ld required'
 	fi
+
+	# Check if the linker supports all the features of the rump kernel
+	# component ldscript used for linking shared libraries.
+	if [ ! ${LD_FLAVOR} = 'sun' ]; then
+		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
+		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
+		if [ $? -ne 0 ]; then
+			if ${KERNONLY} || [ "${MKPIC}" = "no" ]; then
+				LDSCRIPT='no'
+			else
+				LDSCRIPT='ctor'
+			fi
+		fi
+		rm -f ldscript.test
+	else
+		LDSCRIPT='sun'
+	fi
 }
 
 # Check if $NM outputs the format we except, i.e. if symbols
@@ -311,69 +328,6 @@ probe_rumpuserbits ()
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 }
 
-# probes relating to cc and ld, mostly affect how we build kernel code
-probe_compiler ()
-{
-
-	# Check for variant of compiler.
-	# XXX: why can't all cc's that are gcc actually tell me
-	#      that they're gcc with cc --version?!?
-	ccver=$(${CC} --version)
-	if echo ${ccver} | grep -q 'Free Software Foundation'; then
-		CC_FLAVOR=gcc
-	elif echo ${ccver} | grep -q clang; then
-		CC_FLAVOR=clang
-		LLVM='-V HAVE_LLVM=1'
-	elif echo ${ccver} | grep -q pcc; then
-		CC_FLAVOR=pcc
-		PCC='-V HAVE_PCC=1'
-	else
-		die Unsupported \${CC} "(`type ${CC}`)"
-	fi
-
-	# The compiler cannot do %zd/u warnings if the NetBSD kernel
-	# uses the different flavor of size_t (int vs. long) than what
-	# the compiler was built with.  Probing is not entirely easy
-	# since we need to testbuild kernel code, not host code,
-	# and we're only setting up the build now.  So we just
-	# disable format warnings on all 32bit targets.
-	${THIRTYTWO} && appendvar EXTRA_CWARNFLAGS -Wno-format
-
-	#
-	# Check if the linker supports all the features of the rump kernel
-	# component ldscript used for linking shared libraries.
-	if [ ! ${LD_FLAVOR} = 'sun' ]; then
-		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
-		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
-		if [ $? -ne 0 ]; then
-			if ${KERNONLY} || [ "${MKPIC}" = "no" ]; then
-				LDSCRIPT='no'
-			else
-				LDSCRIPT='ctor'
-			fi
-		fi
-		rm -f ldscript.test
-	else
-		LDSCRIPT='sun'
-	fi
-
-	# does target support __thread.  if yes, optimize curlwp
-	if ! ${KERNONLY}; then
-		doesitbuild \
-		    '__thread int lanka; int main(void) {return lanka;}\n'
-		[ $? -eq 0 ] && RUMP_CURLWP=__thread
-	fi
-
-	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
-	# to avoid line number conflicts
-	doesitbuild 'int a = __COUNTER__;\n' -c
-	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
-
-	# linker supports --warn-shared-textrel
-	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
-	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
-}
-
 #
 # Create tools and wrappers.  This step needs to be run at least once.
 # The routine is run if the "tools" argument is specified.
@@ -405,7 +359,6 @@ maketools ()
 	mkconf_final="${BRTOOLDIR}/mk.conf"
 	> ${mkconf_final}
 
-	probe_compiler
 	${KERNONLY} || probe_rumpuserbits
 
 	checkcompiler
@@ -763,6 +716,22 @@ evaltoolchain ()
 		rm -f ${OBJDIR}/canrun
 	fi
 
+	# Check for variant of compiler.
+	# XXX: why can't all cc's that are gcc actually tell me
+	#      that they're gcc with cc --version?!?
+	ccver=$(${CC} --version)
+	if echo ${ccver} | grep -q 'Free Software Foundation'; then
+		CC_FLAVOR=gcc
+	elif echo ${ccver} | grep -q clang; then
+		CC_FLAVOR=clang
+		LLVM='-V HAVE_LLVM=1'
+	elif echo ${ccver} | grep -q pcc; then
+		CC_FLAVOR=pcc
+		PCC='-V HAVE_PCC=1'
+	else
+		die Unsupported \${CC} "(`type ${CC}`)"
+	fi
+
 	# Check the arch we're building for so as to work out the necessary
 	# NetBSD machine code we need to use.  First try -dumpmachine,
 	# and if that works, be happy with it.  Not all compilers support
@@ -832,6 +801,23 @@ evaltoolchain ()
 	else
 		THIRTYTWO=true
 	fi
+
+	# The compiler cannot do %zd/u warnings if the NetBSD kernel
+	# uses the different flavor of size_t (int vs. long) than what
+	# the compiler was built with.  Probing is not entirely easy
+	# since we need to testbuild kernel code, not host code,
+	# and we're only setting up the build now.  So we just
+	# disable format warnings on all 32bit targets.
+	${THIRTYTWO} && appendvar EXTRA_CWARNFLAGS -Wno-format
+
+	# Check if cpp supports __COUNTER__.  If not, override CTASSERT
+	# to avoid line number conflicts
+	doesitbuild 'int a = __COUNTER__;\n' -c
+	[ $? -eq 0 ] || CTASSERT="-D'CTASSERT(x)='"
+
+	# linker supports --warn-shared-textrel
+	doesitbuild 'int main(void) {return 0;}' -Wl,--warn-shared-textrel
+	[ $? -ne 0 ] && SHLIB_WARNTEXTREL=no
 }
 
 # Figure out what we need for the target platform
@@ -881,6 +867,10 @@ evalplatform ()
 	if ! ${target_supported:-true}; then
 		${TITANMODE} || die unsupported target: ${CC_TARGET}
 	fi
+
+	# does target support __thread.  if yes, optimize curlwp
+	doesitbuild '__thread int lanka; int main(void) {return lanka;}\n'
+	[ $? -eq 0 ] && RUMP_CURLWP=__thread
 }
 
 # ARM targets require a few extra checks
