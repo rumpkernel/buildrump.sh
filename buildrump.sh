@@ -1292,8 +1292,9 @@ then
 	resolvepaths
 
 	evaltoolchain
-	${KERNONLY} || evalplatform
 	evalmachine
+
+	${KERNONLY} || evalplatform
 
 	${dotools} && maketools
 	${dobuild} && makebuild
