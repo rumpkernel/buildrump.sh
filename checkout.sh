@@ -318,7 +318,7 @@ checkcheckout ()
 		return 0
 	fi
 
-	setgit
+	setgit || return 0
 
 	# if it's a git repo of the wrong version, issue an error
 	# (caller can choose to ignore it if they so desire)
@@ -369,11 +369,7 @@ setgit ()
 {
 
 	: ${GIT:=git}
-	if ! type ${GIT} >/dev/null 2>&1 ;then
-		echo '>> Need git for checkoutgit functionality'
-		echo '>> Set $GIT or ensure that git is in PATH'
-		die \"${GIT}\" not found
-	fi
+	type ${GIT} >/dev/null 2>&1 || return 1
 }
 
 [ "$1" = "listdates" ] && { listdates ; exit 0; }
@@ -392,13 +388,13 @@ cvs)
 	echo '>> checkout done'
 	;;
 git)
-	setgit
+	setgit || die "require working git"
 	checkoutgit
 	echo '>> checkout done'
 	;;
 githubdate)
 	[ $(dirname $0) != '.' ] && die Script must be run as ./checkout.sh
-	setgit
+	setgit || die "require working git"
 	githubdate
 	echo '>>'
 	echo '>> Update done'
