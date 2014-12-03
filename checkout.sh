@@ -79,6 +79,8 @@ NBSRC_EXTRA_posix='
 	src/lib/librumpuser'
 
 NBSRC_EXTRA_usr='
+    20140826 1200UTC:
+	src/lib/libm/Makefile;
     20141101 0001UTC:
         src/crypto/external/bsd/openssl'
 
