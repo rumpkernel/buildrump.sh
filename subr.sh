@@ -29,12 +29,13 @@ makeuserlib ()
 
 	rumpmake=$1
 	lib=$2
+	shift; shift
 
 	( cd ${lib}
 		${rumpmake} obj
 		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
-		    NOGCCERROR=1 ${STDJ} dependall
-		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no install
+		    NOGCCERROR=1 ${STDJ} "$@" dependall
+		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
 	)
 }
 
