@@ -54,7 +54,7 @@ makeuserlib ()
 	( cd ${lib}
 		${rumpmake} obj
 		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
-		    NOGCCERROR=1 ${STDJ} "$@" dependall
+		    MKNLS=no NOGCCERROR=1 ${STDJ} "$@" dependall
 		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
 	)
 }
