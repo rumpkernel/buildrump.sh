@@ -24,6 +24,26 @@ usermtree ()
 	mkdir -p ${destbase}/lib/pkgconfig
 }
 
+# echo names of normal libs (including optional prefix)
+stdlibs ()
+{
+
+	prefix=${1:+${1}/}
+	liblibs='libc libcrypt libipsec libm libnpf libpci libprop
+	    libpthread librmt libutil liby libz'
+	extralibs='external/bsd/flex/lib
+	    crypto/external/bsd/openssl/lib/libcrypto
+	    crypto/external/bsd/openssl/lib/libdes
+	    crypto/external/bsd/openssl/lib/libssl
+	    external/bsd/libpcap/lib'
+	for lib in ${liblibs}; do
+		echo ${prefix}lib/${lib}
+	done
+	for lib in ${extralibs}; do
+		echo ${prefix}${lib}
+	done
+}
+
 makeuserlib ()
 {
 
