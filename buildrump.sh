@@ -37,15 +37,6 @@ SYS_SUNOS=false
 # support routines
 #
 
-# the parrot routine
-die ()
-{
-
-	echo '>> ERROR:' >&2
-	echo ">> $*" >&2
-	exit 1
-}
-
 helpme ()
 {
 
@@ -1285,6 +1276,7 @@ domake ()
 ###
 
 BRDIR=$(dirname $0)
+. ${BRDIR}/subr.sh
 
 parseargs "$@"
 
