@@ -16,7 +16,8 @@ die ()
 _checkrumpmake ()
 {
 
-	[ -e "${RUMPMAKE}" ] || die 'routine requires $RUMPMAKE to be set'
+	[ -n "${RUMPMAKE}" ] || die 'routine requires $RUMPMAKE to be set'
+	[ -e "${RUMPMAKE}" ] || die ${RUMPMAKE} is not an executable
 }
 
 # adhoc "mtree" required for installaling a subset of userspace
