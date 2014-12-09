@@ -27,8 +27,6 @@ _checkrumpmake ()
 usermtree ()
 {
 
-	_checkrumpmake
-
 	destbase=$1
 
 	INCSDIRS='adosfs altq arpa crypto dev filecorefs fs i386 isofs miscfs
