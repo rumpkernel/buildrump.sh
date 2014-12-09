@@ -13,6 +13,12 @@ die ()
 	exit 1
 }
 
+_checkrumpmake ()
+{
+
+	[ -z "${RUMPMAKE}" ] && die 'routine requires $RUMPMAKE to be set'
+}
+
 # adhoc "mtree" required for installaling a subset of userspace
 # headers and libraries.  maybe we can migrate to a proper use of
 # NetBSD's mtree at some point?
@@ -20,6 +26,8 @@ die ()
 # XXX: hardcoded base paths
 usermtree ()
 {
+
+	_checkrumpmake
 
 	destbase=$1
 
@@ -56,30 +64,32 @@ stdlibs ()
 makeuserlib ()
 {
 
-	rumpmake=$1
-	lib=$2
-	shift; shift
+	_checkrumpmake
+
+	lib=$1
+	shift
 
 	( cd ${lib}
-		${rumpmake} obj
-		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
+		${RUMPMAKE} obj
+		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
 		    MKNLS=no NOGCCERROR=1 ${STDJ} "$@" dependall
-		${rumpmake} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
+		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
 	)
 }
 
 userincludes ()
 {
 
-	rumpmake=$1
-	rumpsrc=$2
-	shift 2
+	_checkrumpmake
+
+	rumpsrc=$1
+	shift
 
 	echo '>> installing userspace headers'
-	( cd ${rumpsrc}/include && ${rumpmake} obj && ${rumpmake} includes )
+	( cd ${rumpsrc}/include && ${RUMPMAKE} obj && ${RUMPMAKE} includes )
 	for lib in $*; do 
-		( cd ${lib} && ${rumpmake} obj )
-		( cd ${lib} && ${rumpmake} includes )
+		( cd ${lib} && ${RUMPMAKE} obj )
+		( cd ${lib} && ${RUMPMAKE} includes )
 	done
 	echo '>> done installing headers'
 }
