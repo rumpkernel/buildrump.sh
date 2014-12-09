@@ -90,15 +90,6 @@ GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
 GITREVFILE='.srcgitrev'
 
-die ()
-{
-
-	echo '>>'
-	echo ">> $*"
-	echo '>>'
-	exit 1
-}
-
 checkoutcvs ()
 {
 
@@ -381,6 +372,8 @@ setgit ()
 [ $# -lt 2 ] && die Invalid usage.  Run this script via buildrump.sh
 BRDIR=$(dirname $0)
 SRCDIR=${2}
+
+. ${BRDIR}/subr.sh
 
 case "${1}" in
 cvs)
