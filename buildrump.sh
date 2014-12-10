@@ -419,6 +419,7 @@ MKHTML=no
 MKCATPAGES=yes
 MKNLS=no
 RUMP_NPF_TESTING?=no
+RUMPRUN=yes
 EOF
 
 	if ! ${KERNONLY}; then
