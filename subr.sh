@@ -71,7 +71,7 @@ makeuserlib ()
 	( cd ${lib}
 		${RUMPMAKE} obj
 		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
-		    MKNLS=no NOGCCERROR=1 ${STDJ} "$@" dependall
+		    MKNLS=no NOGCCERROR=1 HAVE_LIBGCC_EH=yes ${STDJ} "$@" dependall
 		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
 	)
 }
