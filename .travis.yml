@@ -4,6 +4,8 @@ compiler:
   - gcc
   - clang
 
+sudo: false
+
 before_script:
   - ./buildrump.sh checkout
 
