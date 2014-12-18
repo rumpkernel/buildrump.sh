@@ -348,11 +348,28 @@ SRCDIR=${2}
 . ${BRDIR}/subr.sh
 
 case "${1}" in
-cvs)
+cvs|cvsbuildrump)
 	shift ; shift
 	mkdir -p ${SRCDIR} || die cannot create srcdir
 	cd ${SRCDIR} || die cannot access srcdir
 	checkoutcvs checkout sys $*
+	checkoutcvs checkout posix $*
+	echo '>> checkout done'
+	;;
+cvsappstack)
+	shift ; shift
+	mkdir -p ${SRCDIR} || die cannot create srcdir
+	cd ${SRCDIR} || die cannot access srcdir
+	checkoutcvs checkout sys $*
+	checkoutcvs checkout usr $*
+	echo '>> checkout done'
+	;;
+cvsall)
+	shift ; shift
+	mkdir -p ${SRCDIR} || die cannot create srcdir
+	cd ${SRCDIR} || die cannot access srcdir
+	checkoutcvs checkout sys $*
+	checkoutcvs checkout usr $*
 	checkoutcvs checkout posix $*
 	echo '>> checkout done'
 	;;
