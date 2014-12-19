@@ -5,6 +5,7 @@
 #
 #	BUILDXENMETAL_MKCONF:	extra contents for mk.conf
 #	BUILDXENMETAL_PCI_P:	predicate for building PCI drivers
+#	BUILDXENMETAL_PCI_ARGS:	extra build args to PCI build
 #
 
 STDJ='-j4'
@@ -59,5 +60,5 @@ for lib in ${LIBS}; do
 	makeuserlib ${lib}
 done
 
-eval ${BUILDXENMETAL_PCI_P} && makepci ${RUMPSRC}
+eval ${BUILDXENMETAL_PCI_P} && makepci ${RUMPSRC} ${BUILDXENMETAL_PCI_ARGS}
 exit 0
