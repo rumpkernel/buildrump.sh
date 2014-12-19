@@ -76,6 +76,25 @@ makeuserlib ()
 	)
 }
 
+makepci ()
+{
+
+	_checkrumpmake
+
+	rumpsrc=$1
+	shift
+	pcilibs=$(${RUMPMAKE} -f ${rumpsrc}/sys/rump/dev/Makefile.rumpdevcomp \
+	    -V '${RUMPPCIDEVS}')
+
+	for lib in ${pcilibs}; do
+		( cd ${rumpsrc}/sys/rump/dev/lib/lib${lib}
+			${RUMPMAKE} obj
+			${RUMPMAKE} $* dependall
+			${RUMPMAKE} install
+		)
+	done
+}
+
 userincludes ()
 {
 
