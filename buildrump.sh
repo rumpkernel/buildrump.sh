@@ -688,7 +688,7 @@ evaltoolchain ()
 	# is the compiler which targets the host "cc" or something else
 	: ${HOST_CC:=cc}
 	type ${HOST_CC} >/dev/null 2>&1 \
-	    || die set '${HOST_CC}' to a host targeted cc "(now \"${HOST_CC}\")"
+	    || die '${HOST_CC}' not found "(tried \"${HOST_CC}\")"
 
 	# target compiler
 	: ${CC:=cc}
