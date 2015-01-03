@@ -142,8 +142,7 @@ checkoutcvs ()
 	ln -s . src
 
 	# now, do the real checkout
-	echo ">> Fetching the \"${what}\" subset of NetBSD source tree to:"
-	echo "   "`pwd -P`
+	echo ">> Fetching the \"${what}\" subset of NetBSD source tree to: $(pwd -P)"
 	sh listsrcdirs -c ${what} | xargs ${CVS} ${NBSRC_CVSFLAGS} \
 	    -d ${BUILDRUMP_CVSROOT} ${op} \
 	    ${prune} ${NBSRC_CVSPARAM} ${NBSRC_CVSREV:+"${NBSRC_CVSREV}"} \
