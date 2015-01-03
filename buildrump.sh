@@ -367,8 +367,6 @@ maketools ()
 		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
 
 		eval tool=\${${x}}
-		type ${tool} >/dev/null 2>&1 \
-		    || die Cannot find \$${x} at \"${tool}\".
 		printoneconfig 'Tool' "${x}" "${tool}"
 
 		exec 3>&1 1>${tname}
@@ -765,6 +763,11 @@ evaltoolchain ()
 		: ${NM:=${CC_TARGET}-nm}
 		: ${OBJCOPY:=${CC_TARGET}-objcopy}
 	fi
+
+	for tool in AR NM OBJCOPY; do
+		eval t=\${${tool}}
+		type ${t} > /dev/null || die cannot find \$${tool} "(${t})"
+	done
 
 	case ${CC_TARGET} in
 	*-linux*)
