@@ -705,8 +705,10 @@ evaltoolchain ()
 		[ $? -eq 0 ] && ${OBJDIR}/canrun
 		if [ $? -eq 0 ]; then
 			NATIVEBUILD=true
+			echo '>> NATIVE build environment probed'
 		else
 			NATIVEBUILD=false
+			echo '>> CROSS build environment probed'
 		fi
 		rm -f ${OBJDIR}/canrun
 	fi
