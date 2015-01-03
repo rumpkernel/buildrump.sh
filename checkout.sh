@@ -54,7 +54,9 @@ NBSRC_CVSFLAGS="-z3"
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
 NBSRC_EXTRA_sys=''
 
-NBSRC_EXTRA_posix=''
+NBSRC_EXTRA_posix='
+    20150103 1320UTC:
+	src/lib/librumpuser'
 
 NBSRC_EXTRA_usr=''
 
