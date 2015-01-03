@@ -58,7 +58,7 @@ helpme ()
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
 	printf "\t-F: specify build flags with -F XFLAGS=value\n"
 	printf "\t    possible values for XFLAGS:\n"
-	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS,"
+	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS,\n"
 	printf "\t    CPPFLAGS, DBG\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
