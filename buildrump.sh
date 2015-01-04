@@ -159,21 +159,12 @@ probeld ()
 		die 'GNU or Solaris ld required'
 	fi
 
-	# Check if the linker supports all the features of the rump kernel
-	# component ldscript used for linking shared libraries.
-	if [ ! ${LD_FLAVOR} = 'sun' ]; then
-		echo 'SECTIONS { } INSERT AFTER .data' > ldscript.test
-		doesitbuild 'int main(void) {return 0;}' -Wl,-T,ldscript.test
-		if [ $? -ne 0 ]; then
-			if ${KERNONLY} || [ "${MKPIC}" = "no" ]; then
-				LDSCRIPT='no'
-			else
-				LDSCRIPT='ctor'
-			fi
-		fi
-		rm -f ldscript.test
+	# use traditional link sets for freestanding targets,
+	# use __attribute__((constructor)) elsewhere
+	if ${KERNONLY}; then
+		LDSCRIPT='no'
 	else
-		LDSCRIPT='sun'
+		LDSCRIPT='ctor'
 	fi
 }
 
