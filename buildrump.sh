@@ -27,6 +27,7 @@
 #
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
+unset CCWRAPPER_UNARGS
 
 # defaults, can be overriden by probes
 RUMP_VIRTIF=no
@@ -151,6 +152,7 @@ probeld ()
 	elif echo ${linkervers} | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 		SHLIB_MKMAP=no
+		appendvar CCWRAPPER_UNARGS '-Wl,-x'
 	else
 		echo '>> output from linker:'
 		echo ${linkervers}
@@ -374,13 +376,16 @@ maketools ()
 
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
-		if [ ${x} = 'CC' -a ${LD_FLAVOR} = 'sun' ]; then
-			printf 'for x in $*; do\n'
-			printf '\t[ "$x" = "-Wl,-x" ] && continue\n'
+		if [ -z "${CCWRAPPER_UNARGS}" ]; then
+			printf 'exec %s "$@"\n' ${tool}
+		else
+			printf 'for x in $*; do\n\t{ '
+			for arg in ${CCWRAPPER_UNARGS}; do
+				printf '[ "$x" = "'${arg}'" ] || '
+			done
+			printf 'false; } && continue\n'
 			printf '\tnewargs="${newargs} $x"\n'
 			printf 'done\nexec %s ${newargs}\n' ${tool}
-		else
-			printf 'exec %s "$@"\n' ${tool}
 		fi
 		exec 1>&3 3>&-
 		chmod 755 ${tname}
@@ -946,12 +951,20 @@ probemips ()
 	appendvar EXTRA_AFLAGS -fPIC
 }
 
+probex86 ()
+{
+
+	# we probably should unconditionally wipe out -mno-avx for userspace ...
+	doesitbuild 'int i;' -c -mno-avx || appendvar CCWRAPPER_UNARGS -mno-avx
+}
+
 evalmachine ()
 {
 
 	TOOLABI=''
 	case ${MACH_ARCH} in
 	"amd64"|"x86_64")
+		probex86
 		if ${THIRTYTWO} ; then
 			MACHINE="i386"
 			MACH_ARCH="i486"
@@ -962,6 +975,7 @@ evalmachine ()
 		fi
 		;;
 	"i386"|"i486"|"i586"|"i686")
+		probex86
 		MACHINE="i386"
 		MACH_ARCH="i486"
 		TOOLABI="elf"
