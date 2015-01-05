@@ -33,6 +33,7 @@ unset CCWRAPPER_UNARGS
 RUMP_VIRTIF=no
 HIJACK=false
 SYS_SUNOS=false
+NEED_LDSCRIPT=false
 
 #
 # support routines
@@ -163,7 +164,7 @@ probeld ()
 	# use __attribute__((constructor)) elsewhere
 	if ${KERNONLY}; then
 		LDSCRIPT='no'
-	else
+	elif ! ${NEED_LDSCRIPT}; then
 		LDSCRIPT='ctor'
 	fi
 }
@@ -824,6 +825,7 @@ evalplatform ()
 	*-netbsd*)
 		RUMP_VIRTIF=yes
 		HIJACK=true
+		NEED_LDSCRIPT=true
 		;;
 	*-dragonflybsd)
 		RUMP_VIRTIF=yes
