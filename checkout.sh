@@ -43,7 +43,7 @@
 # available via git.
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
-NBSRC_CVSDATE="20141216 2100UTC"
+NBSRC_CVSDATE="20150108 1800UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
@@ -59,9 +59,7 @@ NBSRC_CVSFLAGS="-z3"
 #
 NBSRC_EXTRA_sys=''
 
-NBSRC_EXTRA_posix='
-    20150103 1320UTC:
-	src/lib/librumpuser'
+NBSRC_EXTRA_posix=''
 
 NBSRC_EXTRA_usr=''
 
