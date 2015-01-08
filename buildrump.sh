@@ -532,6 +532,12 @@ EOF
 	# create wrapper script to be used during buildrump.sh, plus tools
 	makemake ${RUMPMAKE} ${OBJDIR}/dest.stage tools
 
+	sysproxy=$(${RUMPMAKE} \
+	    -f ${SRCDIR}/sys/rump/kern/Makefile.rumpkerncomp \
+	    -V '${RUMPKERNCOMPS:Msysproxy}')
+	[ -n "${sysproxy}" ] \
+	    && echo RUMPKERN_SYSPROXY=-lrumpkern_sysproxy >> "${MKCONF}"
+
 	unset ac_cv_header_zlib_h
 
 	# tool build done.  flip mk.conf name so that it gets picked up
