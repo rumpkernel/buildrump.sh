@@ -196,17 +196,26 @@ probear ()
 	fi
 }
 
-# check if cpp defines the given parameter (with any value)
+#
+# Check if cpp defines $1 (with any value).
+# If $# > 1, use the remaining args as args to cc.
+#
 cppdefines ()
 {
 
-	[ -z "${BUILDRUMP_CPPCACHE}" ] \
-	    && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS}	\
-		-E -Wp,-dM - < /dev/null)
 	var=${1}
+	shift
+	if [ $# -eq 0 ]; then
+		[ -z "${BUILDRUMP_CPPCACHE}" ] \
+		    && BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CFLAGS}	\
+			-E -Wp,-dM - < /dev/null)
+		cpplist="${BUILDRUMP_CPPCACHE}"
+	else
+		cpplist==$(${CC} ${EXTRA_CFLAGS} -E -Wp,-dM "$@" - < /dev/null)
+	fi
 	(
 	    IFS=' '
-	    echo ${BUILDRUMP_CPPCACHE} | awk '$2 == "'$var'"{exit 37}'
+	    echo ${cpplist} | awk '$2 == "'$var'"{exit 37}'
 	    exit $?
 	)
 	[ $? -eq 37 ]
@@ -803,6 +812,15 @@ evaltoolchain ()
 		THIRTYTWO=false
 	else
 		THIRTYTWO=true
+	fi
+
+	# At least gcc on Ubuntu wants to set -D_FORTIFY_SOURCE=2
+	# when compiling with -O2 ...  While we have nothing against
+	# ssp, we don't want things to conflict with what the NetBSD
+	# build imagines is going on.  Therefore, force-disable that
+	# helpful default flag.
+	if cppdefines _FORTIFY_SOURCE -O2; then
+		appendvar EXTRA_CFLAGS -U_FORTIFY_SOURCE
 	fi
 
 	# The compiler cannot do %zd/u warnings if the NetBSD kernel
