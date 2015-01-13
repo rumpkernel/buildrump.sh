@@ -61,7 +61,9 @@ NBSRC_EXTRA_sys=''
 
 NBSRC_EXTRA_posix=''
 
-NBSRC_EXTRA_usr=''
+NBSRC_EXTRA_usr='
+    20150113 1000UTC:
+	src/crypto/external/bsd/openssl'
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
