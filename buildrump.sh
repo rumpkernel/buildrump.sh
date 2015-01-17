@@ -277,6 +277,17 @@ probe_rumpuserbits ()
 		fi
 	done
 
+	# Do we need -lpthread for threads?
+	# Most systems do, but Android does not have it at all and
+	# Musl does not require it
+	doesitbuild '#include <pthread.h>\n
+		#include <stddef.h>\n
+		void *t(void *);void *t(void *arg) {return NULL;}\n
+		int main(void) {pthread_t p;return pthread_create(&p,NULL,t,NULL);}'
+	if [ $? -eq 0 ]; then
+		CCWRAPPER_UNARGS='-lpthread'
+	fi
+
 	# is it a source tree which comes with autoconf?  if so, prefer that
 	if [ -x ${SRCDIR}/lib/librumpuser/configure ]; then
 		echo '>> librumpuser configure script detected.  running'
