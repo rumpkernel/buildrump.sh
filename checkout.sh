@@ -57,7 +57,9 @@ NBSRC_CVSFLAGS="-z3"
 #   20151111 1111UTC:
 #	src/sys/rump'
 #
-NBSRC_EXTRA_sys=''
+NBSRC_EXTRA_sys='
+    20150121 1440UTC:
+	src/sys/rump/librump/rumpkern/lwproc.c'
 
 NBSRC_EXTRA_posix=''
 
