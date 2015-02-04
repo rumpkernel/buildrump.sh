@@ -59,9 +59,13 @@ NBSRC_CVSFLAGS="-z3"
 #
 NBSRC_EXTRA_sys='
     20150121 1440UTC:
-	src/sys/rump/librump/rumpkern/lwproc.c'
+	src/sys/rump/librump/rumpkern/lwproc.c;
+    20150204 1300UTC:
+	src/sys/rump/librump/rumpkern/Makefile.rumpkern'
 
-NBSRC_EXTRA_posix=''
+NBSRC_EXTRA_posix='
+    20150204 1300UTC:
+	src/lib/librumpuser/rumpuser_sp.c'
 
 NBSRC_EXTRA_usr='
     20150113 1000UTC:
