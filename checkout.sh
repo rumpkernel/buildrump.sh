@@ -61,7 +61,11 @@ NBSRC_EXTRA_sys='
     20150121 1440UTC:
 	src/sys/rump/librump/rumpkern/lwproc.c;
     20150204 1300UTC:
-	src/sys/rump/librump/rumpkern/Makefile.rumpkern'
+	src/sys/rump/librump/rumpkern/Makefile.rumpkern;
+    20150209 2245UTC:
+	src/lib/libc/Makefile
+	src/lib/libc/compat/arch/i386/Makefile.inc
+	src/lib/libc/compat/arch/x86_64/Makefile.inc'
 
 NBSRC_EXTRA_posix='
     20150204 1300UTC:
