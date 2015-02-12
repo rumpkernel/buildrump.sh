@@ -30,7 +30,8 @@ usermtree ()
 
 	destbase=$1
 
-	INCSDIRS='adosfs altq arpa crypto dev filecorefs fs i386 isofs miscfs
+	INCSDIRS='adosfs altq arpa c++ c++/experimental c++/ext crypto
+	    dev filecorefs fs i386 isofs miscfs
 	    msdosfs net net80211 netatalk netbt netinet netinet6 netipsec
 	    netisdn netkey netmpls netnatm netsmb nfs ntfs openssl pcap
 	    ppath prop protocols rpc rpcsvc ssp sys ufs uvm x86'
