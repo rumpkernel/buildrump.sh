@@ -388,7 +388,7 @@ maketools ()
 
 		# Make the compiler wrapper mangle arguments suitable for ld.
 		# Messy to plug it in here, but ...
-		if [ -z "${CCWRAPPER_UNARGS}" ]; then
+		if [ "${x}" = 'CC' -a -z "${CCWRAPPER_UNARGS}" ]; then
 			printf 'exec %s "$@"\n' ${tool}
 		else
 			printf 'for x in $*; do\n\t{ '
