@@ -236,6 +236,21 @@ doesitbuild ()
 		-x c - -o /dev/null $* > /dev/null 2>&1
 }
 
+# like doesitbuild, except with c++
+doesitcxx ()
+{
+
+	${HAVECXX} || die internal error: doesitcxx called without cxx
+
+	theprog="${1}"
+	shift
+
+	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
+	printf "${theprog}" \
+	    | ${CXX} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
+		-x c - -o /dev/null $* > /dev/null 2>&1
+}
+
 checkcheckout ()
 {
 
@@ -337,11 +352,12 @@ maketoolwrapper ()
 {
 
 	tool=$1
+
 	# ok, it's not really --netbsd, but let's make-believe!
 	if [ ${tool} = CC ]; then
 		lcx=${CC_FLAVOR}
 	else
-		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]')
+		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]' | sed 's/cxx/c++/' )
 	fi
 	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
 
@@ -353,7 +369,12 @@ maketoolwrapper ()
 
 	# Make the compiler wrapper mangle arguments suitable for ld.
 	# Messy to plug it in here, but ...
-	if [ "${tool}" != 'CC' -o -z "${CCWRAPPER_UNARGS}" ]; then
+	if [ "${tool}" = 'CXX' ] && ${MANGLECXXISYSTEM}; then
+		printf 'for x in $*; do\n\t'
+			printf 'x=$(echo $x | sed s/cxx-isystem/isystem/)\n'
+		printf '\tnewargs="${newargs} $x"\n'
+		printf 'done\nexec %s ${newargs}\n' ${evaldtool}
+	elif [ "${tool}" != 'CC' -o -z "${CCWRAPPER_UNARGS}" ]; then
 		printf 'exec %s "$@"\n' ${evaldtool}
 	else
 		printf 'for x in $*; do\n\t{ '
@@ -385,10 +406,10 @@ maketools ()
 
 	checkcheckout
 
-	# Check for ld because we need to make some adjustments based on it
 	probeld
 	probenm
 	probear
+	${HAVECXX} && probecxx
 
 	cd ${OBJDIR}
 
@@ -409,6 +430,8 @@ maketools ()
 	for x in CC AR NM OBJCOPY; do
 		maketoolwrapper $x
 	done
+	${HAVECXX} && maketoolwrapper CXX
+
 	# create a cpp wrapper, but run it via cc -E
 	if [ "${CC_FLAVOR}" = 'clang' ]; then
 		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-clang-cpp
@@ -757,6 +780,34 @@ evaltoolchain ()
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
 
+	# See if we have a c++ compiler.  If CXX is not set,
+	# try to guess what it could be.  In the latter case, do
+	# not treat a missing c++ compiler as an error.
+	if [ -n "${CXX}" ]; then
+		type ${CXX} > /dev/null 2>&1 \
+		    || die \$CXX set \(${CXX}\) but not found
+		HAVECXX=true
+	else
+		case ${CC} in
+		*gcc)
+			cxxguess=$(echo $CC | sed 's/gcc$/g++/')
+			;;
+		*clang)
+			cxxguess=$(echo $CC | sed 's/clang$/clang++/')
+			;;
+		*cc)
+			cxxguess=$(echo $CC | sed 's/cc$/c++/')
+			;;
+		esac
+		if [ -n "${cxxguess}" ] && type ${cxxguess} >/dev/null 2>&1
+		then
+			CXX=${cxxguess}
+			HAVECXX=true
+		else
+			HAVECXX=false
+		fi
+	fi
+
 	# Check the arch we're building for so as to work out the necessary
 	# NetBSD machine code we need to use.  First try -dumpmachine,
 	# and if that works, be happy with it.  Not all compilers support
@@ -934,6 +985,17 @@ probearm ()
 	# in case hardfloat is the compiler default.
 	if cppdefines __VFP_FP__; then
 		MKSOFTFLOAT=no
+	fi
+}
+
+probecxx ()
+{
+
+	# if cxx doesn't support -cxx-isystem, map it to -isystem
+	if ! doesitcxx 'int i;' -c -cxx-isystem /; then
+		MANGLECXXISYSTEM=true
+	else
+		MANGLECXXISYSTEM=false
 	fi
 }
 
