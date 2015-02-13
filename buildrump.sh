@@ -333,6 +333,41 @@ probe_rumpuserbits ()
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 }
 
+maketoolwrapper ()
+{
+
+	tool=$1
+	# ok, it's not really --netbsd, but let's make-believe!
+	if [ ${tool} = CC ]; then
+		lcx=${CC_FLAVOR}
+	else
+		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]')
+	fi
+	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
+
+	eval evaldtool=\${${tool}}
+	printoneconfig 'Tool' "${tool}" "${evaldtool}"
+
+	exec 3>&1 1>${tname}
+	printf '#!/bin/sh\n\n'
+
+	# Make the compiler wrapper mangle arguments suitable for ld.
+	# Messy to plug it in here, but ...
+	if [ "${tool}" = 'CC' -a -z "${CCWRAPPER_UNARGS}" ]; then
+		printf 'exec %s "$@"\n' ${evaldtool}
+	else
+		printf 'for x in $*; do\n\t{ '
+		for arg in ${CCWRAPPER_UNARGS}; do
+			printf '[ "$x" = "'${arg}'" ] || '
+		done
+		printf 'false; } && continue\n'
+		printf '\tnewargs="${newargs} $x"\n'
+		printf 'done\nexec %s ${newargs}\n' ${evaldtool}
+	fi
+	exec 1>&3 3>&-
+	chmod 755 ${tname}
+}
+
 #
 # Create tools and wrappers.  This step needs to be run at least once.
 # The routine is run if the "tools" argument is specified.
@@ -372,35 +407,7 @@ maketools ()
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
 	for x in CC AR NM OBJCOPY; do
-		# ok, it's not really --netbsd, but let's make-believe!
-		if [ ${x} = CC ]; then
-			lcx=${CC_FLAVOR}
-		else
-			lcx=$(echo ${x} | tr '[A-Z]' '[a-z]')
-		fi
-		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
-
-		eval tool=\${${x}}
-		printoneconfig 'Tool' "${x}" "${tool}"
-
-		exec 3>&1 1>${tname}
-		printf '#!/bin/sh\n\n'
-
-		# Make the compiler wrapper mangle arguments suitable for ld.
-		# Messy to plug it in here, but ...
-		if [ "${x}" = 'CC' -a -z "${CCWRAPPER_UNARGS}" ]; then
-			printf 'exec %s "$@"\n' ${tool}
-		else
-			printf 'for x in $*; do\n\t{ '
-			for arg in ${CCWRAPPER_UNARGS}; do
-				printf '[ "$x" = "'${arg}'" ] || '
-			done
-			printf 'false; } && continue\n'
-			printf '\tnewargs="${newargs} $x"\n'
-			printf 'done\nexec %s ${newargs}\n' ${tool}
-		fi
-		exec 1>&3 3>&-
-		chmod 755 ${tname}
+		maketoolwrapper $x
 	done
 	# create a cpp wrapper, but run it via cc -E
 	if [ "${CC_FLAVOR}" = 'clang' ]; then
