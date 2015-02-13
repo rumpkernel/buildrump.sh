@@ -285,7 +285,7 @@ probe_rumpuserbits ()
 		void *t(void *);void *t(void *arg) {return NULL;}\n
 		int main(void) {pthread_t p;return pthread_create(&p,NULL,t,NULL);}'
 	if [ $? -eq 0 ]; then
-		CCWRAPPER_UNARGS='-lpthread'
+		appendvar CCWRAPPER_UNARGS '-lpthread'
 	fi
 
 	# is it a source tree which comes with autoconf?  if so, prefer that
