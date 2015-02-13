@@ -353,7 +353,7 @@ maketoolwrapper ()
 
 	# Make the compiler wrapper mangle arguments suitable for ld.
 	# Messy to plug it in here, but ...
-	if [ "${tool}" = 'CC' -a -z "${CCWRAPPER_UNARGS}" ]; then
+	if [ "${tool}" != 'CC' -o -z "${CCWRAPPER_UNARGS}" ]; then
 		printf 'exec %s "$@"\n' ${evaldtool}
 	else
 		printf 'for x in $*; do\n\t{ '
