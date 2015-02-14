@@ -61,6 +61,12 @@ stdlibs ()
 	done
 }
 
+stdlibsxx ()
+{
+	prefix=${1:+${1}/}
+	echo ${prefix}external/bsd/libc++
+}
+
 makeuserlib ()
 {
 
