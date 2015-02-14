@@ -374,19 +374,27 @@ maketoolwrapper ()
 		printf 'exec %s "$@"\n' ${evaldtool}
 	else
 		printf 'mangle="%s"\n' "${CCWRAPPER_MANGLE# }"
+		printf 'argnum=0\n'
 		printf 'for arg in $*; do\n\tIFS=:\n'
 		printf '	for xf in ${mangle}; do\n'
 		printf '		IFS==\n'
 		printf '		set -- ${xf}\n'
+		printf '		unset IFS\n'
 		printf '		if [ "${arg}" = "$1" ]; then\n'
-		printf '			arg=$2\n'
+		printf '			arg="$2"\n'
 		printf '			break\n'
 		printf '		fi\n'
 		printf '	done\n'
-		printf '	outargs="${outargs} $arg"\n'
-		printf 'done\n'
-		printf 'unset IFS\n\n'
-		printf 'exec %s ${outargs}\n' ${evaldtool}
+		printf '        eval arg${argnum}=${arg}\n'
+		printf '	argnum=$((${argnum}+1))\n'
+		printf 'done\n\n'
+		printf 'iter=0\n'
+		printf 'set --\n'
+		printf 'while [ ${iter} -lt ${argnum} ]; do\n'
+		printf '	set -- "$@" "$(eval echo \$arg${iter})"\n'
+		printf '	iter=$((${iter}+1))\n'
+		printf 'done\n\n'
+		printf 'exec %s ${1+"$@"}\n' ${evaldtool}
 	fi
 	exec 1>&3 3>&-
 	chmod 755 ${tname}
