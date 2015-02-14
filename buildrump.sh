@@ -1034,6 +1034,12 @@ probearm ()
 probecxx ()
 {
 
+	# require a C++11 compiler
+	if ! doesitcxx 'int i;' -c -std=c++11 ; then
+		HAVECXX=false
+		return
+	fi
+
 	# if cxx doesn't support -cxx-isystem, map it to -isystem
 	if ! doesitcxx 'int i;' -c -cxx-isystem /; then
 		appendvar CCWRAPPER_MANGLE '-cxx-isystem=-isystem:'
