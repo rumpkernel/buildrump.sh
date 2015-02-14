@@ -27,7 +27,7 @@
 #
 # scrub necessary parts of the env
 unset BUILDRUMP_CPPCACHE
-unset CCWRAPPER_UNARGS
+unset CCWRAPPER_MANGLE
 
 # defaults, can be overriden by probes
 RUMP_VIRTIF=no
@@ -153,7 +153,7 @@ probeld ()
 	elif echo ${linkervers} | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 		SHLIB_MKMAP=no
-		appendvar CCWRAPPER_UNARGS '-Wl,-x'
+		appendvar CCWRAPPER_MANGLE '-Wl,-x=:'
 	else
 		echo '>> output from linker:'
 		echo ${linkervers}
@@ -300,7 +300,7 @@ probe_rumpuserbits ()
 		void *t(void *);void *t(void *arg) {return NULL;}\n
 		int main(void) {pthread_t p;return pthread_create(&p,NULL,t,NULL);}'
 	if [ $? -eq 0 ]; then
-		appendvar CCWRAPPER_UNARGS '-lpthread'
+		appendvar CCWRAPPER_MANGLE '-lpthread=:'
 	fi
 
 	# is it a source tree which comes with autoconf?  if so, prefer that
@@ -370,21 +370,23 @@ maketoolwrapper ()
 
 	# Make the compiler wrapper mangle arguments suitable for ld.
 	# Messy to plug it in here, but ...
-	if [ "${tool}" = 'CXX' ] && ${MANGLECXXISYSTEM}; then
-		printf 'for x in $*; do\n\t'
-			printf 'x=$(echo $x | sed s/cxx-isystem/isystem/)\n'
-		printf '\tnewargs="${newargs} $x"\n'
-		printf 'done\nexec %s ${newargs}\n' ${evaldtool}
-	elif [ "${tool}" != 'CC' -o -z "${CCWRAPPER_UNARGS}" ]; then
+	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' -o -z "${CCWRAPPER_MANGLE}" ]; then
 		printf 'exec %s "$@"\n' ${evaldtool}
 	else
-		printf 'for x in $*; do\n\t{ '
-		for arg in ${CCWRAPPER_UNARGS}; do
-			printf '[ "$x" = "'${arg}'" ] || '
-		done
-		printf 'false; } && continue\n'
-		printf '\tnewargs="${newargs} $x"\n'
-		printf 'done\nexec %s ${newargs}\n' ${evaldtool}
+		printf 'mangle="%s"\n' "${CCWRAPPER_MANGLE# }"
+		printf 'for arg in $*; do\n\tIFS=:\n'
+		printf '	for xf in ${mangle}; do\n'
+		printf '		IFS==\n'
+		printf '		set -- ${xf}\n'
+		printf '		if [ "${arg}" = "$1" ]; then\n'
+		printf '			arg=$2\n'
+		printf '			break\n'
+		printf '		fi\n'
+		printf '	done\n'
+		printf '	outargs="${outargs} $arg"\n'
+		printf 'done\n'
+		printf 'unset IFS\n\n'
+		printf 'exec %s ${outargs}\n' ${evaldtool}
 	fi
 	exec 1>&3 3>&-
 	chmod 755 ${tname}
@@ -996,9 +998,7 @@ probecxx ()
 
 	# if cxx doesn't support -cxx-isystem, map it to -isystem
 	if ! doesitcxx 'int i;' -c -cxx-isystem /; then
-		MANGLECXXISYSTEM=true
-	else
-		MANGLECXXISYSTEM=false
+		appendvar CCWRAPPER_MANGLE '-cxx-isystem=-isystem:'
 	fi
 }
 
@@ -1055,7 +1055,8 @@ probex86 ()
 {
 
 	# we probably should unconditionally wipe out -mno-avx for userspace ...
-	doesitbuild 'int i;' -c -mno-avx || appendvar CCWRAPPER_UNARGS -mno-avx
+	doesitbuild 'int i;' -c -mno-avx \
+	    || appendvar CCWRAPPER_MANGLE '-mno-avx=:'
 }
 
 evalmachine ()
