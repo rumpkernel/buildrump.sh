@@ -349,6 +349,29 @@ probe_rumpuserbits ()
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
 }
 
+WRAPPERBODY='int
+main(int argc, const char *argv[])
+{
+	int i, j, k;
+
+	for (i = 1; i < argc; i++) {
+		for (j = 0; j < sizeof(mngl_from)/sizeof(mngl_from[0]); j++) {
+			if (strcmp(argv[i], mngl_from[j]) == 0) {
+				if (strlen(mngl_to[j]) == 0) {
+					for (k = i; k < argc; k++) {
+						argv[k] = argv[k+1];
+					}
+					argv[k] = '\0';
+					argc--;
+				} else {
+					argv[i] = mngl_to[j];
+				}
+				break;
+			}
+		}
+	}
+'
+
 maketoolwrapper ()
 {
 
@@ -365,39 +388,44 @@ maketoolwrapper ()
 	eval evaldtool=\${${tool}}
 	printoneconfig 'Tool' "${tool}" "${evaldtool}"
 
-	exec 3>&1 1>${tname}
-	printf '#!/bin/sh\n\n'
-
 	# Mangle wrapper arguments from what NetBSD does to what the
-	# toolchain we use supports.
+	# toolchain we use supports.  In case we need mangling, do it
+	# with a C wrapper to preserve all quoting etc. (couldn't
+	# figure out how to get that right with a shell.
 	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' \
 	    -o -z "${CCWRAPPER_MANGLE}" ]; then
-		printf 'exec %s "$@"\n' ${evaldtool}
+		printf '#!/bin/sh\n\n' > ${tname}
+		printf 'exec %s "$@"\n' ${evaldtool} > ${tname}
 	else
-		printf 'mangle="%s"\n' "${CCWRAPPER_MANGLE# }"
-		printf 'argnum=0\n'
-		printf 'for arg in $*; do\n\tIFS=:\n'
-		printf '	for xf in ${mangle}; do\n'
-		printf '		IFS==\n'
-		printf '		set -- ${xf}\n'
-		printf '		unset IFS\n'
-		printf '		if [ "${arg}" = "$1" ]; then\n'
-		printf '			arg="$2"\n'
-		printf '			break\n'
-		printf '		fi\n'
-		printf '	done\n'
-		printf '        eval arg${argnum}=${arg}\n'
-		printf '	argnum=$((${argnum}+1))\n'
-		printf 'done\n\n'
-		printf 'iter=0\n'
-		printf 'set --\n'
-		printf 'while [ ${iter} -lt ${argnum} ]; do\n'
-		printf '	set -- "$@" "$(eval echo \$arg${iter})"\n'
-		printf '	iter=$((${iter}+1))\n'
-		printf 'done\n\n'
-		printf 'exec %s ${1+"$@"}\n' ${evaldtool}
+		rm -f ${OBJDIR}/wrapper.c
+		exec 3>&1 1>${OBJDIR}/wrapper.c
+		printf '#include <string.h>\n\n'
+		printf 'static const char *mngl_from[] = {\n'
+		(
+			IFS=:
+			for xf in ${CCWRAPPER_MANGLE# }; do
+				IFS==
+				set -- ${xf}
+				printf '\t"%s",\n' ${1}
+			done
+		)
+		printf '};\nstatic const char *mngl_to[] ={\n'
+		(
+			IFS=:
+			for xf in ${CCWRAPPER_MANGLE# }; do
+				IFS==
+				set -- ${xf}
+				printf '\t"%s",\n' ${2}
+			done
+		)
+		printf '};\n\n'
+		IFS=' ' printf '%s' "${WRAPPERBODY}"
+		printf '\targv[0] = "%s";\n' ${evaldtool}
+		printf '\texecvp(argv[0], argv);\n}\n'
+		exec 1>&3 3>&-
+		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
+		    || die failed to build wrapper for ${tool}
 	fi
-	exec 1>&3 3>&-
 	chmod 755 ${tname}
 }
 
