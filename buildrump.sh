@@ -425,6 +425,7 @@ maketoolwrapper ()
 		exec 1>&3 3>&-
 		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
 		    || die failed to build wrapper for ${tool}
+		rm -f ${OBJDIR}/wrapper.c
 	fi
 	chmod 755 ${tname}
 }
