@@ -368,9 +368,10 @@ maketoolwrapper ()
 	exec 3>&1 1>${tname}
 	printf '#!/bin/sh\n\n'
 
-	# Make the compiler wrapper mangle arguments suitable for ld.
-	# Messy to plug it in here, but ...
-	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' -o -z "${CCWRAPPER_MANGLE}" ]; then
+	# Mangle wrapper arguments from what NetBSD does to what the
+	# toolchain we use supports.
+	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' \
+	    -o -z "${CCWRAPPER_MANGLE}" ]; then
 		printf 'exec %s "$@"\n' ${evaldtool}
 	else
 		printf 'mangle="%s"\n' "${CCWRAPPER_MANGLE# }"
