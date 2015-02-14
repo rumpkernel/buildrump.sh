@@ -245,10 +245,9 @@ doesitcxx ()
 	theprog="${1}"
 	shift
 
-	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
-	    | ${CXX} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
-		-x c++ - -o /dev/null $*
+	    | ${CXX} -Werror ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
+		-x c++ - -o /dev/null $* > /dev/null 2>&1
 }
 
 checkcheckout ()
