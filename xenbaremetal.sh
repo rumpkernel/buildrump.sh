@@ -54,6 +54,11 @@ MACHINE=$(${RUMPMAKE} -f /dev/null -V '${MACHINE}')
     build kernelheaders install
 
 LIBS="$(stdlibs ${RUMPSRC})"
+if [ "$(${RUMPMAKE} -f rumptools/mk.conf -V '${_BUILDRUMP_CXX}')" = 'yes' ]
+then
+	LIBS="${LIBS} $(stdlibsxx ${RUMPSRC})"
+fi
+
 usermtree rump
 userincludes ${RUMPSRC} ${LIBS}
 
