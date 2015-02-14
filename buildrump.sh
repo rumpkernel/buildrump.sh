@@ -526,6 +526,7 @@ EOF
 	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
 	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
 	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
+	appendmkconf 'Probe' $(${HAVECXX} && echo yes || echo no) _BUILDRUMP_CXX
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
 
