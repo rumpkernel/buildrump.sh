@@ -38,7 +38,7 @@ fi
 # build tools
 ./buildrump.sh/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
     -V MKPIC=no -s ${RUMPSRC} -T rumptools -o rumpobj -N \
-    -V RUMP_KERNEL_IS_LIBC=1 "$@" tools
+    -V RUMP_KERNEL_IS_LIBC=1 -V BUILDRUMP_SYSROOT=yes "$@" tools
 
 [ -n "${BUILDXENMETAL_MKCONF}" ] \
     && echo "${BUILDXENMETAL_MKCONF}" >> rumptools/mk.conf
@@ -50,7 +50,8 @@ MACHINE=$(${RUMPMAKE} -f /dev/null -V '${MACHINE}')
 # build rump kernel
 ./buildrump.sh/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
     -V MKPIC=no -s ${RUMPSRC} -T rumptools -o rumpobj -N \
-    -V RUMP_KERNEL_IS_LIBC=1 "$@" build kernelheaders install
+    -V RUMP_KERNEL_IS_LIBC=1 -V BUILDRUMP_SYSROOT=yes "$@" \
+    build kernelheaders install
 
 LIBS="$(stdlibs ${RUMPSRC})"
 usermtree rump
