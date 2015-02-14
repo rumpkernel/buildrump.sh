@@ -304,7 +304,8 @@ probe_rumpuserbits ()
 	fi
 
 	# is it a source tree which comes with autoconf?  if so, prefer that
-	if [ -x ${SRCDIR}/lib/librumpuser/configure ]; then
+	if [ -x ${SRCDIR}/lib/librumpuser/configure \
+	     -a ! -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
 		echo '>> librumpuser configure script detected.  running'
 		echo '>>'
 		mkdir -p ${BRTOOLDIR}/autoconf
