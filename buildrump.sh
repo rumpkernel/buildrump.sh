@@ -316,7 +316,9 @@ probe_rumpuserbits ()
 		    && ${SRCDIR}/lib/librumpuser/configure \
 		      $( ! ${NATIVEBUILD} && echo --host ${CC_TARGET} ) )
 		[ $? -eq 0 ] || die configure script failed
+	fi
 
+	if [ -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
 		echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
 		echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
 		return 0
