@@ -394,8 +394,8 @@ maketoolwrapper ()
 	# figure out how to get that right with a shell.
 	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' \
 	    -o -z "${CCWRAPPER_MANGLE}" ]; then
-		printf '#!/bin/sh\n\n' > ${tname}
-		printf 'exec %s "$@"\n' ${evaldtool} > ${tname}
+		printf '#!/bin/sh\n' > ${tname}
+		printf 'exec %s "$@"\n' ${evaldtool} >> ${tname}
 	else
 		rm -f ${OBJDIR}/wrapper.c
 		exec 3>&1 1>${OBJDIR}/wrapper.c
