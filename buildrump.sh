@@ -393,8 +393,17 @@ maketoolwrapper ()
 	# ok, it's not really --netbsd, but let's make-believe!
 	if [ ${tool} = CC ]; then
 		lcx=${CC_FLAVOR}
+	elif [ ${tool} = CXX ]; then
+		case ${CC_FLAVOR} in
+		gcc)
+			lcx=c++
+			;;
+		clang)
+			lcx=clang++
+			;;
+		esac
 	else
-		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]' | sed 's/cxx/c++/' )
+		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]')
 	fi
 	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
 
