@@ -118,12 +118,24 @@ appendmkconf ()
 	fi
 }
 
+appendvar_fs ()
+{
+	vname="${1}"
+	fs="${2}"
+	shift 2
+	if [ -z "$(eval echo \${$vname})" ]; then
+		eval ${vname}="\${*}"
+	else
+		eval ${vname}="\"\${${vname}}"\${fs}"\${*}\""
+	fi
+}
+
 appendvar ()
 {
 
-	vname=${1}
+	vname="$1"
 	shift
-	eval ${vname}="\"\${${vname}} \${*}\""
+	appendvar_fs "${vname}" ' ' $*
 }
 
 #
@@ -153,7 +165,7 @@ probeld ()
 	elif echo ${linkervers} | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 		SHLIB_MKMAP=no
-		appendvar CCWRAPPER_MANGLE '-Wl,-x=:'
+		appendvar_fs CCWRAPPER_MANGLE : '-Wl,-x='
 	else
 		echo '>> output from linker:'
 		echo ${linkervers}
@@ -299,7 +311,7 @@ probe_rumpuserbits ()
 		void *t(void *);void *t(void *arg) {return NULL;}\n
 		int main(void) {pthread_t p;return pthread_create(&p,NULL,t,NULL);}'
 	if [ $? -eq 0 ]; then
-		appendvar CCWRAPPER_MANGLE '-lpthread=:'
+		appendvar_fs CCWRAPPER_MANGLE : '-lpthread='
 	fi
 
 	# is it a source tree which comes with autoconf?  if so, prefer that
@@ -404,7 +416,7 @@ maketoolwrapper ()
 		printf 'static const char *mngl_from[] = {\n'
 		(
 			IFS=:
-			for xf in ${CCWRAPPER_MANGLE# }; do
+			for xf in ${CCWRAPPER_MANGLE}; do
 				IFS==
 				set -- ${xf}
 				printf '\t"%s",\n' ${1}
@@ -413,20 +425,20 @@ maketoolwrapper ()
 		printf '};\nstatic const char *mngl_to[] ={\n'
 		(
 			IFS=:
-			for xf in ${CCWRAPPER_MANGLE# }; do
+			for xf in ${CCWRAPPER_MANGLE}; do
 				IFS==
 				set -- ${xf}
 				printf '\t"%s",\n' ${2}
 			done
 		)
 		printf '};\n\n'
-		IFS=' ' printf '%s' "${WRAPPERBODY}"
+		( IFS=' ' printf '%s' "${WRAPPERBODY}" )
 		printf '\targv[0] = "%s";\n' ${evaldtool}
 		printf '\texecvp(argv[0], argv);\n}\n'
 		exec 1>&3 3>&-
-		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
-		    || die failed to build wrapper for ${tool}
-		rm -f ${OBJDIR}/wrapper.c
+		#${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
+		    #|| die failed to build wrapper for ${tool}
+		#rm -f ${OBJDIR}/wrapper.c
 	fi
 	chmod 755 ${tname}
 }
@@ -1043,7 +1055,7 @@ probecxx ()
 
 	# if cxx doesn't support -cxx-isystem, map it to -isystem
 	if ! doesitcxx 'int i;' -c -cxx-isystem /; then
-		appendvar CCWRAPPER_MANGLE '-cxx-isystem=-isystem:'
+		appendvar_fs CCWRAPPER_MANGLE : '-cxx-isystem=-isystem'
 	fi
 }
 
@@ -1101,7 +1113,7 @@ probex86 ()
 
 	# we probably should unconditionally wipe out -mno-avx for userspace ...
 	doesitbuild 'int i;' -c -mno-avx \
-	    || appendvar CCWRAPPER_MANGLE '-mno-avx=:'
+	    || appendvar_fs CCWRAPPER_MANGLE : '-mno-avx='
 }
 
 evalmachine ()
