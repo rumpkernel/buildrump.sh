@@ -129,3 +129,11 @@ rumpmakevar ()
 	[ -n "${_var}" ] || die make variable \"$1\" does not exist
 	echo ${_var}
 }
+
+havecxx ()
+{
+
+	_checkrumpmake
+
+	[ $(${RUMPMAKE} -f bsd.own.mk -V '${_BUILDRUMP_CXX}') = 'yes' ]
+}
