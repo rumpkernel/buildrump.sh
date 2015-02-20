@@ -30,6 +30,7 @@ app-tools/%: app-tools/%.in Makefile
 		-e 's#!LDLIBS!#$(APP_TOOLS_LDLIBS)#g;' \
 		-e 's#!LDFLAGS!#$(APP_TOOLS_LDFLAGS)#g;' \
 		-e 's#!HEAD_OBJ!#$(APP_TOOLS_HEADOBJ)#g;' \
+		-e 's#!STUBS_OBJ!#$(APP_TOOLS_STUBSOBJ)#g;' \
 		-e 's#!LDSCRIPT!#$(APP_TOOLS_LDSCRIPT)#g;'
 	if test -x $<; then chmod +x $@.tmp; fi
 	mv -f $@.tmp $@
