@@ -61,7 +61,7 @@ helpme ()
 	printf "\t-F: specify build flags with -F XFLAGS=value\n"
 	printf "\t    possible values for XFLAGS:\n"
 	printf "\t    CFLAGS, AFLAGS, LDFLAGS, ACFLAGS, ACLFLAGS,\n"
-	printf "\t    CPPFLAGS, DBG\n"
+	printf "\t    CPPFLAGS, CWARNFLAGS, DBG\n"
 	echo
 	printf "supported commands (default => checkout+fullbuild+tests):\n"
 	printf "\tcheckoutgit:\tfetch NetBSD sources to srcdir from github\n"
