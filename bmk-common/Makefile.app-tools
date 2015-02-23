@@ -8,6 +8,7 @@ APP_TOOLS += rumprun-$(APP_TOOLS_PLATFORM)-cc.configure
 APP_TOOLS += rumprun-$(APP_TOOLS_PLATFORM)-configure
 APP_TOOLS += rumprun-$(APP_TOOLS_PLATFORM)-make
 APP_TOOLS += rumprun-$(APP_TOOLS_PLATFORM)-gmake
+APP_TOOLS += rumprun-$(APP_TOOLS_PLATFORM)-ar
 APP_TOOLS += specs specs.configure
 
 .PHONY: app-tools
@@ -34,6 +35,9 @@ app-tools/%: app-tools/%.in Makefile
 		-e 's#!LDSCRIPT!#$(APP_TOOLS_LDSCRIPT)#g;'
 	if test -x $<; then chmod +x $@.tmp; fi
 	mv -f $@.tmp $@
+
+app-tools/rumprun-$(APP_TOOLS_PLATFORM)-ar:
+	ln -s $(shell which ar) $@
 
 app-tools_clean:
 	rm -f $(addprefix app-tools/, $(APP_TOOLS))
