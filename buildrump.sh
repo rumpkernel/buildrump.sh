@@ -1267,6 +1267,9 @@ parseargs ()
 				DBG\=*)
 					appendvar F_DBG "${ARG}"
 					;;
+				CWARNFLAGS\=*)
+					appendvar EXTRA_CWARNFLAGS "${ARG}"
+					;;
 				*)
 					die Unknown flag: ${OPTARG}
 					;;
