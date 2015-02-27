@@ -9,7 +9,8 @@
 #
 
 STDJ='-j4'
-RUMPSRC=rumpsrc
+: ${RUMPSRC=./rumpsrc}
+: ${BUILDRUMP:=./buildrump.sh}
 
 while getopts '?qs:' opt; do
 	case "$opt" in
@@ -28,7 +29,7 @@ shift $((${OPTIND} - 1))
 # the buildxen.sh is not as forgiving as I am
 set -e
 
-. ./buildrump.sh/subr.sh
+. ${BUILDRUMP}/subr.sh
 
 if git submodule status ${RUMPSRC} | grep -q '^-' ; then
 	git submodule update --init --recursive ${RUMPSRC}
@@ -36,7 +37,7 @@ fi
 [ "$1" = "justcheckout" ] && { echo ">> $0 done" ; exit 0; }
 
 # build tools
-./buildrump.sh/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
+${BUILDRUMP}/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
     -V MKPIC=no -s ${RUMPSRC} -T rumptools -o rumpobj -N \
     -V RUMP_KERNEL_IS_LIBC=1 -V BUILDRUMP_SYSROOT=yes "$@" tools
 
@@ -48,7 +49,7 @@ MACHINE=$(${RUMPMAKE} -f /dev/null -V '${MACHINE}')
 [ -z "${MACHINE}" ] && die could not figure out target machine
 
 # build rump kernel
-./buildrump.sh/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
+${BUILDRUMP}/buildrump.sh ${BUILD_QUIET} ${STDJ} -k \
     -V MKPIC=no -s ${RUMPSRC} -T rumptools -o rumpobj -N \
     -V RUMP_KERNEL_IS_LIBC=1 -V BUILDRUMP_SYSROOT=yes "$@" \
     build kernelheaders install
