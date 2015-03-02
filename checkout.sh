@@ -232,9 +232,14 @@ hubdateonebranch ()
 	echo ">> merging \"${branchbase}-src-clean\" to \"${branchbase}-src\""
 	${GIT} checkout ${branchbase}-src
 
-	# we might have conflicts at this point.  ask user to merge manually
+	# Historically, it was possible to have merge conflicts at this
+	# point.  Since our tree should now be 100% the same as upstream,
+	# merge conflicts should be impossible.  Nevertheless, preserve the
+	# old code.
 	if ! ${GIT} merge --no-edit ${branchbase}-src-clean; then
 		echo '>> MERGE CONFLICT!'
+		echo '>> YOU ARE PROBABLY DOING SOMETHING WRONG!'
+		echo '>>'
 		echo '>> Merge manually and commit in another terminal.'
 		echo '>> Press enter to continue'
 		read jooei
