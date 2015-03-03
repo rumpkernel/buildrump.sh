@@ -68,4 +68,17 @@ for lib in ${LIBS}; do
 done
 
 eval ${BUILDXENMETAL_PCI_P} && makepci ${RUMPSRC} ${BUILDXENMETAL_PCI_ARGS}
+
+# build unwind bits if we support c++
+if havecxx; then
+        ( cd librumprun_unwind && ${RUMPMAKE} dependall && ${RUMPMAKE} install )
+        CONFIG_CXX=yes
+else
+        CONFIG_CXX=no
+fi
+
+echo "BUILDRUMP=${BUILDRUMP}" > config.mk
+echo "RUMPSRC=${RUMPSRC}" >> config.mk
+echo "CONFIG_CXX=${CONFIG_CXX}" >> config.mk
+
 exit 0
