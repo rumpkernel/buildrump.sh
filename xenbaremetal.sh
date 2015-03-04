@@ -31,9 +31,13 @@ set -e
 
 . ${BUILDRUMP}/subr.sh
 
-if git submodule status ${RUMPSRC} | grep -q '^-' ; then
-	git submodule update --init --recursive ${RUMPSRC}
-fi
+# old git versions need to run submodule in the repo root. *sheesh*
+(
+	cd $(git rev-parse --show-cdup)
+	if git submodule status ${RUMPSRC} | grep -q '^-' ; then
+		git submodule update --init --recursive ${RUMPSRC}
+	fi
+)
 [ "$1" = "justcheckout" ] && { echo ">> $0 done" ; exit 0; }
 
 # build tools
