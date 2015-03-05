@@ -12,20 +12,6 @@ STDJ='-j4'
 : ${RUMPSRC=./rumpsrc}
 : ${BUILDRUMP:=./buildrump.sh}
 
-while getopts '?qs:' opt; do
-	case "$opt" in
-	's')
-		RUMPSRC=${OPTARG}
-		;;
-	'q')
-		BUILD_QUIET=${BUILD_QUIET:=-}q
-		;;
-	'?')
-		exit 1
-	esac
-done
-shift $((${OPTIND} - 1))
-
 # the buildxen.sh is not as forgiving as I am
 set -e
 
