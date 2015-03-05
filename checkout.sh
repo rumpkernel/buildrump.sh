@@ -68,8 +68,9 @@ NBSRC_EXTRA_sys='
 	src/lib/libc/compat/arch/x86_64/Makefile.inc'
 
 NBSRC_EXTRA_posix='
-    20150204 1300UTC:
-	src/lib/librumpuser/rumpuser_sp.c'
+    20150305 0030UTC:
+	src/lib/librumpuser
+	src/lib/librumphijack'
 
 NBSRC_EXTRA_usr='
     20150113 1000UTC:
