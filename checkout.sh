@@ -73,7 +73,7 @@ NBSRC_EXTRA_posix='
 	src/lib/librumphijack'
 
 NBSRC_EXTRA_usr='
-    20150113 1000UTC:
+    20150319 1500UTC:
 	src/crypto/external/bsd/openssl'
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
