@@ -359,6 +359,10 @@ probe_rumpuserbits ()
 	    int main(void) {
 		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
 	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
+
+	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${PTHREAD_SETNAME_NP}" "CPPFLAGS" +
 }
 
 WRAPPERBODY='int
@@ -560,9 +564,6 @@ EOF
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	fi
-	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${PTHREAD_SETNAME_NP}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP' ?
 	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
