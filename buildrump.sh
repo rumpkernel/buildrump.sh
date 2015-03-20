@@ -592,6 +592,13 @@ EOF
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
 
+	rm -f ${BRTOOLDIR}/toolchain-conf.mk
+	exec 3>&1 1>${BRTOOLDIR}/toolchain-conf.mk
+	printf 'BUILDRUMP_TOOL_CFLAGS=%s\n' "${EXTRA_CFLAGS}"
+	printf 'BUILDRUMP_TOOL_CPPFLAGS=-D__NetBSD__ %s %s\n' \
+	    "${EXTRA_CPPFLAGS}" "${RUMPKERN_UNDEF}"
+	exec 1>&3 3>&-
+
 	printenv
 
 	chkcrt begins
