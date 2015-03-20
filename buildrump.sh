@@ -54,7 +54,6 @@ helpme ()
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
-	printf "\t-N: emulate NetBSD, set -D__NetBSD__ etc.  default: no\n"
 	echo
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
@@ -555,7 +554,7 @@ EOF
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
-	if ${NATIVENETBSD} && ! cppdefines __NetBSD__; then
+	if ${KERNONLY} && ! cppdefines __NetBSD__; then
 		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
 	else
@@ -1217,7 +1216,6 @@ parseargs ()
 	NOISE=2
 	debugginess=0
 	KERNONLY=false
-	NATIVENETBSD=false
 	OBJDIR=./obj
 	DESTDIR=./rump
 	SRCDIR=./src
@@ -1285,7 +1283,10 @@ parseargs ()
 			KERNONLY=true
 			;;
 		N)
-			NATIVENETBSD=true
+			echo '>> The -N flag is now set by -k.'
+			echo '>> Using -N in the future will flag an error!'
+			echo '>> (giving you a few seconds to read this)'
+			sleep 5
 			;;
 		o)
 			OBJDIR=${OPTARG}
