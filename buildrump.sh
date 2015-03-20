@@ -53,7 +53,7 @@ helpme ()
 	printf "\t-q: quiet build, less compiler output.  default: noisy\n"
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
-	printf "\t-k: only kernel components (no hypercalls).  default: all\n"
+	printf "\t-k: only kernel (no POSIX hypercalls).  default: all\n"
 	echo
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
