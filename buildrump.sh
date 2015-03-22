@@ -1477,6 +1477,12 @@ domake ()
 BRDIR=$(dirname $0)
 . ${BRDIR}/subr.sh
 
+# check that env is clean
+for var in CFLAGS AFLAGS LDFLAGS; do
+	[ -n "$(eval echo \${$var})" ] \
+	    && die unset \"${var}\" from environment, use -F instead
+done
+
 parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
