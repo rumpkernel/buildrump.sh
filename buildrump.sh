@@ -794,9 +794,11 @@ makekernelheaders ()
 
 	dodirs=$(cd ${SRCDIR}/sys && \
 	    ${RUMPMAKE} -V '${SUBDIR:Narch:Nmodules:Ncompat:Nnetnatm}' includes)
-	# missing powerpc and mips
+	# missing some architectures
 	appendvar dodirs arch/amd64/include arch/i386/include arch/x86/include
 	appendvar dodirs arch/arm/include arch/arm/include/arm32
+	appendvar dodirs arch/evbppc/include arch/powerpc/include
+	appendvar dodirs arch/evbmips/include arch/mips/include
 	for dir in ${dodirs}; do
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} obj)
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} includes)
