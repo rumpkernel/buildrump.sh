@@ -1192,7 +1192,7 @@ evalmachine ()
 		fi
 		probemips
 		;;
-	"powerpc"|"ppc64"|"powerpc64le")
+	"powerpc"|"ppc64"|"powerpc64"|"powerpc64le")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
 			MACH_ARCH="powerpc"
