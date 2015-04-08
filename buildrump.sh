@@ -1200,6 +1200,7 @@ evalmachine ()
 		else
 			MACHINE="evbppc64"
 			MACH_ARCH="powerpc64"
+			appendvar EXTRA_CWARNFLAGS -Wno-format
 		fi
 		;;
 	"alpha")
