@@ -34,7 +34,7 @@ usermtree ()
 	    dev filecorefs fs i386 isofs miscfs
 	    msdosfs net net80211 netatalk netbt netinet netinet6 netipsec
 	    netisdn netkey netmpls netnatm netsmb nfs ntfs openssl pcap
-	    ppath prop protocols rpc rpcsvc ssp sys ufs uvm x86'
+	    ppath prop protocols rpc rpcsvc rumprun ssp sys ufs uvm x86'
 	for dir in ${INCSDIRS}; do
 		mkdir -p ${destbase}/include/$dir
 	done
