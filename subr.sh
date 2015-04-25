@@ -46,7 +46,7 @@ stdlibs ()
 {
 
 	prefix=${1:+${1}/}
-	liblibs='libc libcrypt libipsec libm libnpf libpci libprop
+	liblibs='libc libcrypt libipsec libkvm libm libnpf libpci libprop
 	    libpthread librmt libutil liby libz'
 	extralibs='external/bsd/flex/lib
 	    crypto/external/bsd/openssl/lib/libcrypto
