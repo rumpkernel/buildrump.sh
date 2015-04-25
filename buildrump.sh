@@ -693,6 +693,7 @@ makemake ()
 	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
 	    -V BUILDRUMP_STAGE=${stage} \
+	    -V RUMP_NBCOMPAT= \
 	    ${BUILDSH_VARGS} \
 	${cmd}
 	[ $? -ne 0 ] && die build.sh ${cmd} failed
