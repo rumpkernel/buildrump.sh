@@ -1,9 +1,9 @@
-/*	$NetBSD: makerumpif.sh,v 1.6 2013/02/14 10:54:54 pooka Exp $	*/
+/*	$NetBSD: makerumpif.sh,v 1.9 2015/04/23 10:50:00 pooka Exp $	*/
 
 /*
  * Automatically generated.  DO NOT EDIT.
  * from: ;
- * by:   NetBSD: makerumpif.sh,v 1.6 2013/02/14 10:54:54 pooka Exp 
+ * by:   NetBSD: makerumpif.sh,v 1.9 2015/04/23 10:50:00 pooka Exp 
  */
 
 #include <sys/cdefs.h>
