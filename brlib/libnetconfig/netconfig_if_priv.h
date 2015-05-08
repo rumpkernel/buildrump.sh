@@ -21,6 +21,8 @@ int rump_netconfig_ifdestroy(const char *);
 typedef int (*rump_netconfig_ifdestroy_fn)(const char *);
 int rump_netconfig_ipv4_ifaddr(const char *, const char *, const char *);
 typedef int (*rump_netconfig_ipv4_ifaddr_fn)(const char *, const char *, const char *);
+int rump_netconfig_ipv4_ifaddr_cidr(const char *, const char *, int);
+typedef int (*rump_netconfig_ipv4_ifaddr_cidr_fn)(const char *, const char *, int);
 int rump_netconfig_ipv6_ifaddr(const char *, const char *, int);
 typedef int (*rump_netconfig_ipv6_ifaddr_fn)(const char *, const char *, int);
 int rump_netconfig_ipv4_gw(const char *);

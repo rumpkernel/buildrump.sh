@@ -137,13 +137,11 @@ rump_netconfig_ifdestroy(const char *ifname)
 	return wrapifioctl(in4so, SIOCIFDESTROY, &ifr, curlwp);
 }
 
-int
-rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
-	const char *mask)
+static int
+cfg_ipv4(const char *ifname, const char *addr, in_addr_t m_addr)
 {
 	struct ifaliasreq ia;
 	struct sockaddr_in *sin;
-	in_addr_t m_addr;
 	int rv;
 
 	CHECKDOMAIN(in4so);
@@ -159,7 +157,6 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	sin = (struct sockaddr_in *)&ia.ifra_mask;
 	sin->sin_family = AF_INET;
 	sin->sin_len = sizeof(*sin);
-	m_addr = inet_addr(mask);
 	sin->sin_addr.s_addr = m_addr;
 
 	sin = (struct sockaddr_in *)&ia.ifra_broadaddr;
@@ -175,6 +172,24 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	if (rv == 0)
 		kpause("ramasee", false, mstohz(50), NULL);
 	return rv;
+}
+
+int
+rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
+	const char *mask)
+{
+
+	return cfg_ipv4(ifname, addr, inet_addr(mask));
+}
+
+int
+rump_netconfig_ipv4_ifaddr_cidr(const char *ifname, const char *addr,
+	int mask)
+{
+
+	if (mask < 0 || mask > 32)
+		return EINVAL;
+	return cfg_ipv4(ifname, addr, htonl(~0<<(32-mask)));
 }
 
 int

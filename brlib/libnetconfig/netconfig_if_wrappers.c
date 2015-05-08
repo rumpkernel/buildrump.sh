@@ -96,6 +96,18 @@ rump_pub_netconfig_ipv4_ifaddr(const char *arg1, const char *arg2, const char *a
 }
 
 int
+rump_pub_netconfig_ipv4_ifaddr_cidr(const char *arg1, const char *arg2, int arg3)
+{
+	int rv;
+
+	rump_schedule();
+	rv = rump_netconfig_ipv4_ifaddr_cidr(arg1, arg2, arg3);
+	rump_unschedule();
+
+	return rv;
+}
+
+int
 rump_pub_netconfig_ipv6_ifaddr(const char *arg1, const char *arg2, int arg3)
 {
 	int rv;
