@@ -165,7 +165,7 @@ rump_netconfig_ipv4_ifaddr(const char *ifname, const char *addr,
 	sin = (struct sockaddr_in *)&ia.ifra_broadaddr;
 	sin->sin_family = AF_INET;
 	sin->sin_len = sizeof(*sin);
-	sin->sin_addr.s_addr = ~m_addr;
+	sin->sin_addr.s_addr = inet_addr(addr) | ~m_addr;
 
 	rv = wrapifioctl(in4so, SIOCAIFADDR, &ia, curlwp);
 	/*
