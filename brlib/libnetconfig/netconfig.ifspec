@@ -37,3 +37,6 @@ int	|netconfig_ipv6_gw	|const char *
 
 ; dhcp
 int	|netconfig_dhcp_ipv4_oneshot	|const char *
+
+; ipv6 autoconfiguration
+int	|netconfig_auto_ipv6	|const char *

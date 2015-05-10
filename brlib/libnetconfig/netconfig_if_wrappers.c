@@ -154,3 +154,15 @@ rump_pub_netconfig_dhcp_ipv4_oneshot(const char *arg1)
 
 	return rv;
 }
+
+int
+rump_pub_netconfig_auto_ipv6(const char *arg1)
+{
+	int rv;
+
+	rump_schedule();
+	rv = rump_netconfig_auto_ipv6(arg1);
+	rump_unschedule();
+
+	return rv;
+}
