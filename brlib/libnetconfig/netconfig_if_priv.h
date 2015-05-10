@@ -31,5 +31,7 @@ int rump_netconfig_ipv6_gw(const char *);
 typedef int (*rump_netconfig_ipv6_gw_fn)(const char *);
 int rump_netconfig_dhcp_ipv4_oneshot(const char *);
 typedef int (*rump_netconfig_dhcp_ipv4_oneshot_fn)(const char *);
+int rump_netconfig_auto_ipv6(const char *);
+typedef int (*rump_netconfig_auto_ipv6_fn)(const char *);
 
 #endif /* _RUMP_PRIF_NETCONFIG_H_ */

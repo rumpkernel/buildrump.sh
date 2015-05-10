@@ -28,12 +28,17 @@
 #include <sys/socketvar.h>
 
 #include <net/if.h>
+#include <net/if_dl.h>
+#include <net/if_ether.h>
+#include <net/if_types.h>
 #include <net/route.h>
 
 #include <netinet/in.h>
+#include <netinet/icmp6.h>
 
 #include <netinet6/in6.h>
 #include <netinet6/in6_var.h>
+#include <netinet6/ip6_var.h>
 #include <netinet6/nd6.h>
 #include <netinet6/scope6_var.h>
 
@@ -329,6 +334,103 @@ rump_netconfig_ipv6_gw(const char *gwaddr)
 	rv = rtso->so_proto->pr_output(m, rtso);
 	sounlock(rtso);
 
+	return rv;
+}
+
+/* Perform IPv6 autoconfiguration for the specified interface.
+ * This function sets the kernel to accept IPv6 RAs on all interfaces,
+ * brings the interface up and sends a single IPv6 RS packet to the
+ * all-routers multicast address from the specified interface. No attempt is
+ * made to check whether or not this actually provoked an RA in response.
+ */
+
+int
+rump_netconfig_auto_ipv6(const char *ifname)
+{
+	struct ifnet *ifp;
+	int ifindex;
+	struct socket *rsso = NULL;
+	int rv = 0;
+	int hoplimit = 255;
+	struct mbuf *m_nam = NULL,
+		    *m_outbuf = NULL;
+	struct sockaddr_in6 *sin6;
+	char *buf;
+	struct nd_router_solicit rs;
+	struct nd_opt_hdr opt;
+
+	ifp = ifunit(ifname);
+	if (ifp == NULL) {
+		rv = ENXIO;
+		goto out;
+	}
+	if (ifp->if_sadl->sdl_type != IFT_ETHER) {
+		rv = EINVAL;
+		goto out;
+	}
+
+	rv = socreate(PF_INET6, &rsso, SOCK_RAW, IPPROTO_ICMPV6, curlwp, NULL);
+	if (rv != 0)
+		goto out;
+	ifindex = ifp->if_index;
+	rv = so_setsockopt(curlwp, rsso, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+			&ifindex, sizeof ifindex);
+	if (rv != 0)
+		goto out;
+	rv = so_setsockopt(curlwp, rsso, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+			&hoplimit, sizeof hoplimit);
+	if (rv != 0)
+		goto out;
+
+	m_nam = m_get(M_WAIT, MT_SONAME);
+	sin6 = mtod(m_nam, struct sockaddr_in6 *);
+	sin6->sin6_len = m_nam->m_len = sizeof (*sin6);
+	sin6->sin6_family = AF_INET6;
+	netconfig_inet_pton6("ff02::2", &sin6->sin6_addr);
+
+#define rslen (sizeof rs + sizeof opt + ETHER_ADDR_LEN)
+	CTASSERT(rslen <= MCLBYTES);
+	m_outbuf = m_gethdr(M_WAIT, MT_DATA);
+	m_clget(m_outbuf, M_WAIT);
+	m_outbuf->m_pkthdr.len = m_outbuf->m_len = rslen;
+	m_outbuf->m_pkthdr.rcvif = NULL;
+#undef rslen
+	buf = mtod(m_outbuf, char *);
+	memset(&rs, 0, sizeof rs);
+	rs.nd_rs_type = ND_ROUTER_SOLICIT;
+	memset(&opt, 0, sizeof opt);
+	opt.nd_opt_type = ND_OPT_SOURCE_LINKADDR;
+	opt.nd_opt_len = 1; /* units of 8 octets */
+	memcpy(buf, &rs, sizeof rs);
+	buf += sizeof rs;
+	memcpy(buf, &opt, sizeof opt);
+	buf += sizeof opt;
+	memcpy(buf, CLLADDR(ifp->if_sadl), ETHER_ADDR_LEN);
+
+	ip6_accept_rtadv = 1;
+	rv = rump_netconfig_ifup(ifname);
+	if (rv != 0)
+		goto out;
+#if __NetBSD_Prereq__(7,99,12)
+	rv = (*rsso->so_send)(rsso, (struct sockaddr *)sin6, NULL, m_outbuf,
+			NULL, 0, curlwp);
+#else
+	rv = (*rsso->so_send)(rsso, m_nam, NULL, m_outbuf, NULL, 0, curlwp);
+#endif
+	if (rv == 0)
+		/* *(so_send)() takes ownership of m_outbuf on success */
+		m_outbuf = NULL;
+	else
+		goto out;
+
+	rv = 0;
+out:
+	if (m_nam)
+		m_freem(m_nam);
+	if (m_outbuf)
+		m_freem(m_outbuf);
+	if (rsso)
+		soclose(rsso);
 	return rv;
 }
 
