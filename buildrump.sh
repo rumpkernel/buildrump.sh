@@ -1216,6 +1216,7 @@ evalmachine ()
 		else
 			MACHINE="riscv"
 			MACH_ARCH="riscv64"
+			appendvar EXTRA_CWARNFLAGS -Wno-format
 		fi
 		;;
 	esac
