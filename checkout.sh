@@ -65,7 +65,9 @@ NBSRC_EXTRA_sys='
     20150209 2245UTC:
 	src/lib/libc/Makefile
 	src/lib/libc/compat/arch/i386/Makefile.inc
-	src/lib/libc/compat/arch/x86_64/Makefile.inc'
+	src/lib/libc/compat/arch/x86_64/Makefile.inc;
+    20150516 1505UTC:
+	src/sys/rump/dev/lib/libvirtio_ld/ld_at_virtio.c'
 
 NBSRC_EXTRA_posix='
     20150305 0030UTC:
