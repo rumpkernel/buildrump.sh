@@ -803,6 +803,7 @@ makekernelheaders ()
 	appendvar dodirs arch/evbarm64/include arch/aarch64/include
 	appendvar dodirs arch/evbppc/include arch/powerpc/include
 	appendvar dodirs arch/evbmips/include arch/mips/include
+	appendvar dodirs arch/riscv/include
 	for dir in ${dodirs}; do
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} obj)
 		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} includes)
