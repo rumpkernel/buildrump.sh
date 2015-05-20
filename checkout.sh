@@ -43,12 +43,12 @@
 # available via git.
 #
 : ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
-NBSRC_CVSDATE="20150108 1800UTC"
+NBSRC_CVSDATE="20150520 1400UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-NBSRC_LISTDATE="20150425 0850UTC"
+# NBSRC_LISTDATE="20150425 0850UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
@@ -57,26 +57,11 @@ NBSRC_LISTDATE="20150425 0850UTC"
 #   20151111 1111UTC:
 #	src/sys/rump'
 #
-NBSRC_EXTRA_sys='
-    20150121 1440UTC:
-	src/sys/rump/librump/rumpkern/lwproc.c;
-    20150204 1300UTC:
-	src/sys/rump/librump/rumpkern/Makefile.rumpkern;
-    20150209 2245UTC:
-	src/lib/libc/Makefile
-	src/lib/libc/compat/arch/i386/Makefile.inc
-	src/lib/libc/compat/arch/x86_64/Makefile.inc;
-    20150516 1505UTC:
-	src/sys/rump/dev/lib/libvirtio_ld/ld_at_virtio.c'
+NBSRC_EXTRA_sys=''
 
-NBSRC_EXTRA_posix='
-    20150305 0030UTC:
-	src/lib/librumpuser
-	src/lib/librumphijack'
+NBSRC_EXTRA_posix=''
 
-NBSRC_EXTRA_usr='
-    20150401 1500UTC:
-	src/crypto/external/bsd/openssl'
+NBSRC_EXTRA_usr=''
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
