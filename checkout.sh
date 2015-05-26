@@ -57,7 +57,10 @@ NBSRC_CVSFLAGS="-z3"
 #   20151111 1111UTC:
 #	src/sys/rump'
 #
-NBSRC_EXTRA_sys=''
+NBSRC_EXTRA_sys='
+    20150526 1650UTC:
+	src/sys/rump/librump/rumpkern/cons.c
+	src/sys/rump/librump/rumpvfs/rumpblk.c'
 
 NBSRC_EXTRA_posix=''
 
