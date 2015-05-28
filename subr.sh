@@ -83,25 +83,6 @@ makeuserlib ()
 	)
 }
 
-makepci ()
-{
-
-	_checkrumpmake
-
-	rumpsrc=$1
-	shift
-	pcilibs=$(${RUMPMAKE} -f ${rumpsrc}/sys/rump/dev/Makefile.rumpdevcomp \
-	    -V '${RUMPPCIDEVS}')
-
-	for lib in ${pcilibs}; do
-		( cd ${rumpsrc}/sys/rump/dev/lib/lib${lib}
-			${RUMPMAKE} obj
-			${RUMPMAKE} $* dependall
-			${RUMPMAKE} install
-		)
-	done
-}
-
 userincludes ()
 {
 
@@ -117,17 +98,6 @@ userincludes ()
 		( cd ${lib} && ${RUMPMAKE} includes )
 	done
 	echo '>> done installing headers'
-}
-
-# echo rumpmake variable $1.  die if $1 is not set
-rumpmakevar ()
-{
-
-	_checkrumpmake
-
-	_var=$(${RUMPMAKE} -f /dev/null -V "\${$1}")
-	[ -n "${_var}" ] || die make variable \"$1\" does not exist
-	echo ${_var}
 }
 
 havecxx ()
