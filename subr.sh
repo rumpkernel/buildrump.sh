@@ -73,13 +73,15 @@ makeuserlib ()
 	_checkrumpmake
 
 	lib=$1
-	shift
+	objarg=${2:+MAKEOBJDIR=${2}}
 
 	( cd ${lib}
-		${RUMPMAKE} obj
-		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no \
-		    MKNLS=no NOGCCERROR=1 HAVE_LIBGCC_EH=yes ${STDJ} "$@" dependall
-		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no "$@" install
+		${RUMPMAKE} ${objarg} obj
+		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no	\
+		    MKNLS=no NOGCCERROR=1 HAVE_LIBGCC_EH=yes		\
+		    ${objarg} ${STDJ} dependall
+		${RUMPMAKE} MKMAN=no MKLINT=no MKPROFILE=no MKYP=no	\
+		    ${objarg} ${STDJ} install
 	)
 }
 
