@@ -60,7 +60,11 @@ NBSRC_CVSFLAGS="-z3"
 NBSRC_EXTRA_sys='
     20150526 1650UTC:
 	src/sys/rump/librump/rumpkern/cons.c
-	src/sys/rump/librump/rumpvfs/rumpblk.c'
+	src/sys/rump/librump/rumpvfs/rumpblk.c;
+    20150531 1200UTC:
+	src/sys/dev/pci/auich.c
+	src/sys/rump/net/Makefile.rumpnetcomp
+	src/sys/rump/net/lib/libtap'
 
 NBSRC_EXTRA_posix=''
 
