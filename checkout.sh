@@ -64,7 +64,10 @@ NBSRC_EXTRA_sys='
     20150531 1200UTC:
 	src/sys/dev/pci/auich.c
 	src/sys/rump/net/Makefile.rumpnetcomp
-	src/sys/rump/net/lib/libtap'
+	src/sys/rump/net/lib/libtap;
+    20150602 0040UTC:
+	src/sys/modules/hdaudio
+	src/sys/modules/hdaudio_pci'
 
 NBSRC_EXTRA_posix=''
 
