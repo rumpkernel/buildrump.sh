@@ -67,7 +67,14 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/net/lib/libtap;
     20150602 0040UTC:
 	src/sys/modules/hdaudio
-	src/sys/modules/hdaudio_pci'
+	src/sys/modules/hdaudio_pci;
+    20150603 1445UTC:
+	src/sys/rump/Makefile.rump
+	src/sys/rump/README.compileopts
+	src/sys/rump/dev/lib/libpci
+	src/sys/rump/include/sys/bus.h
+	src/sys/rump/dev/Makefile.rumpdevcomp
+	src/sys/rump/dev/lib/libpci_auich'
 
 NBSRC_EXTRA_posix=''
 
