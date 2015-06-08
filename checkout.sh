@@ -42,7 +42,6 @@
 # that once buildrump.sh is published, the NetBSD sources will be
 # available via git.
 #
-: ${BUILDRUMP_CVSROOT:=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot}
 NBSRC_CVSDATE="20150520 1400UTC"
 NBSRC_CVSFLAGS="-z3"
 
@@ -377,6 +376,18 @@ BRDIR=$(dirname $0)
 SRCDIR=${2}
 
 . ${BRDIR}/subr.sh
+
+# default to the most secure source for githubdate
+if [ -z "${BUILDRUMP_CVSROOT}" ]; then
+	case "${1}" in
+	githubdate)
+		BUILDRUMP_CVSROOT=cvs.netbsd.org:/cvsroot
+		;;
+	*)
+		BUILDRUMP_CVSROOT=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot
+		;;
+	esac
+fi
 
 case "${1}" in
 cvs|cvsbuildrump)
