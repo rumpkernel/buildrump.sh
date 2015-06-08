@@ -74,7 +74,12 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/dev/lib/libpci
 	src/sys/rump/include/sys/bus.h
 	src/sys/rump/dev/Makefile.rumpdevcomp
-	src/sys/rump/dev/lib/libpci_auich'
+	src/sys/rump/dev/lib/libpci_auich;
+    20150608 1220UTC:
+	src/sys/rump/librump/rumpkern/rump.c
+	src/sys/rump/librump/rumpvfs/devnodes.c
+	src/sys/rump/librump/rumpvfs/rump_vfs_private.h
+	src/sys/rump/dev/lib/libaudio/audio_component.c'
 
 NBSRC_EXTRA_posix=''
 
