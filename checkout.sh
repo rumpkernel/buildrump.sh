@@ -47,7 +47,7 @@ NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-# NBSRC_LISTDATE="20150425 0850UTC"
+NBSRC_LISTDATE="20150615 1130UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
@@ -78,7 +78,10 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/librump/rumpkern/rump.c
 	src/sys/rump/librump/rumpvfs/devnodes.c
 	src/sys/rump/librump/rumpvfs/rump_vfs_private.h
-	src/sys/rump/dev/lib/libaudio/audio_component.c'
+	src/sys/rump/dev/lib/libaudio/audio_component.c;
+    20150615 1545UTC:
+	src/sys/rump/dev/lib/libumass/Makefile
+	src/sys/rump/dev/lib/libpci'
 
 NBSRC_EXTRA_posix=''
 
