@@ -392,7 +392,18 @@ main(int argc, const char *argv[])
 maketoolwrapper ()
 {
 
-	tool=$1
+	musthave=$1
+	tool=$2
+
+	eval evaldtool=\${${tool}}
+	fptool=$(which ${evaldtool})
+	if [ ! -x ${fptool} ]; then
+		if ! ${musthave}; then
+			return
+		else
+			die Internal error: mandatory tool ${tool} not found
+		fi
+	fi
 
 	# ok, it's not really --netbsd, but let's make-believe!
 	if [ ${tool} = CC ]; then
@@ -411,8 +422,7 @@ maketoolwrapper ()
 	fi
 	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
 
-	eval evaldtool=\${${tool}}
-	printoneconfig 'Tool' "${tool}" "${evaldtool}"
+	printoneconfig 'Tool' "${tool}" "${fptool}"
 
 	# Mangle wrapper arguments from what NetBSD does to what the
 	# toolchain we use supports.  In case we need mangling, do it
@@ -421,7 +431,7 @@ maketoolwrapper ()
 	if [ "${tool}" != 'CC' -a "${tool}" != 'CXX' \
 	    -o -z "${CCWRAPPER_MANGLE}" ]; then
 		printf '#!/bin/sh\n' > ${tname}
-		printf 'exec %s "$@"\n' ${evaldtool} >> ${tname}
+		printf 'exec %s "$@"\n' ${fptool} >> ${tname}
 	else
 		rm -f ${OBJDIR}/wrapper.c
 		exec 3>&1 1>${OBJDIR}/wrapper.c
@@ -446,7 +456,7 @@ maketoolwrapper ()
 		)
 		printf '};\n\n'
 		( IFS=' ' printf '%s' "${WRAPPERBODY}" )
-		printf '\targv[0] = "%s";\n' ${evaldtool}
+		printf '\targv[0] = "%s";\n' ${fptool}
 		printf '\texecvp(argv[0], argv);\n}\n'
 		exec 1>&3 3>&-
 		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
@@ -495,9 +505,11 @@ maketools ()
 	# Create external toolchain wrappers.
 	mkdir -p ${BRTOOLDIR}/bin || die "cannot create ${BRTOOLDIR}/bin"
 	for x in CC AR NM OBJCOPY; do
-		maketoolwrapper $x
+		maketoolwrapper true $x
 	done
-	${HAVECXX} && maketoolwrapper CXX
+	for x in AS CXX LD OBJDUMP RANLIB READELF SIZE STRINGS STRIP; do
+		maketoolwrapper false $x
+	done
 
 	# create a cpp wrapper, but run it via cc -E
 	if [ "${CC_FLAVOR}" = 'clang' ]; then
@@ -811,6 +823,29 @@ makekernelheaders ()
 	(cd ${SRCDIR}/sys/arch && ${RUMPMAKE} NOSUBDIR=1 includes)
 }
 
+settool ()
+{
+	tool=$1
+	crossnames=$2
+	eval evaldtool=\${${tool}}
+
+	if [ -n "${evaldtool}" ]; then
+		# if it's set in the env, we require it to exist
+		if ! type ${evaldtool} > /dev/null; then
+			die ${tool} set in env but not found
+		fi
+	else
+		# else, set a default value, existence to be checked
+		# and consequences evaluated later
+		lcname=$(echo ${tool} | tr '[A-Z]' '[a-z]')
+		if ${crossnames}; then
+			eval ${tool}=${CC_TARGET}-${lcname}
+		else
+			eval ${tool}=${lcname}
+		fi
+	fi
+}
+
 evaltoolchain ()
 {
 
@@ -925,17 +960,23 @@ evaltoolchain ()
 	fi
 
 	# Set names of tools we're going to use.  try to guess them
-	# for common scenarios
-	if ${NATIVEBUILD} || ! ${crosstools}; then
-		: ${AR:=ar}
-		: ${NM:=nm}
-		: ${OBJCOPY:=objcopy}
-	else
-		: ${AR:=${CC_TARGET}-ar}
-		: ${NM:=${CC_TARGET}-nm}
-		: ${OBJCOPY:=${CC_TARGET}-objcopy}
-	fi
+	# for common scenarios.  Since a native (wrt to the host)
+	# toolchain may not be available in tuple form, treat that
+	# as a special case.
+	#
+	# Note: most of these are not required for rump kernels.
+	# See below for that list.   However, we still handle the
+	# tools here for the benefit of people wanting to use
+	# buildrump.sh as the basis of a cross toolchain for further
+	# rump kernel development and integration (see rumprun for
+	# an example of this)
+	for x in AR AS CPP LD NM OBJCOPY OBJDUMP RANLIB READELF \
+	    SIZE STRINGS STRIP; do
+		settool ${x} ${crosstools}
+	done
 
+	# check that we are in posesssion of the
+	# mandatory tools for building rump kernels
 	for tool in AR NM OBJCOPY; do
 		eval t=\${${tool}}
 		type ${t} > /dev/null || die cannot find \$${tool} "(${t})"
