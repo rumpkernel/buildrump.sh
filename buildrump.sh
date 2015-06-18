@@ -911,9 +911,22 @@ evaltoolchain ()
 	fi
 	MACH_ARCH=$(echo ${CC_TARGET} | sed 's/-.*//' )
 
+	#
+	# Try to figure out if we're using the native toolchain or
+	# a cross one.  Assume that a native cc doesn't have '-'
+	# in its name.  We use this information in the step below
+	# where we guess toolchain defaults.
+	#
+	basecc="$(basename ${CC})"
+	if [ "${basecc}" = "${basecc#*-}" ]; then
+		crosstools=false
+	else
+		crosstools=true
+	fi
+
 	# Set names of tools we're going to use.  try to guess them
 	# for common scenarios
-	if ${NATIVEBUILD} || ${KERNONLY}; then
+	if ${NATIVEBUILD} || ! ${crosstools}; then
 		: ${AR:=ar}
 		: ${NM:=nm}
 		: ${OBJCOPY:=objcopy}
