@@ -953,7 +953,7 @@ evaltoolchain ()
 	# where we guess toolchain defaults.
 	#
 	basecc="$(basename ${CC})"
-	if [ "${basecc}" = "${basecc#*-}" ]; then
+	if [ "${basecc}" = "${basecc#*-*-}" ]; then
 		crosstools=false
 	else
 		crosstools=true
