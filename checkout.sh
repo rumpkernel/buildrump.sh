@@ -81,7 +81,18 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/dev/lib/libaudio/audio_component.c;
     20150615 1545UTC:
 	src/sys/rump/dev/lib/libumass/Makefile
-	src/sys/rump/dev/lib/libpci'
+	src/sys/rump/dev/lib/libpci;
+    20150618 2230UTC:
+	src/sys/kern/syscalls.master
+	src/sys/rump/rump.sysmap
+	src/sys/rump/include/rump/rump_syscalls.h
+	src/sys/rump/librump/rumpkern/rump_syscalls.c
+	src/sys/rump/librump/rumpkern/rumpkern_syscalls.c
+	src/sys/rump/librump/rumpnet/rumpnet_syscalls.c
+	src/sys/rump/librump/rumpvfs/rumpvfs_syscalls.c
+	src/sys/sys/syscall.h
+	src/sys/sys/syscallargs.h
+	src/share/mk/bsd.own.mk'
 
 NBSRC_EXTRA_posix=''
 
