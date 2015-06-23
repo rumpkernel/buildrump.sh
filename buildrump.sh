@@ -435,7 +435,9 @@ maketoolwrapper ()
 	else
 		rm -f ${OBJDIR}/wrapper.c
 		exec 3>&1 1>${OBJDIR}/wrapper.c
-		printf '#include <string.h>\n#include <unistd.h>\n\n'
+		printf '#include <inttypes.h>\n'
+		printf '#include <string.h>\n'
+		printf '#include <unistd.h>\n\n'
 		printf 'static const char *mngl_from[] = {\n'
 		(
 			IFS=:
@@ -457,7 +459,8 @@ maketoolwrapper ()
 		printf '};\n\n'
 		( IFS=' ' printf '%s' "${WRAPPERBODY}" )
 		printf '\targv[0] = "%s";\n' ${fptool}
-		printf '\texecvp(argv[0], argv);\n}\n'
+		printf '\texecvp(argv[0], (void *)(uintptr_t)argv);\n'
+		printf '\treturn 0;\n}\n'
 		exec 1>&3 3>&-
 		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
 		    || die failed to build wrapper for ${tool}
