@@ -435,7 +435,7 @@ maketoolwrapper ()
 	else
 		rm -f ${OBJDIR}/wrapper.c
 		exec 3>&1 1>${OBJDIR}/wrapper.c
-		printf '#include <string.h>\n\n'
+		printf '#include <string.h>\n#include <unistd.h>\n\n'
 		printf 'static const char *mngl_from[] = {\n'
 		(
 			IFS=:
