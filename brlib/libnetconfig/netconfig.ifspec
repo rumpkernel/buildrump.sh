@@ -24,6 +24,11 @@ int	|netconfig_ifdown	|const char *
 int	|netconfig_ifdestroy	|const char *
 
 
+; network bridge manipulation
+int	|netconfig_bradd	|const char *, const char *
+int	|netconfig_brdel	|const char *, const char *
+
+
 ; address configuration (ipv4, ipv6)
 int	|netconfig_ipv4_ifaddr	    |const char *, const char *, const char *
 int	|netconfig_ipv4_ifaddr_cidr |const char *, const char *, int

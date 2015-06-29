@@ -84,6 +84,30 @@ rump_pub_netconfig_ifdestroy(const char *arg1)
 }
 
 int
+rump_pub_netconfig_bradd(const char *arg1, const char *arg2)
+{
+	int rv;
+
+	rump_schedule();
+	rv = rump_netconfig_bradd(arg1, arg2);
+	rump_unschedule();
+
+	return rv;
+}
+
+int
+rump_pub_netconfig_brdel(const char *arg1, const char *arg2)
+{
+	int rv;
+
+	rump_schedule();
+	rv = rump_netconfig_brdel(arg1, arg2);
+	rump_unschedule();
+
+	return rv;
+}
+
+int
 rump_pub_netconfig_ipv4_ifaddr(const char *arg1, const char *arg2, const char *arg3)
 {
 	int rv;

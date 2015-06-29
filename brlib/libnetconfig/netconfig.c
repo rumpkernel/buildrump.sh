@@ -30,6 +30,7 @@
 #include <net/if.h>
 #include <net/if_dl.h>
 #include <net/if_ether.h>
+#include <net/if_bridgevar.h>
 #include <net/if_types.h>
 #include <net/route.h>
 
@@ -140,6 +141,43 @@ rump_netconfig_ifdestroy(const char *ifname)
 	memset(&ifr, 0, sizeof(ifr));
 	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
 	return wrapifioctl(in4so, SIOCIFDESTROY, &ifr);
+}
+
+/*
+ * network bridge manipulation (bridge is created with ifbridge)
+ */
+
+static int
+brioctl(const char *bridgename, const char *ifname, unsigned long op)
+{
+	struct ifdrv ifd;
+	struct ifbreq req;
+
+	memset(&req, 0, sizeof(req));
+	strlcpy(req.ifbr_ifsname, ifname, sizeof(req.ifbr_ifsname));
+
+	memset(&ifd, 0, sizeof(ifd));
+	strlcpy(ifd.ifd_name, bridgename, sizeof(ifd.ifd_name));
+	ifd.ifd_cmd = op;
+	ifd.ifd_len = sizeof(req);
+	ifd.ifd_data = &req;
+
+
+	return wrapifioctl(in4so, SIOCSDRVSPEC, &ifd);
+}
+
+int
+rump_netconfig_bradd(const char *bridgename, const char *ifname)
+{
+
+	return brioctl(bridgename, ifname, BRDGADD);
+}
+
+int
+rump_netconfig_brdel(const char *bridgename, const char *ifname)
+{
+
+	return brioctl(bridgename, ifname, BRDGDEL);
 }
 
 static int
