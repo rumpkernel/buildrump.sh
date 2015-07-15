@@ -92,7 +92,12 @@ NBSRC_EXTRA_sys='
 	src/sys/rump/librump/rumpvfs/rumpvfs_syscalls.c
 	src/sys/sys/syscall.h
 	src/sys/sys/syscallargs.h
-	src/share/mk/bsd.own.mk'
+	src/share/mk/bsd.own.mk;
+    20150715 1430UTC:
+	src/lib/libc/arch/i386/Makefile.inc
+	src/lib/libc/arch/i386/gen/Makefile.inc
+	src/lib/libc/arch/x86_64/Makefile.inc
+	src/lib/libc/arch/x86_64/gen/Makefile.inc'
 
 NBSRC_EXTRA_posix=''
 
