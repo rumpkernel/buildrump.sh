@@ -97,10 +97,7 @@ NBSRC_EXTRA_sys='
 	src/lib/libc/arch/i386/Makefile.inc
 	src/lib/libc/arch/i386/gen/Makefile.inc
 	src/lib/libc/arch/x86_64/Makefile.inc
-	src/lib/libc/arch/x86_64/gen/Makefile.inc;
-    20150724 1415UTC:
-	src/lib/librumpuser/rumpuser.c
-	src/sys/rump/librump/rumpkern/emul.c'
+	src/lib/libc/arch/x86_64/gen/Makefile.inc'
 
 NBSRC_EXTRA_posix=''
 
