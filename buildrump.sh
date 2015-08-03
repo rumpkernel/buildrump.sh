@@ -862,6 +862,10 @@ evaltoolchain ()
 	type ${CC} > /dev/null 2>&1 \
 	    || die cannot find \$CC: \"${CC}\".  check env.
 
+	# check that compiler want to compile at all
+	doesitbuild 'int main(void) { return 0; }' -c \
+	    || die simple cc test failed using: ${CC} ${EXTRA_CFLAGS}
+
 	# check for crossbuild
 	if ${KERNONLY}; then
 		NATIVEBUILD=false
