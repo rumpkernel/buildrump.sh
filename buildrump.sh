@@ -610,12 +610,6 @@ EOF
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
 
-	# Just set no MSI in imacros universally now.
-	# Need to:
-	#   a) migrate more defines there
-	#   b) set no MSI only when necessary
-	printf '#define NO_PCI_MSI_MSIX' > ${BUILDRUMP_IMACROS}
-
 	rm -f ${BRTOOLDIR}/toolchain-conf.mk
 	exec 3>&1 1>${BRTOOLDIR}/toolchain-conf.mk
 	printf 'BUILDRUMP_TOOL_CFLAGS=%s\n' "${EXTRA_CFLAGS}"
@@ -684,6 +678,12 @@ EOF
 	    -V '${RUMPKERNCOMPS:Msysproxy}')
 	[ -n "${sysproxy}" ] \
 	    && echo RUMPKERN_SYSPROXY=-lrumpkern_sysproxy >> "${MKCONF}"
+
+	# Just set no MSI in imacros universally now.
+	# Need to:
+	#   a) migrate more defines there
+	#   b) set no MSI only when necessary
+	printf '#define NO_PCI_MSI_MSIX\n' > ${BUILDRUMP_IMACROS}
 
 	unset ac_cv_header_zlib_h
 
