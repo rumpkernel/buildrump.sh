@@ -532,7 +532,7 @@ maketools ()
 	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
 
 	cat >> "${MKCONF}" << EOF
-BUILDRUMP_IMACROS=${BUILDRUMP_IMACROS}
+BUILDRUMP_IMACROS=${BRIMACROS}
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
@@ -683,7 +683,7 @@ EOF
 	# Need to:
 	#   a) migrate more defines there
 	#   b) set no MSI only when necessary
-	printf '#define NO_PCI_MSI_MSIX\n' > ${BUILDRUMP_IMACROS}
+	printf '#define NO_PCI_MSI_MSIX\n' > ${BRIMACROS}.building
 
 	unset ac_cv_header_zlib_h
 
@@ -692,6 +692,13 @@ EOF
 	MKCONF="${mkconf_final}"
 	mv "${omkconf}" "${MKCONF}"
 	unset omkconf mkconf_final
+
+	# set new BRIMACROS only if the contents change (avoids
+	# full rebuild, since every file in the rump kernel depends on the
+	# contents of BRIMACROS
+	if ! diff "${BRIMACROS}" "${BRIMACROS}.building" > /dev/null; then
+		mv "${BRIMACROS}.building" "${BRIMACROS}"
+	fi
 }
 
 makemake ()
@@ -1508,7 +1515,7 @@ resolvepaths ()
 
 	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
 
-	BUILDRUMP_IMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
+	BRIMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
 
 	# mini-mtree
 	dstage=${OBJDIR}/dest.stage/usr
