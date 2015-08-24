@@ -217,13 +217,14 @@ cppdefines ()
 	var=${1}
 	shift
 	if [ $# -eq 0 ]; then
-		[ -z "${BUILDRUMP_CPPCACHE}" ] \
-		    && BUILDRUMP_CPPCACHE=$(${CC} \
-			${EXTRA_CPPFLAGS} ${EXTRA_CFLAGS} \
-			-E -Wp,-dM - < /dev/null)
+		if [ -z "${BUILDRUMP_CPPCACHE}" ]; then
+			BUILDRUMP_CPPCACHE=$(${CC} ${EXTRA_CPPFLAGS} \
+			    ${EXTRA_CFLAGS} -E -Wp,-dM - < /dev/null)
+		fi
 		cpplist="${BUILDRUMP_CPPCACHE}"
 	else
-		cpplist==$(${CC} ${EXTRA_CPPFLAGS} ${EXTRA_CFLAGS} -E -Wp,-dM "$@" - < /dev/null)
+		cpplist=$(${CC} ${EXTRA_CPPFLAGS} ${EXTRA_CFLAGS} \
+		    -E -Wp,-dM "$@" - < /dev/null)
 	fi
 	(
 	    IFS=' '
