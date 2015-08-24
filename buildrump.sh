@@ -1005,6 +1005,13 @@ evaltoolchain ()
 		cppdefines _LITTLE_ENDIAN \
 		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
 		;;
+	*-gnu*)
+		RUMPKERN_UNDEF='-U__GNU__'
+		cppdefines _BIG_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
+		cppdefines _LITTLE_ENDIAN \
+		    && appendvar RUMPKERN_UNDEF -U_LITTLE_ENDIAN
+		;;
 	*-dragonflybsd)
 		RUMPKERN_UNDEF='-U__DragonFly__'
 		;;
@@ -1075,6 +1082,10 @@ evalplatform ()
 		EXTRA_RUMPCLIENT='-lpthread'
 		doesitbuild '#include <linux/if_tun.h>' -c && RUMP_VIRTIF=yes
 		cppdefines '__ANDROID__' || HIJACK=true
+		;;
+	*-gnu*)
+		EXTRA_RUMPCOMMON='-ldl'
+		EXTRA_RUMPCLIENT='-lpthread'
 		;;
 	*-openbsd*)
 		EXTRA_RUMPCLIENT='-lpthread'
