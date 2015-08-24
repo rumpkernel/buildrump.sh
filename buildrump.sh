@@ -532,6 +532,7 @@ maketools ()
 	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
 
 	cat >> "${MKCONF}" << EOF
+BUILDRUMP_IMACROS=${BUILDRUMP_IMACROS}
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
 BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
 .else
@@ -608,6 +609,12 @@ EOF
 	appendmkconf 'Probe' $(${HAVECXX} && echo yes || echo no) _BUILDRUMP_CXX
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
+
+	# Just set no MSI in imacros universally now.
+	# Need to:
+	#   a) migrate more defines there
+	#   b) set no MSI only when necessary
+	printf '#define NO_PCI_MSI_MSIX' > ${BUILDRUMP_IMACROS}
 
 	rm -f ${BRTOOLDIR}/toolchain-conf.mk
 	exec 3>&1 1>${BRTOOLDIR}/toolchain-conf.mk
@@ -1489,6 +1496,8 @@ resolvepaths ()
 	abspath SRCDIR
 
 	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
+
+	BUILDRUMP_IMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
 
 	# mini-mtree
 	dstage=${OBJDIR}/dest.stage/usr
