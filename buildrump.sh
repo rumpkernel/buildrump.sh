@@ -1093,6 +1093,7 @@ evalplatform ()
 	*-gnu*)
 		EXTRA_RUMPCOMMON='-ldl'
 		EXTRA_RUMPCLIENT='-lpthread'
+		appendvar EXTRA_CFLAGS -DMAXHOSTNAMELEN=256 -DPATH_MAX=1024
 		;;
 	*-openbsd*)
 		EXTRA_RUMPCLIENT='-lpthread'
