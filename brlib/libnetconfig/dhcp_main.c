@@ -194,6 +194,9 @@ get_offer(struct interface *iface)
 	get_option_uint8(&type, dhcp, DHO_MESSAGETYPE);
 	switch (type) {
 	case DHCP_OFFER:
+		if (get_option_addr(&iface->state->lease.server,
+		    dhcp, DHO_SERVERID) != 0)
+			iface->state->lease.server.s_addr = INADDR_ANY;
 		break;
 	case DHCP_NAK:
 		printf("dhcp: got NAK from dhcp server\n");
