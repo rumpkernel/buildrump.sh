@@ -524,6 +524,10 @@ maketools ()
 	printf '#!/bin/sh\n\nexec %s -E -x c "${@}"\n' ${CC} > ${tname}
 	chmod 755 ${tname}
 
+	${HOST_CC} -o ${BRTOOLDIR}/bin/brprintmetainfo \
+	    ${BRDIR}/brlib/utils/printmetainfo.c \
+		|| die failed to build printmetainfo
+
 	# Create bounce directory used as the install target.  The
 	# purpose of this is to strip the "usr/" pathname component
 	# that is hardcoded by NetBSD Makefiles.
