@@ -17,7 +17,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	printf("%lld%lld%lld%lld%lld\n",
+	printf("%lld-%lld-%lld-%lld-%lld\n",
 	    (long long)sb.st_ctim.tv_sec, (long long)sb.st_ctim.tv_sec,
 	    (long long)sb.st_mtim.tv_sec, (long long)sb.st_mtim.tv_sec,
 	    (long long)sb.st_size);
