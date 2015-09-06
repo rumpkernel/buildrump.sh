@@ -310,7 +310,8 @@ probe_rumpuserbits ()
 	doesitbuild '#include <pthread.h>\n
 		#include <stddef.h>\n
 		void *t(void *);void *t(void *arg) {return NULL;}\n
-		int main(void) {pthread_t p;return pthread_create(&p,NULL,t,NULL);}'
+		int main(void)\n
+		{pthread_t p;return pthread_create(&p,NULL,t,NULL);}\n'
 	if [ $? -eq 0 ]; then
 		appendvar_fs CCWRAPPER_MANGLE : '-lpthread='
 	fi
