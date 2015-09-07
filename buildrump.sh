@@ -379,7 +379,7 @@ maketoolwrapper ()
 	else
 		lcx=$(echo ${tool} | tr '[A-Z]' '[a-z]')
 	fi
-	tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-${lcx}
+	tname=${BRTOOLDIR}/bin/${MACHINE_GNU_ARCH}--netbsd${TOOLABI}-${lcx}
 
 	printoneconfig 'Tool' "${tool}" "${fptool}"
 
@@ -475,10 +475,11 @@ maketools ()
 
 	# create a cpp wrapper, but run it via cc -E
 	if [ "${CC_FLAVOR}" = 'clang' ]; then
-		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-clang-cpp
+		cppname=clang-cpp
 	else
-		tname=${BRTOOLDIR}/bin/${MACH_ARCH}--netbsd${TOOLABI}-cpp
+		cppname=cpp
 	fi
+	tname=${BRTOOLDIR}/bin/${MACHINE_GNU_ARCH}--netbsd${TOOLABI}-${cppname}
 	printf '#!/bin/sh\n\nexec %s -E -x c "${@}"\n' ${CC} > ${tname}
 	chmod 755 ${tname}
 
@@ -922,7 +923,7 @@ evaltoolchain ()
 			    | sed -n -e 's/^pcc.*for //' -e 's/,.*//p' )
 		fi
 	fi
-	MACH_ARCH=$(echo ${CC_TARGET} | sed 's/-.*//' )
+	MACHINE_GNU_ARCH=$(echo ${CC_TARGET} | sed 's/-.*//' )
 
 	#
 	# Try to figure out if we're using the native toolchain or
@@ -1103,10 +1104,10 @@ probearm ()
 	# check for big endian
 	if cppdefines '__ARMEL__'; then
 		MACHINE="evbearm${hf}-el"
-		MACH_ARCH="arm"
+		MACHINE_GNU_ARCH="arm"
 	else
 		MACHINE="evbearm${hf}-eb"
-		MACH_ARCH="armeb"
+		MACHINE_GNU_ARCH="armeb"
 	fi
 
 	TOOLABI="elf-eabi${hf}"
@@ -1134,10 +1135,10 @@ probeaarch64 ()
 	# check for big endian
 	if cppdefines '__AARCH64EL__'; then
 		MACHINE="evbarm64-el"
-		MACH_ARCH="aarch64"
+		MACHINE_GNU_ARCH="aarch64"
 	else
 		MACHINE="evbarm64-eb"
-		MACH_ARCH="aarch64_be"
+		MACHINE_GNU_ARCH="aarch64_be"
 	fi
 
 	TOOLABI=""
@@ -1188,22 +1189,22 @@ evalmachine ()
 {
 
 	TOOLABI=''
-	case ${MACH_ARCH} in
+	case ${MACHINE_GNU_ARCH} in
 	"amd64"|"x86_64")
 		probex86
 		if ${THIRTYTWO} ; then
 			MACHINE="i386"
-			MACH_ARCH="i486"
+			MACHINE_GNU_ARCH="i486"
 			TOOLABI="elf"
 		else
 			MACHINE="amd64"
-			MACH_ARCH="x86_64"
+			MACHINE_GNU_ARCH="x86_64"
 		fi
 		;;
 	"i386"|"i486"|"i586"|"i686")
 		probex86
 		MACHINE="i386"
-		MACH_ARCH="i486"
+		MACHINE_GNU_ARCH="i486"
 		TOOLABI="elf"
 		;;
 	arm*)
@@ -1215,59 +1216,60 @@ evalmachine ()
 	"sparc"|"sparc64")
 		if ${THIRTYTWO} ; then
 			MACHINE="sparc"
-			MACH_ARCH="sparc"
+			MACHINE_GNU_ARCH="sparc"
 			TOOLABI="elf"
 		else
 			MACHINE="sparc64"
-			MACH_ARCH="sparc64"
+			MACHINE_GNU_ARCH="sparc64"
 		fi
 		;;
 	"mipsel"|"mips64el")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-el"
-			MACH_ARCH="mipsel"
+			MACHINE_GNU_ARCH="mipsel"
 		else
 			MACHINE="evbmips64-el"
-			MACH_ARCH="mips64el"
+			MACHINE_GNU_ARCH="mips64el"
 		fi
 		probemips
 		;;
 	"mips"|"mipseb"|"mips64"|"mips64eb")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbmips-eb"
-			MACH_ARCH="mipseb"
+			MACHINE_GNU_ARCH="mipseb"
 		else
 			MACHINE="evbmips64-eb"
-			MACH_ARCH="mips64"
+			MACHINE_GNU_ARCH="mips64"
 		fi
 		probemips
 		;;
 	"powerpc"|"ppc64"|"powerpc64"|"powerpc64le")
 		if ${THIRTYTWO} ; then
 			MACHINE="evbppc"
-			MACH_ARCH="powerpc"
+			MACHINE_GNU_ARCH="powerpc"
 		else
 			MACHINE="evbppc64"
-			MACH_ARCH="powerpc64"
+			MACHINE_GNU_ARCH="powerpc64"
 			appendvar EXTRA_CWARNFLAGS -Wno-format
 		fi
 		;;
 	"alpha")
 		MACHINE="alpha"
-		MACH_ARCH="alpha"
+		MACHINE_GNU_ARCH="alpha"
 		;;
 	"riscv"|"riscv64")
 		if ${THIRTYTWO} ; then
 			MACHINE="riscv"
-			MACH_ARCH="riscv32"
+			MACHINE_GNU_ARCH="riscv32"
 		else
 			MACHINE="riscv"
-			MACH_ARCH="riscv64"
+			MACHINE_GNU_ARCH="riscv64"
 			appendvar EXTRA_CWARNFLAGS -Wno-format
 		fi
 		;;
 	esac
-	[ -z "${MACHINE}" ] && die script does not know machine \"${MACH_ARCH}\"
+	[ -z "${MACHINE}" ] \
+	    && die script does not know machine \"${MACHINE_GNU_ARCH}\"
 }
 
 parseargs ()
