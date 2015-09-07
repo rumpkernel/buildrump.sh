@@ -671,7 +671,9 @@ makemake ()
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
-	    ${LLVM} ${PCC} ${BEQUIET} \
+	    ${HAVE_LLVM:+-V HAVE_LLVM=${HAVE_LLVM}} \
+	    ${HAVE_PCC:+-V HAVE_PCC=${HAVE_PCC}} \
+	    ${BEQUIET} \
 	    -E -Z S \
 	    -V EXTERNAL_TOOLCHAIN=${BRTOOLDIR} -V TOOLCHAIN_MISSING=yes \
 	    -V TOOLS_BUILDRUMP=yes \
@@ -859,15 +861,16 @@ evaltoolchain ()
 	# Check for variant of compiler.
 	# XXX: why can't all cc's that are gcc actually tell me
 	#      that they're gcc with cc --version?!?
+	unset HAVE_LLVM HAVE_PCC
 	ccver=$(${CC} --version)
 	if echo ${ccver} | grep -q 'Free Software Foundation'; then
 		CC_FLAVOR=gcc
 	elif echo ${ccver} | grep -q clang; then
 		CC_FLAVOR=clang
-		LLVM='-V HAVE_LLVM=1'
+		HAVE_LLVM=yes
 	elif echo ${ccver} | grep -q pcc; then
 		CC_FLAVOR=pcc
-		PCC='-V HAVE_PCC=1'
+		HAVE_PCC=yes
 	else
 		die Unsupported \${CC} "(`type ${CC}`)"
 	fi
