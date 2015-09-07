@@ -1477,7 +1477,7 @@ resolvepaths ()
 	abspath BRTOOLDIR
 	abspath SRCDIR
 
-	RUMPMAKE="${BRTOOLDIR}/_buildrumpsh-rumpmake"
+	RUMPMAKE="${BRTOOLDIR}/bin/brrumpmake"
 
 	BRIMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
 
