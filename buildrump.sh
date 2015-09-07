@@ -305,10 +305,11 @@ probe_rumpuserbits ()
 		appendvar_fs CCWRAPPER_MANGLE : '-lpthread='
 	fi
 
-	# is it a source tree which comes with autoconf?  if so, prefer that
-	if [ -x ${SRCDIR}/lib/librumpuser/configure \
-	     -a ! -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
-		echo '>> librumpuser configure script detected.  running'
+	[ -x ${SRCDIR}/lib/librumpuser/configure ] \
+	    || die 'librumpuser configure script missing (source dir too old)'
+
+	if [ ! -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
+		echo '>> running librumpuser configure script'
 		echo '>>'
 		mkdir -p ${BRTOOLDIR}/autoconf
 		( export CFLAGS="${EXTRA_CFLAGS}"
@@ -320,41 +321,8 @@ probe_rumpuserbits ()
 		[ $? -eq 0 ] || die configure script failed
 	fi
 
-	if [ -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
-		echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
-		echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
-		return 0
-	fi
-
-	#
-	# else, homegrown autoconf for old source trees
-	#
-
-	#
-	# Check if the target supports posix_memalign()
-	doesitbuild \
-	    '#include <stdlib.h>
-		void *m;int main(void){posix_memalign(&m,0,0);return 0;}\n'
-	[ $? -eq 0 ] && POSIX_MEMALIGN='-DHAVE_POSIX_MEMALIGN'
-
-	doesitbuild \
-	    '#include <sys/ioctl.h>\n#include <unistd.h>\n
-	    int ioctl(int fd, int cmd, ...); int main(void) {return 0;}\n'
-	[ $? -eq 0 ] && IOCTL_CMD_INT='-DHAVE_IOCTL_CMD_INT'
-
-	# two or three-arg pthread_setname_np().  or none?
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee", 0);return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_3'
-	doesitbuild '#define _GNU_SOURCE\n#include <pthread.h>\n
-	    int main(void) {
-		pthread_t pt; pthread_setname_np(pt, "jee");return 0;}' -c
-	[ $? -eq 0 ] && PTHREAD_SETNAME_NP='-DHAVE_PTHREAD_SETNAME_2'
-
-	appendmkconf 'Probe' "${POSIX_MEMALIGN}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${IOCTL_CMD_INT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${PTHREAD_SETNAME_NP}" "CPPFLAGS" +
+	echo "CPPFLAGS+=-DRUMPUSER_CONFIG=yes" >> "${MKCONF}"
+	echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
 }
 
 WRAPPERBODY='int
