@@ -325,6 +325,23 @@ probe_rumpuserbits ()
 	echo "CPPFLAGS+=-I${BRTOOLDIR}/autoconf" >> "${MKCONF}"
 }
 
+writeproberes ()
+{
+
+	probevars='
+		HAVE_LLVM
+		HAVE_PCC
+		MACHINE
+		MACHINE_GNU_ARCH
+	'
+
+	rm -f ${BRTOOLDIR}/proberes.sh
+	for x in ${probevars}; do
+		printf 'BUILDRUMP_%s="%s"\n' ${x} $(eval echo \$${x}) \
+		    >> ${BRTOOLDIR}/proberes.sh
+	done
+}
+
 WRAPPERBODY='int
 main(int argc, const char *argv[])
 {
@@ -1395,7 +1412,7 @@ parseargs ()
 	#
 	# Determine what which parts we should execute.
 	#
-	allcmds='checkout checkoutcvs checkoutgit tools build install
+	allcmds='checkout checkoutcvs checkoutgit probe tools build install
 	    tests fullbuild kernelheaders'
 	fullbuildcmds="tools build install"
 
@@ -1548,8 +1565,8 @@ parseargs "$@"
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
-if ${dotools} || ${dobuild} || ${dokernelheaders} || ${doinstall} || ${dotests}
-then
+if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
+    || ${doinstall} || ${dotests}; then
 	resolvepaths
 
 	evaltoolchain
@@ -1557,6 +1574,7 @@ then
 
 	${KERNONLY} || evalplatform
 
+	${doprobe} && writeproberes
 	${dotools} && maketools
 	${dobuild} && makebuild
 	${dokernelheaders} && makekernelheaders
