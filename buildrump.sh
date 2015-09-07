@@ -713,8 +713,8 @@ makebuild ()
 	    && appendvar DIRS_second ${SRCDIR}/sys/rump/share
 
 	if [ ${MACHINE} = "i386" -o ${MACHINE} = "amd64" \
-	     -o ${MACHINE} = "evbearm-el" -o ${MACHINE} = "evbearm-eb" \
-	     -o ${MACHINE} = "evbppc" -o ${MACHINE} = "evbppc64" ]; then
+	     -o ${MACHINE#evbearm} != ${MACHINE} \
+	     -o ${MACHINE#evbppc} != ${MACHINE} ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
 	${SYS_SUNOS} && appendvar DIRS_emul sys/rump/kern/lib/libsys_sunos
@@ -1086,24 +1086,26 @@ evalplatform ()
 probearm ()
 {
 
-	# check for big endian
-	if cppdefines '__ARMEL__'; then
-		MACHINE="evbearm-el"
-		MACH_ARCH="arm"
-	else
-		MACHINE="evbearm-eb"
-		MACH_ARCH="armeb"
-	fi
-
-	TOOLABI="elf-eabi"
-
 	# NetBSD/evbarm is softfloat by default, but force the NetBSD
 	# build to use hardfloat if the compiler defaults to VFP.
 	# This is because the softfloat env is not always functional
 	# in case hardfloat is the compiler default.
 	if cppdefines __VFP_FP__; then
-		MKSOFTFLOAT=no
+		hf=hf
+	else
+		hf=
 	fi
+
+	# check for big endian
+	if cppdefines '__ARMEL__'; then
+		MACHINE="evbearm${hf}-el"
+		MACH_ARCH="arm"
+	else
+		MACHINE="evbearm${hf}-eb"
+		MACH_ARCH="armeb"
+	fi
+
+	TOOLABI="elf-eabi${hf}"
 }
 
 probecxx ()
