@@ -682,7 +682,7 @@ EOF
 	# set new BRIMACROS only if the contents change (avoids
 	# full rebuild, since every file in the rump kernel depends on the
 	# contents of BRIMACROS
-	if ! diff "${BRIMACROS}" "${BRIMACROS}.building" > /dev/null; then
+	if ! diff "${BRIMACROS}" "${BRIMACROS}.building" > /dev/null 2>&1; then
 		mv "${BRIMACROS}.building" "${BRIMACROS}"
 	fi
 }
