@@ -678,12 +678,6 @@ EOF
 	# create wrapper script to be used during buildrump.sh, plus tools
 	makemake ${RUMPMAKE} ${OBJDIR}/dest.stage tools
 
-	sysproxy=$(${RUMPMAKE} \
-	    -f ${SRCDIR}/sys/rump/kern/Makefile.rumpkerncomp \
-	    -V '${RUMPKERNCOMPS:Msysproxy}')
-	[ -n "${sysproxy}" ] \
-	    && echo RUMPKERN_SYSPROXY=-lrumpkern_sysproxy >> "${MKCONF}"
-
 	# Just set no MSI in imacros universally now.
 	# Need to:
 	#   a) migrate more defines there
