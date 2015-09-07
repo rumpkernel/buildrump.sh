@@ -84,17 +84,6 @@ printoneconfig ()
 	[ -z "${2}" ] || printf "%-5s %-18s: %s\n" "${1}" "${2}" "${3}"
 }
 
-printenv ()
-{
-
-	# XXX: this is not yet functional the way I want it to be
-	echo '>> Build environment (from shell)'
-	printoneconfig 'Env' 'BUILDRUMP_CPPFLAGS' "${BUILDRUMP_CPPFLAGS}"
-	printoneconfig 'Env' 'BUILDRUMP_CFLAGS' "${BUILDRUMP_CFLAGS}"
-	printoneconfig 'Env' 'BUILDRUMP_AFLAGS' "${BUILDRUMP_AFLAGS}"
-	printoneconfig 'Env' 'BUILDRUMP_LDFLAGS' "${BUILDRUMP_LDFLAGS}"
-}
-
 appendmkconf ()
 {
 	if [ ! -z "${2}" ]; then
@@ -623,8 +612,6 @@ EOF
 	    "${EXTRA_CPPFLAGS}" "${RUMPKERN_UNDEF}"
 	exec 1>&3 3>&-
 
-	printenv
-
 	chkcrt begins
 	chkcrt ends
 	chkcrt i
@@ -735,8 +722,6 @@ makebuild ()
 
 	# ensure we're in SRCDIR, in case "tools" wasn't run
 	cd ${SRCDIR}
-
-	printenv
 
 	targets="obj includes dependall install"
 
