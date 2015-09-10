@@ -400,11 +400,11 @@ setgit ()
 
 [ "$1" = "listdates" ] && { listdates ; exit 0; }
 
-[ $# -lt 2 ] && die Invalid usage.  Run this script via buildrump.sh
 BRDIR=$(dirname $0)
-SRCDIR=${2}
-
 . ${BRDIR}/subr.sh
+
+[ $# -lt 2 ] && die Invalid usage.  Run this script via buildrump.sh
+SRCDIR=${2}
 
 # default to the most secure source for githubdate
 if [ -z "${BUILDRUMP_CVSROOT}" ]; then
