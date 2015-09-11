@@ -111,7 +111,9 @@ NBSRC_EXTRA_usr='
 	src/lib/libpthread/pthread_types.h
 	src/sbin/raidctl/raidctl.c;
     20150712 2100UTC:
-	src/crypto/external/bsd/openssl'
+	src/crypto/external/bsd/openssl;
+    20150911 1125UTC:
+	src/external/bsd/libc++/dist/libcxxrt'
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
