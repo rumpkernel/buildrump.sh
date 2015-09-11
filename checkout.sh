@@ -99,7 +99,9 @@ NBSRC_EXTRA_sys='
 	src/lib/libc/arch/x86_64/Makefile.inc
 	src/lib/libc/arch/x86_64/gen/Makefile.inc;
     20150724 1415UTC:
-	src/sys/rump/librump/rumpkern/emul.c'
+	src/sys/rump/librump/rumpkern/emul.c;
+    20150911 1125UTC:
+	src/sys/rump/include/rump/rumpdefs.h'
 
 NBSRC_EXTRA_posix='
     20150724 1415UTC:
@@ -113,7 +115,12 @@ NBSRC_EXTRA_usr='
     20150712 2100UTC:
 	src/crypto/external/bsd/openssl;
     20150911 1125UTC:
-	src/external/bsd/libc++/dist/libcxxrt'
+	src/external/bsd/libc++/dist/libcxx/include
+	src/external/bsd/libc++/dist/libcxx/src
+	src/external/bsd/libc++/dist/libcxx/utils
+	src/external/bsd/libc++/dist/libcxxrt
+	src/external/bsd/libc++/include
+	src/external/bsd/libc++/lib'
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
