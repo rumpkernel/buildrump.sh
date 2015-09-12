@@ -101,11 +101,3 @@ userincludes ()
 	done
 	echo '>> done installing headers'
 }
-
-havecxx ()
-{
-
-	_checkrumpmake
-
-	[ $(${RUMPMAKE} -f bsd.own.mk -V '${_BUILDRUMP_CXX}') = 'yes' ]
-}
