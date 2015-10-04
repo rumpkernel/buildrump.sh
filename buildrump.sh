@@ -508,13 +508,6 @@ maketools ()
 	[ -x ${BRTOOLDIR}/bin/brprintmetainfo ] \
 	    || die failed to build brprintmetainfo
 
-	# Create bounce directory used as the install target.  The
-	# purpose of this is to strip the "usr/" pathname component
-	# that is hardcoded by NetBSD Makefiles.
-	mkdir -p ${BRTOOLDIR}/dest || die "cannot create ${BRTOOLDIR}/dest"
-	rm -f ${BRTOOLDIR}/dest/usr
-	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
-
 	cat >> "${MKCONF}" << EOF
 BUILDRUMP_IMACROS=${BRIMACROS}
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
@@ -1502,6 +1495,13 @@ resolvepaths ()
 
 	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
 	abspath DESTDIR
+
+	# Create bounce directory used as the install target.  The
+	# purpose of this is to strip the "usr/" pathname component
+	# that is hardcoded by NetBSD Makefiles.
+	mkdir -p ${BRTOOLDIR}/dest || die "cannot create ${BRTOOLDIR}/dest"
+	rm -f ${BRTOOLDIR}/dest/usr
+	ln -s ${DESTDIR} ${BRTOOLDIR}/dest/usr
 
 	# mini-mtree
 	dstage=${OBJDIR}/dest.stage/usr
