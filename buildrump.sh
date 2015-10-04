@@ -1485,18 +1485,23 @@ resolvepaths ()
 	# resolve critical directories
 	abspath BRDIR
 
-	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
-	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
 	mkdir -p ${BRTOOLDIR} || die "cannot create ${BRTOOLDIR} (tooldir)"
 
-	abspath DESTDIR
-	abspath OBJDIR
 	abspath BRTOOLDIR
 	abspath SRCDIR
 
 	RUMPMAKE="${BRTOOLDIR}/bin/brrumpmake"
-
 	BRIMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
+
+	${dotools} || ${dobuild} || return
+
+	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
+	abspath OBJDIR
+
+	${dobuild} || return
+
+	mkdir -p ${DESTDIR} || die cannot create ${DESTDIR}
+	abspath DESTDIR
 
 	# mini-mtree
 	dstage=${OBJDIR}/dest.stage/usr
