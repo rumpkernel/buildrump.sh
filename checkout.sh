@@ -101,7 +101,9 @@ NBSRC_EXTRA_sys='
     20150724 1415UTC:
 	src/sys/rump/librump/rumpkern/emul.c;
     20150911 1125UTC:
-	src/sys/rump/include/rump/rumpdefs.h'
+	src/sys/rump/include/rump/rumpdefs.h;
+    20151025 1605UTC:
+	src/lib/libc/gen/Makefile.inc'
 
 NBSRC_EXTRA_posix='
     20150724 1415UTC:
