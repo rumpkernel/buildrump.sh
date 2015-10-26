@@ -153,7 +153,7 @@ probeld ()
 	elif echo ${linkervers} | grep -q 'Solaris Link Editor' ; then
 		LD_FLAVOR=sun
 		SHLIB_MKMAP=no
-		appendvar_fs CCWRAPPER_MANGLE : '-Wl,-x='
+		appendvar_fs CCWRAPPER_MANGLE : '-Wl,-x'
 	else
 		echo '>> output from linker:'
 		echo ${linkervers}
@@ -302,7 +302,7 @@ probe_rumpuserbits ()
 		int main(void)\n
 		{pthread_t p;return pthread_create(&p,NULL,t,NULL);}\n'
 	if [ $? -eq 0 ]; then
-		appendvar_fs CCWRAPPER_MANGLE : '-lpthread='
+		appendvar_fs CCWRAPPER_MANGLE : '-lpthread'
 	fi
 
 	[ -x ${SRCDIR}/lib/librumpuser/configure ] \
@@ -418,7 +418,7 @@ maketoolwrapper ()
 		(
 			IFS=:
 			for xf in ${CCWRAPPER_MANGLE}; do
-				IFS==
+				IFS=' '
 				set -- ${xf}
 				printf '\t"%s",\n' ${1}
 			done
@@ -427,7 +427,7 @@ maketoolwrapper ()
 		(
 			IFS=:
 			for xf in ${CCWRAPPER_MANGLE}; do
-				IFS==
+				IFS=' '
 				set -- ${xf}
 				printf '\t"%s",\n' ${2}
 			done
@@ -438,6 +438,7 @@ maketoolwrapper ()
 		printf '\texecvp(argv[0], (void *)(uintptr_t)argv);\n'
 		printf '\treturn 0;\n}\n'
 		exec 1>&3 3>&-
+
 		${HOST_CC} ${OBJDIR}/wrapper.c -o ${tname} \
 		    || die failed to build wrapper for ${tool}
 		rm -f ${OBJDIR}/wrapper.c
@@ -1137,7 +1138,7 @@ probecxx ()
 
 	# if cxx doesn't support -cxx-isystem, map it to -isystem
 	if ! doesitcxx 'int i;' -c -cxx-isystem /; then
-		appendvar_fs CCWRAPPER_MANGLE : '-cxx-isystem=-isystem'
+		appendvar_fs CCWRAPPER_MANGLE : '-cxx-isystem -isystem'
 	fi
 }
 
@@ -1195,7 +1196,7 @@ probex86 ()
 
 	# we probably should unconditionally wipe out -mno-avx for userspace ...
 	doesitbuild 'int i;' -c -mno-avx \
-	    || appendvar_fs CCWRAPPER_MANGLE : '-mno-avx='
+	    || appendvar_fs CCWRAPPER_MANGLE : '-mno-avx'
 }
 
 evalmachine ()
