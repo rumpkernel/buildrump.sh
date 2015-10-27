@@ -360,10 +360,8 @@ writeproberes ()
 		MACHINE_GNU_ARCH
 	'
 
-	rm -f ${BRTOOLDIR}/proberes.sh
 	for x in ${probevars}; do
-		printf 'BUILDRUMP_%s="%s"\n' ${x} $(eval echo \$${x}) \
-		    >> ${BRTOOLDIR}/proberes.sh
+		printf 'BUILDRUMP_%s="%s"\n' ${x} $(eval echo \${${x}:-})
 	done
 }
 
@@ -1437,12 +1435,14 @@ parseargs ()
 	for cmd in ${allcmds}; do
 		eval do${cmd}=false
 	done
+	ncmds=0
 	if [ $# -ne 0 ]; then
 		for arg in $*; do
 			while true ; do
 				for cmd in ${allcmds}; do
 					if [ "${arg}" = "${cmd}" ]; then
 						eval do${cmd}=true
+						ncmds=$((${ncmds}+1))
 						break 2
 					fi
 				done
@@ -1458,6 +1458,11 @@ parseargs ()
 		for cmd in ${fullbuildcmds}; do
 			eval do${cmd}=true
 		done
+	fi
+
+	if ${doprobe}; then
+		[ ${ncmds} -ne 1 ] && die probe works alone
+		DIAGOUT=:
 	fi
 
 	if ${docheckout} || ${docheckoutgit} ; then
@@ -1592,7 +1597,7 @@ ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
 if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
     || ${doinstall} || ${dotests}; then
-	resolvepaths
+	${doprobe} || resolvepaths
 
 	evaltoolchain
 	evalmachine
