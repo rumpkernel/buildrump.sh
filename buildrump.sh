@@ -1299,7 +1299,7 @@ parseargs ()
 	SRCDIR=./src
 	JNUM=4
 
-	while getopts 'd:DhHj:kNo:qrs:T:V:F:' opt; do
+	while getopts 'd:DhHj:ko:qrs:T:V:F:' opt; do
 		case "$opt" in
 		d)
 			DESTDIR=${OPTARG}
@@ -1359,12 +1359,6 @@ parseargs ()
 			;;
 		k)
 			KERNONLY=true
-			;;
-		N)
-			echo '>> The -N flag is now set by -k.'
-			echo '>> Using -N in the future will flag an error!'
-			echo '>> (giving you a few seconds to read this)'
-			sleep 5
 			;;
 		o)
 			OBJDIR=${OPTARG}
