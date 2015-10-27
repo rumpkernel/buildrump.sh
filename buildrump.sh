@@ -1329,7 +1329,7 @@ parseargs ()
 			DESTDIR=${OPTARG}
 			;;
 		D)
-			[ ! -z "${RUMP_DIAGNOSTIC}" ] \
+			[ ! -z "${RUMP_DIAGNOSTIC:-}" ] \
 			    && die Cannot specify releasy debug
 
 			debugginess=$((debugginess+1))
