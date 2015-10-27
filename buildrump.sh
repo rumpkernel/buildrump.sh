@@ -74,6 +74,18 @@ helpme ()
 	exit 1
 }
 
+DIAGOUT=echo
+diagout ()
+{
+
+	if [ "$1" != '-r' ]; then
+		${DIAGOUT} -n '>> '
+	else
+		shift
+	fi
+	${DIAGOUT} $*
+}
+
 #
 # toolchain creation helper routines
 #
@@ -155,8 +167,8 @@ probeld ()
 		SHLIB_MKMAP=no
 		appendvar_fs CCWRAPPER_MANGLE : '-Wl,-x'
 	else
-		echo '>> output from linker:'
-		echo ${linkervers}
+		diagout 'output from linker:'
+		diagout -r ${linkervers}
 		die 'GNU or Solaris ld required'
 	fi
 
@@ -179,7 +191,7 @@ probenm ()
 	    | ${CC} ${EXTRA_CFLAGS} -x c -c - -o ${OBJDIR}/probenm.o
 	lastfield=$(${NM} -go ${OBJDIR}/probenm.o | awk '/testsym/{print $NF}')
 	if [ "${lastfield}" != 'testsym' ]; then
-		echo nm: expected \"testsym\", got \"${lastfield}\"
+		diagout nm: expected \"testsym\", got \"${lastfield}\"
 		die incompatible output from probing \"${NM}\"
 	fi
 	rm -f ${OBJDIR}/probenm.o
@@ -309,8 +321,8 @@ probe_rumpuserbits ()
 	    || die 'librumpuser configure script missing (source dir too old)'
 
 	if [ ! -f ${BRTOOLDIR}/autoconf/rumpuser_config.h ]; then
-		echo '>> running librumpuser configure script'
-		echo '>>'
+		diagout '>> running librumpuser configure script'
+		diagout
 		mkdir -p ${BRTOOLDIR}/autoconf
 		( export CFLAGS="${EXTRA_CFLAGS}"
 		  export LDFLAGS="${EXTRA_LDFLAGS}"
@@ -861,10 +873,10 @@ evaltoolchain ()
 		[ $? -eq 0 ] && ${OBJDIR}/canrun
 		if [ $? -eq 0 ]; then
 			NATIVEBUILD=true
-			echo '>> NATIVE build environment probed'
+			diagout NATIVE build environment probed
 		else
 			NATIVEBUILD=false
-			echo '>> CROSS build environment probed'
+			diagout CROSS build environment probed
 		fi
 		rm -f ${OBJDIR}/canrun
 	fi
@@ -1084,7 +1096,7 @@ evalplatform ()
 		target_supported=false
 		;;
 	*-apple-darwin*)
-		echo '>> Mach-O object format used by OS X is not yet supported'
+		diagout Mach-O object format used by OS X is not yet supported
 		target_supported=false
 		;;
 	*)
@@ -1582,7 +1594,7 @@ if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
 
 	if ${dotests}; then
 		if ${KERNONLY}; then
-			echo '>> Kernel-only; skipping tests (no hypervisor)'
+			diagout 'Kernel-only; skipping tests (no hypervisor)'
 		else
 			. ${BRDIR}/tests/testrump.sh
 			alltests
@@ -1590,5 +1602,5 @@ if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
 	fi
 fi
 
-echo '>> buildrump.sh ran successfully'
+diagout buildrump.sh ran successfully
 exit 0
