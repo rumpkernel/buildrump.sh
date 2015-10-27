@@ -24,16 +24,29 @@
 # SUCH DAMAGE.
 #
 
+set -u
+
 #
 # scrub necessary parts of the env
-unset BUILDRUMP_CPPCACHE
-unset CCWRAPPER_MANGLE
+BUILDRUMP_CPPCACHE=
+CCWRAPPER_MANGLE=
 
 # defaults, can be overriden by probes
 RUMP_VIRTIF=no
 HIJACK=false
 SYS_SUNOS=false
 NEED_LDSCRIPT=false
+TARBALLMODE=
+
+# empty before proven contentful
+EXTRA_CFLAGS=
+EXTRA_LDFLAGS=
+EXTRA_AFLAGS=
+EXTRA_CPPFLAGS=
+EXTRA_CWARNFLAGS=
+EXTRA_RUMPUSER=
+EXTRA_RUMPCOMMON=
+EXTRA_RUMPCLIENT=
 
 #
 # support routines
@@ -78,7 +91,7 @@ DIAGOUT=echo
 diagout ()
 {
 
-	if [ "$1" != '-r' ]; then
+	if [ "${1:-}" != '-r' ]; then
 		${DIAGOUT} -n '>> '
 	else
 		shift
@@ -114,7 +127,7 @@ appendmkconf ()
 
 		val=${2# }
 		printoneconfig "${1}" "${name}" "${val}"
-		echo "${3}${4}=${val}" >> "${MKCONF}"
+		echo "${3}${4:-}=${val}" >> "${MKCONF}"
 	fi
 }
 
@@ -123,7 +136,7 @@ appendvar_fs ()
 	vname="${1}"
 	fs="${2}"
 	shift 2
-	if [ -z "$(eval echo \${$vname})" ]; then
+	if [ -z "$(eval echo \${${vname}:-})" ]; then
 		eval ${vname}="\${*}"
 	else
 		eval ${vname}="\"\${${vname}}"\${fs}"\${*}\""
@@ -556,10 +569,10 @@ EOF
 	printoneconfig 'Cmd' "OBJDIR" "${OBJDIR}"
 	printoneconfig 'Cmd' "BRTOOLDIR" "${BRTOOLDIR}"
 
-	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC}" "RUMP_DIAGNOSTIC"
-	appendmkconf 'Cmd' "${RUMP_DEBUG}" "RUMP_DEBUG"
-	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG}" "RUMP_LOCKDEBUG"
-	appendmkconf 'Cmd' "${DBG}" "DBG"
+	appendmkconf 'Cmd' "${RUMP_DIAGNOSTIC:-}" "RUMP_DIAGNOSTIC"
+	appendmkconf 'Cmd' "${RUMP_DEBUG:-}" "RUMP_DEBUG"
+	appendmkconf 'Cmd' "${RUMP_LOCKDEBUG:-}" "RUMP_LOCKDEBUG"
+	appendmkconf 'Cmd' "${DBG:-}" "DBG"
 	printoneconfig 'Cmd' "make -j[num]" "-j ${JNUM}"
 
 	if ${KERNONLY}; then
@@ -572,30 +585,30 @@ EOF
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
 	fi
-	appendmkconf 'Probe' "${RUMP_CURLWP}" 'RUMP_CURLWP' ?
-	appendmkconf 'Probe' "${CTASSERT}" "CPPFLAGS" +
-	appendmkconf 'Probe' "${RUMP_VIRTIF}" "RUMP_VIRTIF"
+	appendmkconf 'Probe' "${RUMP_CURLWP:-}" 'RUMP_CURLWP' ?
+	appendmkconf 'Probe' "${CTASSERT:-}" "CPPFLAGS" +
+	appendmkconf 'Probe' "${RUMP_VIRTIF:-}" "RUMP_VIRTIF"
 	appendmkconf 'Probe' "${EXTRA_CWARNFLAGS}" "CWARNFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_LDFLAGS}" "LDFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CPPFLAGS}" "CPPFLAGS" +
 	appendmkconf 'Probe' "${EXTRA_CFLAGS}" "BUILDRUMP_CFLAGS"
 	appendmkconf 'Probe' "${EXTRA_AFLAGS}" "BUILDRUMP_AFLAGS"
-	unset _tmpvar
+	_tmpvar=
 	for x in ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}; do
 		appendvar _tmpvar "${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPUSER_EXTERNAL_DPLIBS" +
-	unset _tmpvar
+	_tmpvar=
 	for x in ${EXTRA_RUMPCLIENT} ${EXTRA_RUMPCOMMON}; do
 		appendvar _tmpvar "${x#-l}"
 	done
 	appendmkconf 'Probe' "${_tmpvar}" "RUMPCLIENT_EXTERNAL_DPLIBS" +
-	appendmkconf 'Probe' "${LDSCRIPT}" "RUMP_LDSCRIPT"
-	appendmkconf 'Probe' "${SHLIB_MKMAP}" 'SHLIB_MKMAP'
-	appendmkconf 'Probe' "${SHLIB_WARNTEXTREL}" "SHLIB_WARNTEXTREL"
-	appendmkconf 'Probe' "${MKSTATICLIB}"  "MKSTATICLIB"
-	appendmkconf 'Probe' "${MKPIC}"  "MKPIC"
-	appendmkconf 'Probe' "${MKSOFTFLOAT}"  "MKSOFTFLOAT"
+	appendmkconf 'Probe' "${LDSCRIPT:-}" "RUMP_LDSCRIPT"
+	appendmkconf 'Probe' "${SHLIB_MKMAP:-}" 'SHLIB_MKMAP'
+	appendmkconf 'Probe' "${SHLIB_WARNTEXTREL:-}" "SHLIB_WARNTEXTREL"
+	appendmkconf 'Probe' "${MKSTATICLIB:-}"  "MKSTATICLIB"
+	appendmkconf 'Probe' "${MKPIC:-}"  "MKPIC"
+	appendmkconf 'Probe' "${MKSOFTFLOAT:-}"  "MKSOFTFLOAT"
 	appendmkconf 'Probe' $(${HAVECXX} && echo yes || echo no) _BUILDRUMP_CXX
 
 	printoneconfig 'Mode' "${TARBALLMODE}" 'yes'
@@ -708,7 +721,7 @@ makemake ()
 	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
 	    -V BUILDRUMP_STAGE=${stage} \
-	    ${BUILDSH_VARGS} \
+	    ${BUILDSH_VARGS:-} \
 	${cmd}
 	[ $? -ne 0 ] && die build.sh ${cmd} failed
 }
@@ -825,9 +838,10 @@ makekernelheaders ()
 
 settool ()
 {
+
 	tool=$1
 	crossnames=$2
-	eval evaldtool=\${${tool}}
+	eval evaldtool=\${${tool}:-}
 
 	if [ -n "${evaldtool}" ]; then
 		# if it's set in the env, we require it to exist
@@ -901,7 +915,7 @@ evaltoolchain ()
 	# See if we have a c++ compiler.  If CXX is not set,
 	# try to guess what it could be.  In the latter case, do
 	# not treat a missing c++ compiler as an error.
-	if [ -n "${CXX}" ]; then
+	if [ -n "${CXX:-}" ]; then
 		type ${CXX} > /dev/null 2>&1 \
 		    || die \$CXX set \(${CXX}\) but not found
 		HAVECXX=true
@@ -983,7 +997,7 @@ evaltoolchain ()
 	# check that we are in posesssion of the
 	# mandatory tools for building rump kernels
 	for tool in AR NM OBJCOPY; do
-		eval t=\${${tool}}
+		eval t=\${${tool}:-}
 		type ${t} > /dev/null || die cannot find \$${tool} "(${t})"
 	done
 
@@ -1407,7 +1421,7 @@ parseargs ()
 	DBG="${F_DBG:-${DBG}}"
 
 	BEQUIET="-N${NOISE}"
-	[ -z "${BRTOOLDIR}" ] && BRTOOLDIR=${OBJDIR}/tooldir
+	[ -z "${BRTOOLDIR:-}" ] && BRTOOLDIR=${OBJDIR}/tooldir
 
 	#
 	# Determine what which parts we should execute.
@@ -1477,7 +1491,6 @@ resolvepaths ()
 {
 
 	# check if we're running from a tarball, i.e. is checkout possible
-	unset TARBALLMODE
 	if [ ! -f "${BRDIR}/checkout.sh" -a -f "${BRDIR}/tarup-gitdate" ]; then
 		TARBALLMODE='Run from tarball'
 	fi
@@ -1569,7 +1582,7 @@ BRDIR=$(dirname $0)
 
 # check that env is clean
 for var in CFLAGS AFLAGS LDFLAGS; do
-	[ -n "$(eval echo \${$var})" ] \
+	[ -n "$(eval echo \${${var}:-})" ] \
 	    && die unset \"${var}\" from environment, use -F instead
 done
 
