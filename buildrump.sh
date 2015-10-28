@@ -920,10 +920,10 @@ evaltoolchain ()
 		HAVECXX=true
 	else
 		case ${CC} in
-		*gcc)
+		*gcc*)
 			cxxguess=$(echo $CC | sed 's/gcc$/g++/')
 			;;
-		*clang)
+		*clang*)
 			cxxguess=$(echo $CC | sed 's/clang$/clang++/')
 			;;
 		*cc)
