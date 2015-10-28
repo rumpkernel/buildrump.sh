@@ -1512,8 +1512,6 @@ resolvepaths ()
 	RUMPMAKE="${BRTOOLDIR}/bin/brrumpmake"
 	BRIMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
 
-	${dotools} || ${dobuild} || ${dokernelheaders} || return
-
 	mkdir -p ${OBJDIR} || die cannot create ${OBJDIR}
 	abspath OBJDIR
 
