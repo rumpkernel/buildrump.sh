@@ -919,6 +919,7 @@ evaltoolchain ()
 		    || die \$CXX set \(${CXX}\) but not found
 		HAVECXX=true
 	else
+		cxxguess=
 		case ${CC} in
 		*gcc*)
 			cxxguess=$(echo $CC | sed 's/gcc$/g++/')
