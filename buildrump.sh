@@ -533,6 +533,9 @@ maketools ()
 	[ -x ${BRTOOLDIR}/bin/brprintmetainfo ] \
 	    || die failed to build brprintmetainfo
 
+	${HOST_CC} -o ${BRTOOLDIR}/bin/brrealpath \
+	    ${BRDIR}/brlib/utils/realpath.c || die failed to build brrealpath
+
 	cat >> "${MKCONF}" << EOF
 BUILDRUMP_IMACROS=${BRIMACROS}
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
