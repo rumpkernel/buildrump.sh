@@ -48,6 +48,7 @@ EXTRA_RUMPUSER=
 EXTRA_RUMPCOMMON=
 EXTRA_RUMPCLIENT=
 RUMPKERN_UNDEF=
+BUILDSH_VARS=
 
 #
 # support routines
@@ -723,7 +724,7 @@ makemake ()
 	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
 	    -V BUILDRUMP_STAGE=${stage} \
-	    ${BUILDSH_VARGS:-} \
+	    ${BUILDSH_VARGS} \
 	${cmd}
 	[ $? -ne 0 ] && die build.sh ${cmd} failed
 }
