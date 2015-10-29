@@ -764,7 +764,11 @@ makebuild ()
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
 	fi
 	${SYS_SUNOS} && appendvar DIRS_emul sys/rump/kern/lib/libsys_sunos
-	${HIJACK} && DIRS_final="lib/librumphijack"
+	if ${HIJACK}; then
+		DIRS_final="lib/librumphijack"
+	else
+		DIRS_final=
+	fi
 
 	DIRS_third="${DIRS_third} ${DIRS_emul}"
 
