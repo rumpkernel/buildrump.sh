@@ -705,7 +705,7 @@ makemake ()
 	stage=$2
 	cmd=$3
 
-	env CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh \
+	CFLAGS= HOST_LDFLAGS=-L${OBJDIR} ./build.sh \
 	    -m ${MACHINE} -u \
 	    -D ${stage} -w ${wrapper} \
 	    -T ${BRTOOLDIR} -j ${JNUM} \
