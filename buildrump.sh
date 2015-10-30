@@ -295,6 +295,16 @@ checkcheckout ()
 checkcompiler ()
 {
 
+	# Iron out the clang version differences.
+	if [ "${CC_FLAVOR}" = 'clang' ]; then
+		doesitbuild 'int main(void) {return 0;}\n' -c \
+			-Wtautological-pointer-compare
+		if [ $? -ne 0 ]; then
+			appendvar_fs CCWRAPPER_MANGLE : \
+				"-Wno-error=tautological-pointer-compare -Wno-error=tautological-compare"
+		fi
+	fi
+
 	if ! ${KERNONLY}; then
 		doesitbuild 'int main(void) {return 0;}\n' \
 		    ${EXTRA_RUMPUSER} ${EXTRA_RUMPCOMMON}
