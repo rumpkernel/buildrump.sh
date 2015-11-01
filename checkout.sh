@@ -42,12 +42,12 @@
 # that once buildrump.sh is published, the NetBSD sources will be
 # available via git.
 #
-NBSRC_CVSDATE="20150520 1400UTC"
+NBSRC_CVSDATE="20151101 2242UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
 # NBSRC_CVSDATE is used.
-NBSRC_LISTDATE="20150615 1130UTC"
+#NBSRC_LISTDATE="20150615 1130UTC"
 
 # Cherry-pick patches are not in $NBSRC_CVSDATE
 # the format is "date1:dir1 dir2 dir3 ...;date2:dir 4..."
@@ -56,73 +56,11 @@ NBSRC_LISTDATE="20150615 1130UTC"
 #   20151111 1111UTC:
 #	src/sys/rump'
 #
-NBSRC_EXTRA_sys='
-    20150526 1650UTC:
-	src/sys/rump/librump/rumpkern/cons.c
-	src/sys/rump/librump/rumpvfs/rumpblk.c;
-    20150531 1200UTC:
-	src/sys/dev/pci/auich.c
-	src/sys/rump/net/Makefile.rumpnetcomp
-	src/sys/rump/net/lib/libtap;
-    20150602 0040UTC:
-	src/sys/modules/hdaudio
-	src/sys/modules/hdaudio_pci;
-    20150603 1445UTC:
-	src/sys/rump/Makefile.rump
-	src/sys/rump/README.compileopts
-	src/sys/rump/dev/lib/libpci
-	src/sys/rump/include/sys/bus.h
-	src/sys/rump/dev/Makefile.rumpdevcomp
-	src/sys/rump/dev/lib/libpci_auich;
-    20150608 1220UTC:
-	src/sys/rump/librump/rumpkern/rump.c
-	src/sys/rump/librump/rumpvfs/devnodes.c
-	src/sys/rump/librump/rumpvfs/rump_vfs_private.h
-	src/sys/rump/dev/lib/libaudio/audio_component.c;
-    20150615 1545UTC:
-	src/sys/rump/dev/lib/libumass/Makefile
-	src/sys/rump/dev/lib/libpci;
-    20150618 2230UTC:
-	src/sys/kern/syscalls.master
-	src/sys/rump/rump.sysmap
-	src/sys/rump/include/rump/rump_syscalls.h
-	src/sys/rump/librump/rumpkern/rump_syscalls.c
-	src/sys/rump/librump/rumpkern/rumpkern_syscalls.c
-	src/sys/rump/librump/rumpnet/rumpnet_syscalls.c
-	src/sys/rump/librump/rumpvfs/rumpvfs_syscalls.c
-	src/sys/sys/syscall.h
-	src/sys/sys/syscallargs.h
-	src/share/mk/bsd.own.mk;
-    20150715 1430UTC:
-	src/lib/libc/arch/i386/Makefile.inc
-	src/lib/libc/arch/i386/gen/Makefile.inc
-	src/lib/libc/arch/x86_64/Makefile.inc
-	src/lib/libc/arch/x86_64/gen/Makefile.inc;
-    20150724 1415UTC:
-	src/sys/rump/librump/rumpkern/emul.c;
-    20150911 1125UTC:
-	src/sys/rump/include/rump/rumpdefs.h;
-    20151025 1605UTC:
-	src/lib/libc/gen/Makefile.inc'
+NBSRC_EXTRA_sys=''
 
-NBSRC_EXTRA_posix='
-    20150724 1415UTC:
-	src/lib/librumpuser/rumpuser.c'
+NBSRC_EXTRA_posix=''
 
-NBSRC_EXTRA_usr='
-    20150626 0135UTC:
-	src/external/bsd/libc++/dist/libcxxrt/src/exception.cc
-	src/lib/libpthread/pthread_types.h
-	src/sbin/raidctl/raidctl.c;
-    20150712 2100UTC:
-	src/crypto/external/bsd/openssl;
-    20150911 1125UTC:
-	src/external/bsd/libc++/dist/libcxx/include
-	src/external/bsd/libc++/dist/libcxx/src
-	src/external/bsd/libc++/dist/libcxx/utils
-	src/external/bsd/libc++/dist/libcxxrt
-	src/external/bsd/libc++/include
-	src/external/bsd/libc++/lib'
+NBSRC_EXTRA_usr=''
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
 GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
