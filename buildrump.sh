@@ -464,7 +464,7 @@ maketoolwrapper ()
 			for xf in ${CCWRAPPER_MANGLE}; do
 				IFS=' '
 				set -- ${xf}
-				printf '\t"%s",\n' ${2}
+				printf '\t"%s",\n' ${2:-}
 			done
 		)
 		printf '};\n\n'
