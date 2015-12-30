@@ -522,9 +522,10 @@ maketools ()
 	for x in CC AR NM OBJCOPY; do
 		maketoolwrapper true $x
 	done
-	for x in AS CXX LD OBJDUMP RANLIB READELF SIZE STRINGS STRIP; do
+	for x in AS LD OBJDUMP RANLIB READELF SIZE STRINGS STRIP; do
 		maketoolwrapper false $x
 	done
+	${HAVECXX} && maketoolwrapper false CXX
 
 	# create a cpp wrapper, but run it via cc -E
 	if [ "${CC_FLAVOR}" = 'clang' ]; then
