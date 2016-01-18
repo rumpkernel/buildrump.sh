@@ -61,7 +61,9 @@ NBSRC_EXTRA_sys='
 	src/sys/rump
 	src/sys/fs/sysvbfs/sysvbfs_vnops.c
 	src/share/mk/bsd.own.mk
-	src/usr.bin/config'
+	src/usr.bin/config;
+    20160112 2130UTC:
+	src/sys/ufs/ext2fs/ext2fs_lookup.c'
 
 NBSRC_EXTRA_posix=''
 
