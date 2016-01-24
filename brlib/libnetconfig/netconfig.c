@@ -319,7 +319,11 @@ rump_netconfig_ipv4_gw(const char *gwaddr)
 	m->m_pkthdr.len = rtmp->rtm_msglen = off;
 
 	solock(rtso);
+#if __NetBSD_Prereq__(7,99,26)
+	rv = rtso->so_proto->pr_usrreqs->pr_send(rtso, m, NULL, NULL, curlwp);
+#else
 	rv = rtso->so_proto->pr_output(m, rtso);
+#endif
 	sounlock(rtso);
 
 	return rv;
@@ -369,7 +373,11 @@ rump_netconfig_ipv6_gw(const char *gwaddr)
 	rtmp->rtm_msglen = off;
 
 	solock(rtso);
+#if __NetBSD_Prereq__(7,99,26)
+	rv = rtso->so_proto->pr_usrreqs->pr_send(rtso, m, NULL, NULL, curlwp);
+#else
 	rv = rtso->so_proto->pr_output(m, rtso);
+#endif
 	sounlock(rtso);
 
 	return rv;

@@ -245,7 +245,12 @@ if_route(const struct interface *iface, const struct in_addr *dest,
 
 	/* XXX: no check */
 	solock(routeso);
+#if __NetBSD_Prereq__(7,99,26)
+	error = routeso->so_proto->pr_usrreqs->pr_send(routeso,
+	    m, NULL, NULL, curlwp);
+#else
 	error = routeso->so_proto->pr_output(m, routeso);
+#endif
 	sounlock(routeso);
 
 	return error;
