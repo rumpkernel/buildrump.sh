@@ -63,12 +63,18 @@ NBSRC_EXTRA_sys='
 	src/share/mk/bsd.own.mk
 	src/usr.bin/config;
     20160112 2130UTC:
-	src/sys/ufs/ext2fs/ext2fs_lookup.c'
+	src/sys/ufs/ext2fs/ext2fs_lookup.c;
+    20160202 1225UTC:
+	src/sys/rump/include/rump-sys
+	src/sys/rump/include/rump/rumpfs.h
+	src/sys/rump/include/rump/rumpdefs.h
+	src/sys/rump/include/rump/makerumpdefs.sh
+	src/sys/rump/librump/rumpvfs/rumpfs.c'
 
 NBSRC_EXTRA_posix=''
 
 NBSRC_EXTRA_usr='
-    20151206 2200UTC:
+    20160202 1200UTC:
 	src/crypto/external/bsd/openssl'
 
 GITREPO='https://github.com/rumpkernel/src-netbsd'
