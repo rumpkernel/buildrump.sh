@@ -66,9 +66,7 @@ NBSRC_EXTRA_sys='
 	src/sys/ufs/ext2fs/ext2fs_lookup.c;
     20160202 1225UTC:
 	src/sys/rump/include/rump-sys
-	src/sys/rump/include/rump/rumpfs.h
-	src/sys/rump/include/rump/rumpdefs.h
-	src/sys/rump/include/rump/makerumpdefs.sh
+	src/sys/rump/include/rump
 	src/sys/rump/librump/rumpvfs/rumpfs.c'
 
 NBSRC_EXTRA_posix=''
