@@ -23,8 +23,6 @@ _checkrumpmake ()
 # adhoc "mtree" required for installaling a subset of userspace
 # headers and libraries.  maybe we can migrate to a proper use of
 # NetBSD's mtree at some point?
-#
-# XXX: hardcoded base paths
 usermtree ()
 {
 
