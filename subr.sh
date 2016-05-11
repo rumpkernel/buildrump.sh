@@ -47,9 +47,6 @@ stdlibs ()
 	liblibs='libc libcrypt libipsec libkvm libm libnpf libpci libprop
 	    libpthread librmt libutil liby libz'
 	extralibs='external/bsd/flex/lib
-	    crypto/external/bsd/openssl/lib/libcrypto
-	    crypto/external/bsd/openssl/lib/libdes
-	    crypto/external/bsd/openssl/lib/libssl
 	    external/bsd/libpcap/lib'
 	for lib in ${liblibs}; do
 		echo ${prefix}lib/${lib}
