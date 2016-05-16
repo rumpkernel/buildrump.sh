@@ -170,7 +170,7 @@ chkcrt ()
 probeld ()
 {
 
-	linkervers=$(${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1)
+	linkervers=$(LANG=C ${CC} ${EXTRA_LDFLAGS} -Wl,--version 2>&1)
 	if echo ${linkervers} | grep -q 'GNU ld' ; then
 		LD_FLAVOR=GNU
 		LD_AS_NEEDED='-Wl,--no-as-needed'
