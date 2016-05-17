@@ -57,9 +57,10 @@ NBSRC_CVSFLAGS="-z3"
 #	src/sys/rump'
 #
 NBSRC_EXTRA_sys='
-    20160517 1010UTC:
+    20160517 1140UTC:
 	src/sys/dev/pci/if_vioif.c
-	src/sys/rump/dev/lib/librnd/rnd_component.c'
+	src/sys/rump/dev/lib/librnd/rnd_component.c
+	src/sys/dev/usb/usbdi.c'
 
 NBSRC_EXTRA_posix=''
 
