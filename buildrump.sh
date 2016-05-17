@@ -732,6 +732,7 @@ makemake ()
 	    -V MKZFS=no \
 	    -V MKDYNAMICROOT=no \
 	    -V MKDTRACE=no -V MKCTF=no \
+	    -V MKPIE=no \
 	    -V TOPRUMP="${SRCDIR}/sys/rump" \
 	    -V MAKECONF="${mkconf_final}" \
 	    -V MAKEOBJDIR="\${.CURDIR:C,^(${SRCDIR}|${BRDIR}),${OBJDIR},}" \
