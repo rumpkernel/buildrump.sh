@@ -16,6 +16,11 @@ env:
   - NAME='release' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-r' TESTS='tests'
   - NAME='fibers' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-V RUMPUSER_THREADS=fiber -V RUMP_CURLWP=hypercall' TESTS=''
 
+addons:
+  apt:
+    packages:
+    - zlib1g-dev
+
 script:
   -  ./buildrump.sh -o obj.${NAME} -d rump.${NAME} -qq -j16 -V ${LIBTYPE} ${BUILDTYPE} fullbuild ${TESTS}
 
