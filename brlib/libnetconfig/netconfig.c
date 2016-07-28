@@ -232,7 +232,7 @@ rump_netconfig_ipv4_ifaddr_cidr(const char *ifname, const char *addr,
 
 	if (mask < 0 || mask > 32)
 		return EINVAL;
-	return cfg_ipv4(ifname, addr, htonl(~0<<(32-mask)));
+	return cfg_ipv4(ifname, addr, htonl(~0U<<(32-mask)));
 }
 
 int
