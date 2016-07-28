@@ -265,6 +265,16 @@ doesitbuild ()
 		-x c - -o /dev/null $* > /dev/null 2>&1
 }
 
+doesitbuild_host ()
+{
+
+	theprog="${1}"
+	shift
+
+	printf "${theprog}" \
+	    | ${HOST_CC} -Wall -Werror -x c - -o /dev/null $* > /dev/null 2>&1
+}
+
 # like doesitbuild, except with c++
 doesitcxx ()
 {
@@ -512,6 +522,18 @@ maketools ()
 	mkconf_final="${BRTOOLDIR}/mk.conf"
 	> ${mkconf_final}
 
+	# nuke fakelibz (compat for old libz hack, the following line can
+	# be removed e.g. in 2017)
+	rm -f ${OBJDIR}/libz.a
+
+	# We now require a host zlib for tools.  nb. we explicitly whine
+	# about this one here since the NetBSD tools build process gets
+	# very confused if you start the build, it bombs, you add zlib,
+	# and retry.
+	doesitbuild_host '#include <zlib.h>
+int main() {gzopen(NULL, NULL);}' -lz \
+	    || die 'Host zlib (libz, -lz) required, please install one!'
+
 	${KERNONLY} || probe_rumpuserbits
 
 	checkcompiler
@@ -668,15 +690,6 @@ EOF
 		echo '.endif # PROG' >> "${MKCONF}"
 	fi
 
-	# skip the zlib tests run by "make tools", since we don't need zlib
-	# and it's only required by one tools autoconf script.  Of course,
-	# the fun bit is that autoconf wants to use -lz internally,
-	# so we provide some foo which macquerades as libz.a.
-	export ac_cv_header_zlib_h=yes
-	echo 'int gzdopen(int); int gzdopen(int v) { return 0; }' > fakezlib.c
-	${HOST_CC} -o libz.a -c fakezlib.c
-	rm -f fakezlib.c
-
 	# Run build.sh.  Use some defaults.
 	# The html pages would be nice, but result in too many broken
 	# links, since they assume the whole NetBSD man page set to be present.
@@ -693,8 +706,6 @@ EOF
 	#   a) migrate more defines there
 	#   b) set no MSI only when necessary
 	printf '#define NO_PCI_MSI_MSIX\n' > ${BRIMACROS}.building
-
-	unset ac_cv_header_zlib_h
 
 	# tool build done.  flip mk.conf name so that it gets picked up
 	omkconf="${MKCONF}"
