@@ -42,7 +42,7 @@
 # that once buildrump.sh is published, the NetBSD sources will be
 # available via git.
 #
-NBSRC_CVSDATE="20160510 2000UTC"
+NBSRC_CVSDATE="20160728 1100UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
@@ -56,11 +56,7 @@ NBSRC_CVSFLAGS="-z3"
 #   20151111 1111UTC:
 #	src/sys/rump'
 #
-NBSRC_EXTRA_sys='
-    20160517 1140UTC:
-	src/sys/dev/pci/if_vioif.c
-	src/sys/rump/dev/lib/librnd/rnd_component.c
-	src/sys/dev/usb/usbdi.c'
+NBSRC_EXTRA_sys=''
 
 NBSRC_EXTRA_posix=''
 
