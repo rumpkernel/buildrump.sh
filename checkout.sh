@@ -365,6 +365,7 @@ if [ -z "${BUILDRUMP_CVSROOT}" ]; then
 		BUILDRUMP_CVSROOT=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot
 		;;
 	esac
+	BUILDRUMP_CVSROOT=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot
 fi
 
 case "${1}" in
