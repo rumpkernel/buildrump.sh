@@ -4,7 +4,7 @@ PROG= nettest_routed6
 SRCS= nettest_routed.c
 
 RUMPLIBS= -lrumpnet_shmif -lrumpnet_config -lrumpnet_netinet6 -lrumpnet_net
-RUMPLIBS+=-lrumpnet ${RUMPKERN_SYSPROXY} -lrump -lrumpuser
+RUMPLIBS+=-lrumpnet ${RUMPKERN_SYSPROXY} -lrump -lrumpuser -lrumpdev -lrumpvfs
 
 CLEANFILES+= busmem1 busmem2
 
