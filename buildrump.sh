@@ -531,6 +531,9 @@ maketools ()
 	# very confused if you start the build, it bombs, you add zlib,
 	# and retry.
 	doesitbuild_host '#include <zlib.h>
+#ifndef NULL
+#define NULL ((void *)0)
+#endif
 int main() {gzopen(NULL, NULL); return 0;}' -lz \
 	    || die 'Host zlib (libz, -lz) required, please install one!'
 
