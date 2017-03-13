@@ -574,7 +574,7 @@ int main() {gzopen(NULL, NULL); return 0;}' -lz \
 	cat >> "${MKCONF}" << EOF
 BUILDRUMP_IMACROS=${BRIMACROS}
 .if \${BUILDRUMP_SYSROOT:Uno} == "yes"
-BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE}
+BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE} -isystem =/usr/include
 .else
 BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
 .endif
