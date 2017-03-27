@@ -362,6 +362,7 @@ probe_rumpuserbits ()
 		( export CFLAGS="${EXTRA_CFLAGS}"
 		  export LDFLAGS="${EXTRA_LDFLAGS}"
 		  export CPPFLAGS="${EXTRA_CPPFLAGS}"
+		  export CC="${CC}"
 		  cd ${BRTOOLDIR}/autoconf \
 		    && ${SRCDIR}/lib/librumpuser/configure \
 		      $( ! ${NATIVEBUILD} && echo --host ${CC_TARGET} ) )
