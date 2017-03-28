@@ -62,8 +62,8 @@ NBSRC_EXTRA_posix=''
 
 NBSRC_EXTRA_usr=''
 
-GITREPO='https://github.com/rumpkernel/src-netbsd'
-GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
+GITREPO='https://github.com/huikang/src-netbsd'
+GITREPOPUSH='https://github.com/huikang/src-netbsd'
 GITREVFILE='.srcgitrev'
 
 checkoutcvs ()
@@ -188,7 +188,7 @@ checkoutgit ()
 		cd ${SRCDIR}
 		[ -z "$(${GIT} status --porcelain)" ] \
 		    || die "Cloned repo in ${SRCDIR} is not clean, aborting."
-		${GIT} fetch origin buildrump-src || die Failed to fetch repo
+		${GIT} fetch origin add-tun-component || die Failed to fetch repo
 	else
 		${GIT} clone -n ${GITREPO} ${SRCDIR} || die Clone failed
 		cd ${SRCDIR}
@@ -266,7 +266,7 @@ githubdate ()
 	${GIT} merge --no-edit kernel-src user-src posix-src
 
 	# buildrump-src revision gets embedded in buildrump.sh
-	${GIT} checkout buildrump-src
+	${GIT} checkout add-tun-component
 	${GIT} merge --no-edit kernel-src posix-src
 	gitsrcrev=$(${GIT} rev-parse HEAD)
 
@@ -365,6 +365,7 @@ if [ -z "${BUILDRUMP_CVSROOT}" ]; then
 		BUILDRUMP_CVSROOT=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot
 		;;
 	esac
+	BUILDRUMP_CVSROOT=:pserver:anoncvs@anoncvs.netbsd.org:/cvsroot
 fi
 
 case "${1}" in
