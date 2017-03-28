@@ -247,10 +247,20 @@ massage_host_routes(struct rt *rt, const struct interface *iface)
 {
 	struct rt *r;
 
-	for (r = rt; r; r = r->next)
+	for (r = rt; r; r = r->next) {
 		if (r->gate.s_addr == iface->addr.s_addr &&
 		    r->net.s_addr == INADDR_BROADCAST)
 			r->gate.s_addr = r->dest.s_addr;
+
+/*
+Some DHCP servers (GCE) set a route with a netmask of 255.255.255.255
+we need to set the gate on there so that this route actually works
+https://code.google.com/p/google-compute-engine/issues/detail?id=77
+*/
+		if (r->gate.s_addr == INADDR_ANY && r->net.s_addr == INADDR_BROADCAST)
+			r->gate.s_addr = r->dest.s_addr;
+	}
+
 	return rt;
 }
 
