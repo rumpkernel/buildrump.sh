@@ -1,4 +1,12 @@
 language: c
+addons:
+  apt:
+    packages:
+      - bc
+      - libfuse-dev
+      - libarchive-dev
+      - xfsprogs
+      - btrfs-tools
 
 compiler:
   - gcc
@@ -7,7 +15,7 @@ compiler:
 sudo: false
 
 before_script:
-  - ./buildrump.sh checkout
+  - ./buildrump.sh ${RUMPKERNEL} checkout
 
 env:
   - NAME='static' LIBTYPE='MKPIC=no' BUILDTYPE='' TESTS='tests'
@@ -15,9 +23,18 @@ env:
   - NAME='debug' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-DDD' TESTS='tests'
   - NAME='release' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-r' TESTS='tests'
   - NAME='fibers' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-V RUMPUSER_THREADS=fiber -V RUMP_CURLWP=hypercall' TESTS=''
+  - NAME='dynamic' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='' TESTS='' RUMPKERNEL='-l linux'
+  - NAME='fibers' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-V RUMPUSER_THREADS=fiber -V RUMP_CURLWP=hypercall' TESTS='' RUMPKERNEL='-l linux'
+
+matrix:
+   allow_failures:
+     - compiler: clang
+       env: NAME='dynamic' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='' TESTS='' RUMPKERNEL='-l linux'
+     - compiler: clang
+       env: NAME='fibers' LIBTYPE='MKSTATICLIB=no' BUILDTYPE='-V RUMPUSER_THREADS=fiber -V RUMP_CURLWP=hypercall' TESTS='' RUMPKERNEL='-l linux'
 
 script:
-  -  ./buildrump.sh -o obj.${NAME} -d rump.${NAME} -qq -j16 -V ${LIBTYPE} ${BUILDTYPE} fullbuild ${TESTS}
+  - ./buildrump.sh ${RUMPKERNEL} -o obj.${NAME} -d rump.${NAME} -qq -j16 -V ${LIBTYPE} ${BUILDTYPE} fullbuild ${TESTS}
 
 notifications:
   irc:
