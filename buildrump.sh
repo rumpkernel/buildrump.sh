@@ -69,6 +69,7 @@ helpme ()
 	printf "\t-r: release build (no -g, DIAGNOSTIC, etc.).  default: no\n"
 	printf "\t-D: increase debugginess.  default: -O2 -g\n"
 	printf "\t-k: only kernel (no POSIX hypercalls).  default: all\n"
+	printf "\t-l: choose a rumpkernel: netbsd or linux.  default: netbsd\n"
 	echo
 	printf "\t-H: ignore diagnostic checks (expert-only).  default: no\n"
 	printf "\t-V: specify -V arguments to NetBSD build (expert-only)\n"
@@ -287,19 +288,6 @@ doesitcxx ()
 	printf "${theprog}" \
 	    | ${CXX} -Werror ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
 		-x c++ - -o /dev/null $* > /dev/null 2>&1
-}
-
-checkcheckout ()
-{
-
-	[ -x "${SRCDIR}/build.sh" ] || die "Cannot find ${SRCDIR}/build.sh!"
-
-	[ ! -z "${TARBALLMODE}" ] && return
-
-	if ! ${BRDIR}/checkout.sh checkcheckout ${SRCDIR} \
-	    && ! ${TITANMODE}; then
-		die 'revision mismatch, run checkout (or -H to override)'
-	fi
 }
 
 checkcompiler ()
@@ -556,6 +544,7 @@ int main() {gzopen(NULL, NULL); return 0;}' -lz \
 	else
 		cppname=cpp
 	fi
+	# NB: we need rumpmake to build libbmk_*, but rumpmake needs --netbsd TOOLTUPLES
 	tname=${BRTOOLDIR}/bin/${MACHINE_GNU_ARCH}--netbsd${TOOLABI}-${cppname}
 	printf '#!/bin/sh\n\nexec %s -E -x c "${@}"\n' ${CC} > ${tname}
 	chmod 755 ${tname}
@@ -616,8 +605,8 @@ EOF
 		appendmkconf Cmd yes RUMPKERN_ONLY
 	fi
 
-	if ${KERNONLY} && ! cppdefines __NetBSD__; then
-		appendmkconf 'Cmd' '-D__NetBSD__' 'CPPFLAGS' +
+	if ${KERNONLY} && ! cppdefines ${RUMPKERN_CPPFLAGS}; then
+		appendmkconf 'Cmd' "${RUMPKERN_CPPFLAGS}" 'CPPFLAGS' +
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" 'CPPFLAGS' +
 	else
 		appendmkconf 'Probe' "${RUMPKERN_UNDEF}" "RUMPKERN_UNDEF"
@@ -654,8 +643,8 @@ EOF
 	exec 3>&1 1>${BRTOOLDIR}/toolchain-conf.mk
 	printf 'BUILDRUMP_TOOL_CFLAGS=%s\n' "${EXTRA_CFLAGS}"
 	printf 'BUILDRUMP_TOOL_CXXFLAGS=%s\n' "${EXTRA_CFLAGS}"
-	printf 'BUILDRUMP_TOOL_CPPFLAGS=-D__NetBSD__ %s %s\n' \
-	    "${EXTRA_CPPFLAGS}" "${RUMPKERN_UNDEF}"
+	printf 'BUILDRUMP_TOOL_CPPFLAGS=%s %s %s\n' \
+	    "${RUMPKERN_CPPFLAGS}" "${EXTRA_CPPFLAGS}" "${RUMPKERN_UNDEF}"
 	exec 1>&3 3>&-
 
 	chkcrt begins
@@ -752,120 +741,6 @@ makemake ()
 	    ${BUILDSH_VARGS} \
 	${cmd}
 	[ $? -ne 0 ] && die build.sh ${cmd} failed
-}
-
-makebuild ()
-{
-
-	checkcheckout
-
-	# ensure we're in SRCDIR, in case "tools" wasn't run
-	cd ${SRCDIR}
-
-	targets="obj includes dependall install"
-
-	#
-	# Building takes 4 passes, just like when
-	# building NetBSD the regular way.  The passes are:
-	# 1) obj
-	# 2) includes
-	# 3) dependall
-	# 4) install
-	#
-
-	DIRS_first='lib/librumpuser'
-	DIRS_second='lib/librump'
-	DIRS_third="lib/librumpdev lib/librumpnet lib/librumpvfs
-	    sys/rump/dev sys/rump/fs sys/rump/kern sys/rump/net
-	    sys/rump/include ${BRDIR}/brlib"
-
-	# sys/rump/share was added to ${SRCDIR} 11/2014
-	[ -d ${SRCDIR}/sys/rump/share ] \
-	    && appendvar DIRS_second ${SRCDIR}/sys/rump/share
-
-	if [ ${MACHINE} = "i386" -o ${MACHINE} = "amd64" \
-	     -o ${MACHINE#evbearm} != ${MACHINE} \
-	     -o ${MACHINE#evbppc} != ${MACHINE} ]; then
-		DIRS_emul=sys/rump/kern/lib/libsys_linux
-	fi
-	${SYS_SUNOS} && appendvar DIRS_emul sys/rump/kern/lib/libsys_sunos
-	if ${HIJACK}; then
-		DIRS_final="lib/librumphijack"
-	else
-		DIRS_final=
-	fi
-
-	DIRS_third="${DIRS_third} ${DIRS_emul}"
-
-	if ${KERNONLY}; then
-		mkmakefile ${OBJDIR}/Makefile.all \
-		    sys/rump ${DIRS_emul} ${BRDIR}/brlib
-	else
-		DIRS_third="lib/librumpclient ${DIRS_third}"
-
-		mkmakefile ${OBJDIR}/Makefile.first ${DIRS_first}
-		mkmakefile ${OBJDIR}/Makefile.second ${DIRS_second}
-		mkmakefile ${OBJDIR}/Makefile.third ${DIRS_third}
-		mkmakefile ${OBJDIR}/Makefile.final ${DIRS_final}
-		mkmakefile ${OBJDIR}/Makefile.all \
-		    ${DIRS_first} ${DIRS_second} ${DIRS_third} ${DIRS_final}
-	fi
-
-	# try to minimize the amount of domake invocations.  this makes a
-	# difference especially on systems with a large number of slow cores
-	for target in ${targets}; do
-		if [ ${target} = "dependall" ] && ! ${KERNONLY}; then
-			domake ${OBJDIR}/Makefile.first ${target}
-			domake ${OBJDIR}/Makefile.second ${target}
-			domake ${OBJDIR}/Makefile.third ${target}
-			domake ${OBJDIR}/Makefile.final ${target}
-		else
-			domake ${OBJDIR}/Makefile.all ${target}
-		fi
-	done
-
-	if ! ${KERNONLY}; then
-		mkmakefile ${OBJDIR}/Makefile.utils \
-		    usr.bin/rump_server usr.bin/rump_allserver \
-		    usr.bin/rump_wmd
-		for target in ${targets}; do
-			domake ${OBJDIR}/Makefile.utils ${target}
-		done
-	fi
-}
-
-makeinstall ()
-{
-
-	# ensure we run this in a directory that does not have a
-	# Makefile that could confuse rumpmake
-	stage=$(cd ${BRTOOLDIR} && ${RUMPMAKE} -V '${BUILDRUMP_STAGE}')
-	(cd ${stage}/usr ; tar -cf - .) | (cd ${DESTDIR} ; tar -xf -)
-}
-
-#
-# install kernel headers.
-# Note: Do _NOT_ do this unless you want to install a
-#       full rump kernel application stack
-#  
-makekernelheaders ()
-{
-
-	dodirs=$(cd ${SRCDIR}/sys && \
-	    ${RUMPMAKE} -V '${SUBDIR:Narch:Nmodules:Ncompat:Nnetnatm}' includes)
-	# missing some architectures
-	appendvar dodirs arch/amd64/include arch/i386/include arch/x86/include
-	appendvar dodirs arch/arm/include arch/arm/include/arm32
-	appendvar dodirs arch/evbarm64/include arch/aarch64/include
-	appendvar dodirs arch/evbppc/include arch/powerpc/include
-	appendvar dodirs arch/evbmips/include arch/mips/include
-	appendvar dodirs arch/riscv/include
-	for dir in ${dodirs}; do
-		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} obj)
-		(cd ${SRCDIR}/sys/${dir} && ${RUMPMAKE} includes)
-	done
-	# create machine symlink
-	(cd ${SRCDIR}/sys/arch && ${RUMPMAKE} NOSUBDIR=1 includes)
 }
 
 settool ()
@@ -1036,7 +911,9 @@ evaltoolchain ()
 
 	case ${CC_TARGET} in
 	*-linux*)
-		RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		if [ ${RUMPKERNEL} != "linux" ]; then
+			RUMPKERN_UNDEF='-Ulinux -U__linux -U__linux__ -U__gnu_linux__'
+		fi
 		cppdefines _BIG_ENDIAN \
 		    && appendvar RUMPKERN_UNDEF -U_BIG_ENDIAN
 		cppdefines _LITTLE_ENDIAN \
@@ -1353,12 +1230,14 @@ parseargs ()
 	NOISE=2
 	debugginess=0
 	KERNONLY=false
+	RUMPKERNEL=netbsd
 	OBJDIR=./obj
 	DESTDIR=./rump
 	SRCDIR=./src
+	LKL_SRCDIR=./linux
 	JNUM=4
 
-	while getopts 'd:DhHj:ko:qrs:T:V:F:' opt; do
+	while getopts 'd:DhHj:kl:o:qrs:T:V:F:' opt; do
 		case "$opt" in
 		d)
 			DESTDIR=${OPTARG}
@@ -1419,6 +1298,9 @@ parseargs ()
 		k)
 			KERNONLY=true
 			;;
+		l)
+			RUMPKERNEL=${OPTARG}
+			;;
 		o)
 			OBJDIR=${OPTARG}
 			;;
@@ -1450,6 +1332,14 @@ parseargs ()
 		esac
 	done
 	shift $((${OPTIND} - 1))
+
+	# load rump kernel specific scripts
+	if [ ${RUMPKERNEL} != "netbsd" -a ${RUMPKERNEL} != "linux" ]; then
+	    echo '>> ERROR:'
+	    echo '>> -l option (RUMPKERNEL) must be netbsd or linux'
+	    exit 1
+	fi
+	. ${BRDIR}/${RUMPKERNEL}.sh
 
 	DBG="${F_DBG:-${DBG}}"
 
@@ -1508,6 +1398,10 @@ parseargs ()
 		docheckout=true
 		checkoutstyle=cvs
 	fi
+	if ${docheckout} && [ ${RUMPKERNEL} = "linux" ] ; then
+		docheckout=true
+		checkoutstyle=linux-git
+	fi
 
 	# sanity checks
 	if [ ! -z "${TARBALLMODE}" ]; then
@@ -1542,6 +1436,7 @@ resolvepaths ()
 
 	abspath BRTOOLDIR
 	abspath SRCDIR
+	[ "${RUMPKERNEL}" = "linux" ] && abspath LKL_SRCDIR
 
 	RUMPMAKE="${BRTOOLDIR}/bin/brrumpmake"
 	BRIMACROS="${BRTOOLDIR}/include/opt_buildrump.h"
@@ -1572,40 +1467,7 @@ resolvepaths ()
 	done
 }
 
-# create the makefiles used for building
-mkmakefile ()
-{
 
-	makefile=$1
-	shift
-	exec 3>&1 1>${makefile}
-	printf '# GENERATED FILE, MIGHT I SUGGEST NOT EDITING?\n'
-	printf 'SUBDIR='
-	for dir in $*; do
-		case ${dir} in
-		/*)
-			printf ' %s' ${dir}
-			;;
-		*)
-			printf ' %s' ${SRCDIR}/${dir}
-			;;
-		esac
-	done
-
-	printf '\n.include <bsd.subdir.mk>\n'
-	exec 1>&3 3>&-
-}
-
-domake ()
-{
-
-	mkfile=${1}; shift
-	mktarget=${1}; shift
-
-	[ ! -x ${RUMPMAKE} ] && die "No rumpmake (${RUMPMAKE}). Forgot tools?"
-	${RUMPMAKE} $* -j ${JNUM} -f ${mkfile} ${mktarget}
-	[ $? -eq 0 ] || die "make $mkfile $mktarget"
-}
 
 ###
 ###
@@ -1624,7 +1486,7 @@ done
 
 parseargs "$@"
 
-${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
+${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} ${LKL_SRCDIR} || exit 1; }
 
 if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
     || ${doinstall} || ${dotests}; then
@@ -1635,20 +1497,14 @@ if ${doprobe} || ${dotools} || ${dobuild} || ${dokernelheaders} \
 
 	${KERNONLY} || evalplatform
 
+	export RUMPKERNEL
 	${doprobe} && writeproberes
 	${dotools} && maketools
 	${dobuild} && makebuild
 	${dokernelheaders} && makekernelheaders
 	${doinstall} && makeinstall
 
-	if ${dotests}; then
-		if ${KERNONLY}; then
-			diagout 'Kernel-only; skipping tests (no hypervisor)'
-		else
-			. ${BRDIR}/tests/testrump.sh
-			alltests
-		fi
-	fi
+	${dotests} && maketests
 fi
 
 diagout buildrump.sh ran successfully
