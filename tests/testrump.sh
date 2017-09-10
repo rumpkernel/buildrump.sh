@@ -108,9 +108,20 @@ dodynamic ()
 	fi
 }
 
+dorandomtest ()
+{
+
+	printf 'Random number generation ... '
+	if ./randomtest; then
+		echo done
+	else
+		die failed: $?
+	fi
+}
+
 ALLTESTS="init fstest fstest_img simpleclient
 	nettest_simple nettest_simple6 nettest_routed nettest_routed6
-	dynamic"
+	dynamic randomtest"
 
 alltests ()
 {
