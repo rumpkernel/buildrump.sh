@@ -42,7 +42,7 @@
 # that once buildrump.sh is published, the NetBSD sources will be
 # available via git.
 #
-NBSRC_CVSDATE="20160728 1100UTC"
+NBSRC_CVSDATE="201601005 0100UTC"
 NBSRC_CVSFLAGS="-z3"
 
 # If set, timestamp for src/sys/rump/listsrcdir.  If unset,
@@ -62,8 +62,8 @@ NBSRC_EXTRA_posix=''
 
 NBSRC_EXTRA_usr=''
 
-GITREPO='https://github.com/rumpkernel/src-netbsd'
-GITREPOPUSH='git@github.com:rumpkernel/src-netbsd'
+GITREPO='https://github.com/huikang/src-netbsd'
+GITREPOPUSH='https://github.com/huikang/src-netbsd'
 GITREVFILE='.srcgitrev'
 
 checkoutcvs ()
