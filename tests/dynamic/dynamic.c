@@ -17,6 +17,10 @@ main()
 	int s;
 
 	/* use this as a "do we have dynamic libs" test */
+	if (dlopen("librumpvfs.so", RTLD_LAZY | RTLD_GLOBAL) == NULL)
+		return 37;
+	if (dlopen("librumpdev.so", RTLD_LAZY | RTLD_GLOBAL) == NULL)
+		return 37;
 	if (dlopen("librumpnet.so", RTLD_LAZY | RTLD_GLOBAL) == NULL)
 		return 37;
 
