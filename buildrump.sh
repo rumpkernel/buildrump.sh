@@ -98,7 +98,7 @@ diagout ()
 	else
 		shift
 	fi
-	${DIAGOUT} $*
+	${DIAGOUT} ${1+"$@"}
 }
 
 #
@@ -240,7 +240,7 @@ cppdefines ()
 		cpplist="${BUILDRUMP_CPPCACHE}"
 	else
 		cpplist=$(${CC} ${EXTRA_CPPFLAGS} ${EXTRA_CFLAGS} \
-		    -E -Wp,-dM "$@" - < /dev/null)
+		    -E -Wp,-dM ${1+"$@"} - < /dev/null)
 	fi
 	(
 	    IFS=' '
@@ -262,7 +262,7 @@ doesitbuild ()
 	warnflags="-Wmissing-prototypes -Wstrict-prototypes -Wimplicit -Werror"
 	printf "${theprog}" \
 	    | ${CC} ${warnflags} ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
-		-x c - -o /dev/null $* > /dev/null 2>&1
+		-x c - -o /dev/null ${1+"$@"} > /dev/null 2>&1
 }
 
 doesitbuild_host ()
@@ -286,7 +286,7 @@ doesitcxx ()
 
 	printf "${theprog}" \
 	    | ${CXX} -Werror ${EXTRA_LDFLAGS} ${EXTRA_CFLAGS}	\
-		-x c++ - -o /dev/null $* > /dev/null 2>&1
+		-x c++ - -o /dev/null ${1+"$@"} > /dev/null 2>&1
 }
 
 checkcheckout ()
@@ -1475,7 +1475,7 @@ parseargs ()
 	done
 	ncmds=0
 	if [ $# -ne 0 ]; then
-		for arg in $*; do
+		for arg in "$@"; do
 			while true ; do
 				for cmd in ${allcmds}; do
 					if [ "${arg}" = "${cmd}" ]; then
@@ -1584,7 +1584,7 @@ mkmakefile ()
 	exec 3>&1 1>${makefile}
 	printf '# GENERATED FILE, MIGHT I SUGGEST NOT EDITING?\n'
 	printf 'SUBDIR='
-	for dir in $*; do
+	for dir in ${1+"$@"}; do
 		case ${dir} in
 		/*)
 			printf ' %s' ${dir}
@@ -1606,7 +1606,7 @@ domake ()
 	mktarget=${1}; shift
 
 	[ ! -x ${RUMPMAKE} ] && die "No rumpmake (${RUMPMAKE}). Forgot tools?"
-	${RUMPMAKE} $* -j ${JNUM} -f ${mkfile} ${mktarget}
+	${RUMPMAKE} ${1+"$@"} -j ${JNUM} -f ${mkfile} ${mktarget}
 	[ $? -eq 0 ] || die "make $mkfile $mktarget"
 }
 
@@ -1625,7 +1625,7 @@ for var in CFLAGS AFLAGS LDFLAGS; do
 	    && die unset \"${var}\" from environment, use -F instead
 done
 
-parseargs "$@"
+parseargs ${1+"$@"}
 
 ${docheckout} && { ${BRDIR}/checkout.sh ${checkoutstyle} ${SRCDIR} || exit 1; }
 
