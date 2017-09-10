@@ -788,6 +788,8 @@ makebuild ()
 	     -o ${MACHINE#evbearm} != ${MACHINE} \
 	     -o ${MACHINE#evbppc} != ${MACHINE} ]; then
 		DIRS_emul=sys/rump/kern/lib/libsys_linux
+	else
+		DIRS_emul=
 	fi
 	${SYS_SUNOS} && appendvar DIRS_emul sys/rump/kern/lib/libsys_sunos
 	if ${HIJACK}; then
