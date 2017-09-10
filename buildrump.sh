@@ -580,6 +580,7 @@ BUILDRUMP_CPPFLAGS=--sysroot=\${BUILDRUMP_STAGE} -isystem =/usr/include
 BUILDRUMP_CPPFLAGS=-I\${BUILDRUMP_STAGE}/usr/include
 .endif
 BUILDRUMP_CPPFLAGS+=${EXTRA_CPPFLAGS}
+BUILDRUMP_LDFLAGS=-L\${BUILDRUMP_STAGE}/usr/lib -Wl,-R${DESTDIR}/lib
 LIBDO.pthread=_external
 INSTPRIV=-U
 AFLAGS+=-Wa,--noexecstack
