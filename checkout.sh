@@ -259,15 +259,18 @@ githubdate ()
 	hubdateonebranch sys kernel
 	hubdateonebranch usr user
 
+	GIT_VERSION=`git --version | cut -d' ' -f 3`
+	version_le "2.9" "${GIT_VERSION}" && GIT_AUH="--allow-unrelated-histories"
+
 	${GIT} checkout appstack-src
-	${GIT} merge --no-edit kernel-src user-src
+	${GIT} merge --no-edit "${GIT_AUH}" kernel-src user-src
 
 	${GIT} checkout all-src
-	${GIT} merge --no-edit kernel-src user-src posix-src
+	${GIT} merge --no-edit "${GIT_AUH}" kernel-src user-src posix-src
 
 	# buildrump-src revision gets embedded in buildrump.sh
 	${GIT} checkout buildrump-src
-	${GIT} merge --no-edit kernel-src posix-src
+	${GIT} merge --no-edit "${GIT_AUH}" kernel-src posix-src
 	gitsrcrev=$(${GIT} rev-parse HEAD)
 
 	${GIT} checkout master
