@@ -96,3 +96,21 @@ userincludes ()
 	done
 	echo '>> done installing headers'
 }
+
+version_le ()
+{
+	VS0="$1"
+	VS1="$2"
+	while true; do
+		vs0="${VS0%%.*}"
+		[ "${VS0}" = "${VS0#*.}" ] && VS0="" || VS0="${VS0#*.}"
+		vs1="${VS1%%.*}"
+		[ "${VS1}" = "${VS1#*.}" ] && VS1="" || VS1="${VS1#*.}"
+		[ "${vs0}" -lt "${vs1}" ] && return 0
+		[ "${vs0}" -gt "${vs1}" ] && return 1
+		[ -z "${VS0}" -a -z "${VS1}" ] && return 0
+		[ -z "${VS0}" ] && return 0
+		[ -z "${VS1}" ] && return 1
+	done
+}
+
