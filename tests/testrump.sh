@@ -5,15 +5,16 @@
 
 TESTDIR=${BRDIR}/tests
 TESTOBJ=${OBJDIR}/brtests
+SOCKPATH="/tmp/testrump_socket.$$"
+SOCKURL="unix://${SOCKPATH}"
 
 dosimpleclient ()
 {
 
 	printf 'Remote communication ... '
-	export RUMP_SERVER="unix://mysocket"
+	export RUMP_SERVER="${SOCKURL}"
 	${DESTDIR}/bin/rump_server "${RUMP_SERVER}" || die rump_server failed
 	./simpleclient || die simpleclient failed
-	unset RUMP_SERVER
 	echo done
 }
 
@@ -68,11 +69,11 @@ donettest_routed ()
 
 	rm -f busmem1 busmem2
 	./nettest_routed server || die nettest server failed
-	./nettest_routed router unix://routerctrl || die router fail
+	./nettest_routed router "${SOCKURL}" || die router fail
 	./nettest_routed client || die nettest client failed
 
 	# "code reuse ;)"
-	export RUMP_SERVER="unix://routerctrl"
+	export RUMP_SERVER="${SOCKURL}"
 	${TESTOBJ}/simpleclient/simpleclient || die failed to reboot router
 	echo done
 }
@@ -84,11 +85,11 @@ donettest_routed6 ()
 
 	rm -f busmem1 busmem2
 	./nettest_routed6 server6 || die nettest server failed
-	./nettest_routed6 router6 unix://routerctrl || die router fail
+	./nettest_routed6 router6 "${SOCKURL}" || die router fail
 	./nettest_routed6 client6 || die nettest client failed
 
 	# "code reuse ;)"
-	export RUMP_SERVER="unix://routerctrl"
+	export RUMP_SERVER="${SOCKURL}"
 	${TESTOBJ}/simpleclient/simpleclient || die failed to reboot router
 	echo done
 }
@@ -138,6 +139,7 @@ alltests ()
 			     dependall || exit 1
 		) && ( cd ${TO} ; do${test} )
 		failed=$(( ${failed} + $? ))
+		rm -f "${SOCKPATH}"
 	done
 
 	pkill -TERM -P $$
